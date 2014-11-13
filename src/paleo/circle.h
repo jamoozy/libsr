@@ -20,7 +20,7 @@ circle_t* circle_create_full(long r, long x, long y);
 
 // Creates a circle with the given center and radius.  The passed center will
 // be taken over by the circle -- in other words, it will not be cloned in
-// this function; it will be freed on a call to circle_destroy(point_t*).
+// this function; it will be freed on a call to circle_destroy(circle_t*).
 //   r: The radius.
 //   c: The center.
 circle_t* circle_create_with_point(long r, point_t* c);
