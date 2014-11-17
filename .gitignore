@@ -1,2 +1,8 @@
-
 *.o
+Makefile.in
+.build-aux
+autom4te.cache
+aclocal.m4
+build
+config.h.in
+configure

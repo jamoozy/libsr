@@ -18,6 +18,7 @@ line_t* line_create_points_with_longs(long ax, long ay, long bx, long by) {
   line_t* self = line_create();
   self->points[0] = point_create_coords(ax, ay);
   self->points[1] = point_create_coords(bx, by);
+  return self;
 }
 
 void line_destroy(line_t* self) {

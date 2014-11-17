@@ -10,7 +10,7 @@ curve_t* curve_create(long num) {
 curve_t* curve_create_coords(long num, long* xs, long* ys) {
   curve_t* self = curve_create(num);
   for (int i = 0; i < self->num; i++) {
-    self->points[i] = point_create(xs[i], ys[i]);
+    self->points[i] = point_create_coords(xs[i], ys[i]);
   }
   return self;
 }
