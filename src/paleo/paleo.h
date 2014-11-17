@@ -1,7 +1,9 @@
 #ifndef  __paleo_h__
 #define  __paleo_h__
 
-#include "point.h"
+#include "common/point.h"
+#include "common/stroke.h"
+
 #include "line.h"
 #include "circle.h"
 #include "curve.h"

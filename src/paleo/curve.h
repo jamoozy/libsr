@@ -1,7 +1,7 @@
 #ifndef __curve_h__
 #define __curve_h__
 
-#include "point.h"
+#include "common/point.h"
 
 // A Bezier curve with some number of control points.
 typedef struct {

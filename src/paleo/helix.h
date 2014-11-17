@@ -1,7 +1,7 @@
 #ifndef __helix_h__
 #define __helix_h__
 
-#include "point.h"
+#include "common/point.h"
 
 typedef struct {
 } helix_t;

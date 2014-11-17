@@ -1,7 +1,7 @@
 #ifndef __spiral_h__
 #define __spiral_h__
 
-#include "point.h"
+#include "common/point.h"
 
 typedef struct {
 } spiral_t;

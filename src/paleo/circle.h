@@ -1,7 +1,7 @@
 #ifndef __circle_h__
 #define __circle_h__
 
-#include "point.h"
+#include "common/point.h"
 
 // A circle with some number of joints.
 typedef struct {

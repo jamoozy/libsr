@@ -1,7 +1,7 @@
 #ifndef __line_h__
 #define __line_h__
 
-#include "point.h"
+#include "common/point.h"
 
 // A line with some number of joints.
 typedef struct {
