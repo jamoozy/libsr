@@ -4,12 +4,25 @@
 
 #include <stdlib.h>
 
+// A simple 2D point.
+typedef struct {
+  long x;  // X-coord.
+  long y;  // Y-coord.
+} point2d_t;
+
+// A 2D point with timestamp;
+typedef struct {
+  long x;  // X-coord.
+  long y;  // Y-coord.
+  long t;  // Unix time created (for drawn points)
+} point2dt_t;
+
 // A point structure with coordinates in space, time, and index.
 typedef struct {
   long x;  // X-coord.
   long y;  // Y-coord.
   long t;  // unix time created (for drawn points)
-  long i;  // Index (for strokes
+  long i;  // Index (for strokes)
 } point_t;
 
 // Creates a point.
