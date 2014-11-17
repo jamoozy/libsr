@@ -1,1 +1,1 @@
-SUBDIRS = paleo
+SUBDIRS = common paleo
