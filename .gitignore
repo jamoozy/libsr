@@ -1,8 +1,11 @@
 *.o
 Makefile.in
-.build-aux
-autom4te.cache
-aclocal.m4
-build
-config.h.in
-configure
+
+/build
+/.build-aux
+/autom4te.cache
+/aclocal.m4
+/config.h.in
+/configure
+/autoscan.log
+/configure.scan
