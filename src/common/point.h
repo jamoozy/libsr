@@ -47,7 +47,7 @@ point_t* point_create_timed(long x, long y, long t);
 point_t* point_create_full(long x, long y, long t, long i);
 
 // Destroys (frees the memory of) a point.
-void inline point_destroy(point_t* self) { free(self); }
+void point_destroy(point_t* self);
 
 #endif // __point_h__
 

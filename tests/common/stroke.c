@@ -1,4 +1,5 @@
 #include <check.h>
+#include <limits.h>
 
 #include "point.h"
 #include "stroke.h"
@@ -35,11 +36,11 @@ END_TEST
 
 START_TEST(c_point_create_timed)
 {
-  point_t* point = point_create_timed(80, -80, 109828365);
+  point_t* point = point_create_timed(80, -80, LONG_MAX);
   ck_assert(point != NULL);
   ck_assert_int_eq(point->x,  80);
   ck_assert_int_eq(point->y, -80);
-  ck_assert_int_eq(point->t, 109828365);
+  ck_assert_int_eq(point->t, LONG_MAX);
   ck_assert_int_eq(point->i, -1);
   point_destroy(point);
 }
@@ -47,11 +48,11 @@ END_TEST
 
 START_TEST(c_point_create_full)
 {
-  point_t* point = point_create_full(480, 1200, 9109828365, 80);
+  point_t* point = point_create_full(480, 1200, LONG_MAX, 80);
   ck_assert(point != NULL);
   ck_assert_int_eq(point->x,  480);
   ck_assert_int_eq(point->y, 1200);
-  ck_assert_int_eq(point->t, 9109828365);
+  ck_assert_int_eq(point->t, LONG_MAX);
   ck_assert_int_eq(point->i, 80);
   point_destroy(point);
 }
@@ -87,7 +88,7 @@ START_TEST(c_stroke_create_point2dts)
     {  2,  4,  8 },
     { 12, 13, 14 },
     {  0, 14, 28 },
-    { 99,180,109213907123}
+    { 99,180, LONG_MAX }
   };
   stroke_t* stroke = stroke_create_point2dts(5, (point2dt_t**)&points);
   ck_assert(stroke != NULL);

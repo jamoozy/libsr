@@ -24,3 +24,7 @@ point_t* point_create_full(long x, long y, long t, long i) {
   self->i = i;
   return self;
 }
+
+void inline point_destroy(point_t* self) {
+  free(self);
+}

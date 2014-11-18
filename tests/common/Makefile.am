@@ -1,5 +1,10 @@
 AM_CPPFLAGS = -I$(top_srcdir)/src/common
 
+noinst_LIBRARIES = libmockpoint.a
+libmockpoint_a_SOURCES = \
+	$(top_srcdir)/src/common/point.h \
+	mock_point.c
+
 TESTS = check_stroke
 check_PROGRAMS = check_stroke
 check_stroke_SOURCES = stroke.c \

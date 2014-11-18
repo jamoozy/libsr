@@ -1,6 +1,6 @@
 #include <check.h>
 
-#include "common/point.h"  // But need to mock common point functions.
+#include "common/mock_point.h"
 #include "line.h"
 #include "circle.h"
 #include "curve.h"
@@ -176,14 +176,7 @@ END_TEST
 static Suite* shapes_suite() {
   Suite* suite = suite_create("shapes");
 
-  TCase* tc = tcase_create("point");
-  tcase_add_test(tc, c_point_create);
-  tcase_add_test(tc, c_point_create_coords);
-  tcase_add_test(tc, c_point_create_timed);
-  tcase_add_test(tc, c_point_create_full);
-  suite_add_tcase(suite, tc);
-
-  tc = tcase_create("line");
+  TCase* tc = tcase_create("line");
   tcase_add_test(tc, c_line_create);
   tcase_add_test(tc, c_line_create_points_with_points);
   tcase_add_test(tc, c_line_create_points_with_longs);
