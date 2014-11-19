@@ -3,6 +3,7 @@
 
 
 #include <stdlib.h>
+#include <math.h>
 
 // A simple 2D point.
 typedef struct {
@@ -48,6 +49,18 @@ point_t* point_create_full(long x, long y, long t, long i);
 
 // Destroys (frees the memory of) a point.
 void point_destroy(point_t* self);
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// ------------------------------ Point Utils ------------------------------- //
+////////////////////////////////////////////////////////////////////////////////
+
+double inline point2d_distance(const point2d_t* a, const point2d_t* b) {
+  const long diff_x = a->x - b->x;
+  const long diff_y = a->y - b->y;
+  return sqrt(diff_x * diff_x + diff_y * diff_y);
+}
 
 #endif // __point_h__
 
