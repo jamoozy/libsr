@@ -5,9 +5,9 @@
 #include "point.h"
 
 typedef struct {
-  long num;         // Number of points in the points array.
-  long size;        // Used size of points.
-  point_t* points;  // The points.
+  long num;      // Number of points in the points array.
+  long size;     // Used size of points.
+  point_t* pts;  // The points.
 } stroke_t;
 
 // Creates a stroke with no points and the given size.
@@ -18,13 +18,13 @@ stroke_t* stroke_create(int size);
 // must be destroyed by the caller.
 //   size: The number of points in points
 //   points: The points.
-stroke_t* stroke_create_point2dts(int size, point2dt_t** points);
+stroke_t* stroke_create_point2dts(int size, const point2dt_t* points);
 
 // Adds a point to the stroke.  Increases the size if necessary.  DOES NOT take
 // over the points; they must be destroyed by the caller.
 //   self: The stroke to add to.
 //   point: The point to add.
-void stroke_add_point2dt(stroke_t* self, point2dt_t* point);
+void stroke_add_point2dt(stroke_t* self, const point2dt_t* point);
 
 // Creates a point at the coordinates and adds it to the stroke.  Uses current
 // time as time of creation.
@@ -44,7 +44,7 @@ void stroke_add_timed(stroke_t* self, long x, long y, long t);
 // memory.
 //   self: The stroke to destroy.
 inline void stroke_destroy(stroke_t* self) {
-  free(self->points);
+  free(self->pts);
   free(self);
 }
 

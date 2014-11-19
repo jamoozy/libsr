@@ -70,12 +70,12 @@ START_TEST(c_stroke_create)
   ck_assert(stroke != NULL);
   ck_assert_int_eq(stroke->num, 0);
   ck_assert_int_eq(stroke->size, 40);
-  ck_assert(stroke->points != NULL);
+  ck_assert(stroke->pts != NULL);
   for (int i = 0; i < stroke->size; i++) {
-    ck_assert_int_eq(stroke->points[i].x, 0);
-    ck_assert_int_eq(stroke->points[i].y, 0);
-    ck_assert_int_eq(stroke->points[i].t, 0);
-    ck_assert_int_eq(stroke->points[i].i, 0);
+    ck_assert_int_eq(stroke->pts[i].x, 0);
+    ck_assert_int_eq(stroke->pts[i].y, 0);
+    ck_assert_int_eq(stroke->pts[i].t, 0);
+    ck_assert_int_eq(stroke->pts[i].i, 0);
   }
   stroke_destroy(stroke);
 }
@@ -94,13 +94,13 @@ START_TEST(c_stroke_create_point2dts)
   ck_assert(stroke != NULL);
   ck_assert_int_eq(stroke->num, 5);
   ck_assert_int_eq(stroke->size, 5);
-  ck_assert(stroke->points != NULL);
-  ck_assert((point2dt_t*)stroke->points != points);
+  ck_assert(stroke->pts != NULL);
+  ck_assert((point2dt_t*)stroke->pts != points);
   for (int i = 0; i < stroke->size; i++) {
-    ck_assert_int_eq(stroke->points[i].x, points[i].x);
-    ck_assert_int_eq(stroke->points[i].y, points[i].y);
-    ck_assert_int_eq(stroke->points[i].t, points[i].t);
-    ck_assert_int_eq(stroke->points[i].i, i);
+    ck_assert_int_eq(stroke->pts[i].x, points[i].x);
+    ck_assert_int_eq(stroke->pts[i].y, points[i].y);
+    ck_assert_int_eq(stroke->pts[i].t, points[i].t);
+    ck_assert_int_eq(stroke->pts[i].i, i);
   }
   stroke_destroy(stroke);
 }
@@ -134,7 +134,7 @@ int main() {
   Suite* suite = stroke_suite();
   SRunner* runner = srunner_create(suite);
 
-  srunner_run_all(runner, CK_NORMAL);
+  srunner_run_all(runner, CK_MINIMAL);
   number_failed = srunner_ntests_failed(runner);
   srunner_free(runner);
 
