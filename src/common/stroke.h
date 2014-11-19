@@ -18,7 +18,7 @@ stroke_t* stroke_create(int size);
 // must be destroyed by the caller.
 //   size: The number of points in points
 //   points: The points.
-stroke_t* stroke_create_point2dts(int size, const point2dt_t* points);
+stroke_t* stroke_create_point2dts(int size, const point2dt_t* pts);
 
 // Adds a point to the stroke.  Increases the size if necessary.  DOES NOT take
 // over the points; they must be destroyed by the caller.

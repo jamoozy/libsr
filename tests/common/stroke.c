@@ -90,7 +90,7 @@ START_TEST(c_stroke_create_point2dts)
     {  0, 14, 28 },
     { 99,180, LONG_MAX }
   };
-  stroke_t* stroke = stroke_create_point2dts(5, (point2dt_t**)&points);
+  stroke_t* stroke = stroke_create_point2dts(5, (point2dt_t*)points);
   ck_assert(stroke != NULL);
   ck_assert_int_eq(stroke->num, 5);
   ck_assert_int_eq(stroke->size, 5);
