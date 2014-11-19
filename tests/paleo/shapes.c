@@ -156,8 +156,6 @@ END_TEST
 
 
 
-
-
 //////////////////////////////////////////////////////////////////////////////
 // ----------------------------- Entry Point ------------------------------ //
 //////////////////////////////////////////////////////////////////////////////
@@ -191,7 +189,7 @@ int main() {
   Suite* suite = shapes_suite();
   SRunner* runner = srunner_create(suite);
 
-  srunner_run_all(runner, CK_MINIMAL);
+  srunner_run_all(runner, CK_VERBOSE);
   number_failed = srunner_ntests_failed(runner);
   srunner_free(runner);
 
