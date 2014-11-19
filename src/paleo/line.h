@@ -5,18 +5,17 @@
 
 // A line with some number of joints.
 typedef struct {
-  size_t num;       // The number of points, including start and end.
-  point_t** points;  // The points.  Must be at least 2.
+  size_t num;      // The number of points, including start and end.
+  point2d_t* pts;  // The points.  Must be at least 2.
 } line_t;
 
 // Creates a new line from 0,0 to 0,0.
 line_t* line_create();
 
-// Creates a line with the given points.  The line will then grab ownership of
-// the points, meaning line_destroy(line_t*) will free the passed points.
+// Creates a line with the given points.
 //   a: The starting point of the line.
 //   b: The ending point of the line.
-line_t* line_create_points_with_points(point_t* a, point_t* b);
+line_t* line_create_points_with_points(const point2d_t* a, const point2d_t* b);
 
 // Creates a line containing newly created points with the given coordinates.
 //   ax: The starting point's X coord.

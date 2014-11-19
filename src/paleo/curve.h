@@ -5,8 +5,8 @@
 
 // A Bezier curve with some number of control points.
 typedef struct {
-  long num;          // The number of control points
-  point_t** points;  // The control points.
+  long num;        // The number of control points
+  point2d_t* pts;  // The control points.
 } curve_t;
 
 // Creates a new curve at with the specified number of points, all of which
@@ -20,13 +20,10 @@ curve_t* curve_create(long num);
 //   ys: Y coordinates.
 curve_t* curve_create_coords(long num, long* xs, long* ys);
 
-// Creates a curve with the given points.  The passed points will be taken
-// over by the curve -- in other words, they will not be cloned in this
-// function; they will be freed on a call to curve_destroy(curve_t*).  The
-// array itself, however, will not be taken over.
+// Creates a curve with the given points.
 //   num: The number of points.
 //   points: The points.
-curve_t* curve_create_points(long num, point_t** points);
+curve_t* curve_create_points(long num, const point2d_t* points);
 
 // Destroys the curve by freeing its memory.
 void curve_destroy(curve_t*);
