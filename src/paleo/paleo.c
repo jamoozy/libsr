@@ -43,6 +43,14 @@ static inline double _speed(const point2dt_t* a, const point2dt_t* b) {
   return point2d_distance((point2d_t*)a, (point2d_t*)b) / abs(b->t - a->t);
 }
 
+// Determines the simple dy/dx for b given a was the last point in the
+// stroke.
+//   a: The first point.
+//   b: The second point.
+static inline double _dy_dx_direction(const point2d_t* a, const point2d_t* b) {
+  return (b->y - a->y) / (b->x - a->x);
+}
+
 // Based on paper by Bo Yu & Shijie Cai in 2003 entitled:
 //   "A Domain-Independent System for Sketch Recognition"
 // See page 142 (PDF page 2) for the definition of direction.

@@ -23,8 +23,11 @@ typedef struct {
   point_t p;
   int corner;   // Is this a corner?
   double dir;   // Direction of stroke here.
+  double dy_dx; // dy/dx wrt last point.
   double sp;    // Speed of pen when drawing this point.
   double curv;  // Curvature at this point.
+  double ndde;  // Normalized Distance between Direction Extremes.
+  double dcr;   // Direction Change Ratio.
 } paleo_point_t;
 
 // A paleo stroke; just like a normal stroke, but some paleo-specific info.
