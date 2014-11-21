@@ -3,9 +3,9 @@
 
 #include <time.h>
 
-inline long get_utime() {
-  time_t t = time(NULL);
-  return (long)t;
-}
+#define swap(type, a, b) { type s = a; a = b; b = s; }
+
+#define get_utime() ((long)time(NULL))
 
 #endif  // __util_h__
+
