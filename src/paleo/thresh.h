@@ -1,12 +1,12 @@
 #ifndef __thresholds_h__
 #define __thresholds_h__
 
-#define PALEO_THRESH_A   0.5
-#define PALEO_THRESH_B   5.0
-#define PALEO_THRESH_C  70.0
-#define PALEO_THRESH_D   1.31
-#define PALEO_THRESH_E   0.16
-#define PALEO_THRESH_F   0.75
+#define PALEO_THRESH_A   0.5      // Tail-removing thresh.
+#define PALEO_THRESH_B   5.0      // Min points for tail removal.
+#define PALEO_THRESH_C  70.0      // Min px_length for tail removal.
+#define PALEO_THRESH_D   1.31     // Overtraced revolution percentage.
+#define PALEO_THRESH_E   0.16     // Closedness dist/len ratio.
+#define PALEO_THRESH_F   0.75     // Closedness min revolutions.
 #define PALEO_THRESH_G   2.0
 #define PALEO_THRESH_H  10.25
 #define PALEO_THRESH_I   0.0036
