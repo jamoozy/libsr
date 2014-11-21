@@ -1,9 +1,11 @@
+#include <assert.h>
 #include <string.h>
 #include <math.h>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
+#include "common/util.h"
 #include "paleo.h"
 
 
@@ -62,8 +64,7 @@ static inline double _yu_direction(const point2d_t* a, const point2d_t* b) {
   return atan((b->y - a->y) / (b->x - a->x));
 }
 
-// The default K used in the below computation.
-#define K 3
+#define K 3  // The default K used in the below computation.
 
 // Based on paper by Bo Yu & Shijie Cai in 2003 entitled:
 //   "A Domain-Independent System for Sketch Recognition"
@@ -92,10 +93,47 @@ static inline double _yu_curvature(int k, const paleo_point_t* sub_strk) {
   return diff_sum / len;
 }
 
+// Computes DCR of paleo.stroke.
+static inline void _compute_dcr() {
+  assert(paleo.stroke != NULL);
+
+  double prog = 0;  // length-based progress along the stroke
+  double first_i = -1, last_i = -1;  // portion of stroke we use
+  double avg_d_dir = 0;  // average change in direction
+  double max_d_dir = 0;  // maximum change in direction
+  for (int i = 1; i < paleo.stroke->num_pts; i++) {
+    prog += point2d_distance(
+        (point2d_t*)&paleo.stroke->pts[i-1], (point2d_t*)&paleo.stroke->pts[i]);
+
+    if (prog / paleo.stroke->px_length <= 0.05) { continue; }
+    if (first_i < 0) { first_i = i; }
+    if (prog / paleo.stroke->px_length >= 0.95) {
+      last_i = i;
+      break;
+    }
+
+    double d_dir = abs(paleo.stroke->pts[i-1].dir - paleo.stroke->pts[i].dir);
+    if (d_dir > max_d_dir) { max_d_dir = d_dir; }
+    avg_d_dir += d_dir;
+  }
+  avg_d_dir /= last_i - first_i + 1;
+  paleo.stroke->dcr = max_d_dir / avg_d_dir;
+}
+
+static inline void _break_stroke(int first_i, int last_i) {
+  assert(0 <= first_i && first_i < last_i && last_i < paleo.stroke->num_pts);
+  paleo.stroke->num_pts = last_i - first_i + 1;
+  memmove(paleo.stroke->pts, &paleo.stroke->pts[first_i],
+      paleo.stroke->num_pts * sizeof(paleo_point_t));
+  paleo.stroke->pts = realloc(paleo.stroke->pts,
+      paleo.stroke->num_pts * sizeof(paleo_point_t));
+}
+
+
 // Does pre-processing on a stroke to create a paleo stroke: a stroke with more
 // information, used by the individual recognizers.
-static paleo_stroke_t* _process_stroke(const stroke_t* strk) {
-  paleo_stroke_t* ps = calloc(1, sizeof(paleo_stroke_t));
+static void _process_stroke(const stroke_t* strk) {
+  paleo_stroke_t* ps = paleo.stroke = calloc(1, sizeof(paleo_stroke_t));
   ps->pts = calloc(strk->num, sizeof(paleo_point_t));
 
   // PaleoSketch, pg 3, para 1:
@@ -157,13 +195,74 @@ static paleo_stroke_t* _process_stroke(const stroke_t* strk) {
         &ps->pts[i]);
   }
 
-  // TODO continue
+  // Compute length.
+  ps->px_length = 0;
+  for (int i = 1; i < ps->num_pts; i++) {
+    ps->px_length += point2d_distance(
+        (point2d_t*)&ps->pts[i-1], (point2d_t*)&ps->pts[i]);
+  }
 
-  return ps;
+  // Compute dy/dx for each point (to compute NDDE).
+  int max_i = 1;
+  int min_i = 1;
+  for (int i = 1; i < ps->num_pts; i++) {
+    ps->pts[i].dy_dx = _dy_dx_direction(
+        (point2d_t*)&ps->pts[i-1], (point2d_t*)&ps->pts[i]);
+    if (ps->pts[i].dy_dx > ps->pts[max_i].dy_dx) { max_i = i; }
+    if (ps->pts[i].dy_dx < ps->pts[min_i].dy_dx) { min_i = i; }
+  }
+
+  // Compute length between min and max, then normalize.
+  double sub_length = 0;
+  if (max_i < min_i) { swap(int, max_i, min_i); }
+  for (int i = min_i + 1; i < max_i; i++) {
+    sub_length += point2d_distance(
+        (point2d_t*)&ps->pts[i-1], (point2d_t*)&ps->pts[i]);
+  }
+  ps->ndde = sub_length / ps->px_length;
+
+  // Compute DCR.
+  _compute_dcr();
+
+  if (ps->num_pts < PALEO_THRESH_B || ps->px_length < PALEO_THRESH_C) {
+    // Stroke too small to warrant tail removal.
+    return;
+  }
+
+  // Trim tails -- find first and last highest curvature.
+  int first_i = 0, last_i = ps->num_pts - 1;
+  double prog = 0;
+  for (int i = 1; i < ps->num_pts - 1; i++) {
+    prog += point2d_distance(
+        (point2d_t*)&ps->pts[i-1], (point2d_t*)&ps->pts[i]);
+    double prog_pct = prog / ps->px_length;
+
+    if (prog_pct < 0.20) {  // Scanning for first tail ...
+      if (ps->pts[first_i].curv < ps->pts[i].curv) {
+        first_i = i;
+      }
+    } else if (0.20 < prog_pct && prog_pct < 0.80) {
+      continue;
+    } else {  // Scanning for last tail ...
+      if (ps->pts[last_i].curv < ps->pts[i].curv) {
+        last_i = i;
+      }
+    }
+  }
+  _break_stroke(first_i, last_i);
+
+  // Compute total rotation & whether it's overtraced.
+  ps->tot_revs = (ps->pts[ps->num_pts-1].dir - ps->pts[0].dir) / (2 * M_PI);
+  ps->overtraced = ps->tot_revs > PALEO_THRESH_D;
+
+  // Compute closed-ness.
+  ps->closed = (point2d_distance(
+        (point2d_t*)&ps->pts[0], (point2d_t*)&ps->pts[ps->num_pts-1]) /
+      ps->px_length) < PALEO_THRESH_E && ps->tot_revs > PALEO_THRESH_F;
 }
 
 paleo_type_e paleo_recognize(const stroke_t* stroke) {
-  paleo.stroke = _process_stroke(stroke);
+  _process_stroke(stroke);
 
   // TODO continue
 
