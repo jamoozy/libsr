@@ -7,6 +7,14 @@
 
 #include "common/util.h"
 #include "paleo.h"
+#include "line.h"
+#include "line_test.h"
+#include "circle.h"
+//#include "arc.h"
+#include "curve.h"
+//#include "spiral.h"
+//#include "helix.h"
+//#include "complex.h"
 
 
 
@@ -22,7 +30,7 @@ void paleo_init() {
 }
 
 void paleo_deinit() {
-  //line_rec_deinit();
+  line_test_deinit();
   //circle_rec_deinit();
   //ellipse_rec_deinit();
   //arc_rec_deinit();
@@ -30,6 +38,9 @@ void paleo_deinit() {
   //spiral_rec_deinit();
   //helix_rec_deinit();
   //complex_rec_deinit();
+
+  free(paleo.stroke->pts);
+  free(paleo.stroke->corners);
 }
 
 
@@ -63,6 +74,41 @@ static inline double _dy_dx_direction(const point2d_t* a, const point2d_t* b) {
 static inline double _yu_direction(const point2d_t* a, const point2d_t* b) {
   return atan((b->y - a->y) / (b->x - a->x));
 }
+
+
+#define _paleo_add_to_corners(i) \
+  (paleo.stroke->corners[paleo.stroke->num_corners++] = &paleo.stroke->pts[(i)])
+
+static inline void _paulson_corners() {
+  assert(paleo.stroke->num_corners == 0);
+  assert(paleo.stroke->corners == NULL);
+
+  // init corners with 0th point.
+  paleo.stroke->num_corners = 0;
+  paleo.stroke->corners = realloc(paleo.stroke->corners,
+      paleo.stroke->num_pts * sizeof(paleo_point_t*));
+  _paleo_add_to_corners(0);
+
+  paleo_point_t* last = &paleo.stroke->pts[0];
+  double px_length = 0;
+  for (int i = 1; i < paleo.stroke->num_pts - 1; i++) {
+    px_length += point2d_distance(
+        (point2d_t*)&paleo.stroke->pts[i-1], (point2d_t*)&paleo.stroke->pts[i]);
+
+    // Are we un-line-like enough?
+    if (point2d_distance((point2d_t*)last, (point2d_t*)&paleo.stroke->pts[i])
+        > PALEO_THRESH_Y) {
+      _paleo_add_to_corners(i-1);
+      last = &paleo.stroke->pts[i];
+      px_length = 0;
+    }
+  }
+
+  _paleo_add_to_corners(paleo.stroke->num_pts-1);
+  paleo.stroke->corners = realloc(paleo.stroke->corners,
+      paleo.stroke->num_corners * sizeof(paleo_point_t*));
+}
+#undef _paleo_add_to_corners
 
 #define K 3  // The default K used in the below computation.
 

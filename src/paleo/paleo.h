@@ -6,14 +6,6 @@
 
 #include "thresh.h"
 
-#include "line.h"
-#include "circle.h"
-//#include "arc.h"
-#include "curve.h"
-//#include "spiral.h"
-//#include "helix.h"
-//#include "complex.h"
-
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -34,6 +26,8 @@ typedef struct {
 typedef struct {
   int num_pts;         // Number of points.
   paleo_point_t* pts;  // Points.
+  int num_corners;     // Number of corners.
+  paleo_point_t** corners;
   double px_length;    // Length of the stroke in pixels.
   double ndde;         // Normalized Distance between Direction Extremes.
   double dcr;          // Direction Change Ratio.
@@ -41,6 +35,10 @@ typedef struct {
   short overtraced;    // Whether the stroke is overtraced.
   short closed;        // Whether the shape is closed.
 } paleo_stroke_t;
+
+// Common result info for all tests.
+typedef struct {
+} paleo_test_result_t;
 
 
 

@@ -5,6 +5,7 @@ libpaleo_a_SOURCES = \
 	thresh.h \
 	paleo.h paleo.c \
 	line.c line.h \
+	line_test.c line_test.h \
 	circle.c circle.h \
 	curve.c curve.h \
 	helix.h \
