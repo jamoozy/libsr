@@ -1,5 +1,5 @@
-#ifndef __thresholds_h__
-#define __thresholds_h__
+#ifndef __paleo_thresh_h__
+#define __paleo_thresh_h__
 
 #define PALEO_THRESH_A   0.5      // Tail-removing thresh.
 #define PALEO_THRESH_B   5.0      // Min points for tail removal.
@@ -28,4 +28,4 @@
 #define PALEO_THRESH_Y   0.99
 #define PALEO_THRESH_Z   0.06
 
-#endif  // __thresholds_h__
+#endif  // __paleo_thresh_h__
