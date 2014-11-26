@@ -56,14 +56,6 @@ static inline double _speed(const point2dt_t* a, const point2dt_t* b) {
   return point2d_distance((point2d_t*)a, (point2d_t*)b) / abs(b->t - a->t);
 }
 
-// Determines the simple dy/dx for b given a was the last point in the
-// stroke.
-//   a: The first point.
-//   b: The second point.
-static inline double _dy_dx_direction(const point2d_t* a, const point2d_t* b) {
-  return (b->y - a->y) / (b->x - a->x);
-}
-
 // Based on paper by Bo Yu & Shijie Cai in 2003 entitled:
 //   "A Domain-Independent System for Sketch Recognition"
 // See page 142 (PDF page 2) for the definition of direction.
@@ -71,108 +63,7 @@ static inline double _dy_dx_direction(const point2d_t* a, const point2d_t* b) {
 // This finds the curvature defined by the two given points according to Yu et
 // al.'s method.  This function will return the "direction" (defined in the
 // paper) of the point at a given its next point b.
-static inline double _yu_direction(const point2d_t* a, const point2d_t* b) {
-  return atan((b->y - a->y) / (b->x - a->x));
-}
-
-// Merges corners sufficiently close together.  Returns whether something was
-// changed in the crnrs array.
-static inline short _paulson_merge_corners() {
-  short rtn = 0;
-  for (int c = 1; c < paleo.stroke->num_crnrs; c++) {
-    if (paleo.stroke->crnrs[c-1]->p.i + PALEO_THRESH_Z * paleo.stroke->num_pts <=
-        paleo.stroke->crnrs[c]->p.i) {  // Sufficiently close to be merged.
-      rtn = 1;
-      if (c == 1) {   // 0th point: just remove other point.
-        memmove(&paleo.stroke->crnrs[1], &paleo.stroke->crnrs[2],
-            (paleo.stroke->num_crnrs-2) * sizeof(paleo_point_t*));
-        paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
-            --paleo.stroke->num_crnrs * sizeof(paleo_point_t*));
-        c--;
-      } else if (c == paleo.stroke->num_crnrs - 1) {  // Last point:
-        // Just remove other point.
-        memmove(&paleo.stroke->crnrs[paleo.stroke->num_crnrs-2],
-            &paleo.stroke->crnrs[paleo.stroke->num_crnrs-1],
-            sizeof(paleo_point_t*));
-        paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
-            --paleo.stroke->num_crnrs * sizeof(paleo_point_t*));
-        c--;
-      } else if (c >= paleo.stroke->num_crnrs) {
-        assert(0);
-      } else {
-        const int avg_i =
-          (paleo.stroke->crnrs[c-1]->p.i + paleo.stroke->crnrs[c]->p.i) / 2;
-        paleo.stroke->crnrs[c-1] = &paleo.stroke->pts[avg_i];
-        memmove(&paleo.stroke->crnrs[c], &paleo.stroke->crnrs[c+1],
-            (paleo.stroke->num_crnrs - c - 1) * sizeof(paleo_point_t*));
-        paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
-            --paleo.stroke->num_crnrs * sizeof(paleo_point_t*));
-        c--;
-      }
-    }
-  }
-  return rtn;
-}
-
-// Find highest curvature in each corner's neighbor hood and set that as the
-// corner.  Returns whether something was changed in the crnrs array.
-static inline short _paulson_replace_corners() {
-  const int range = (int)ceil(paleo.stroke->num_pts * PALEO_THRESH_Z);
-  short rtn = 0;
-  for (int c = 0; c < paleo.stroke->num_crnrs; c++) {
-    paleo_point_t* corner = paleo.stroke->crnrs[c];
-    for (int i = corner->p.i - range; i < MIN(corner->p.i + range, paleo.stroke->num_pts); i++) {
-      if (paleo.stroke->pts[i].curv > paleo.stroke->crnrs[c]->curv) {
-        paleo.stroke->crnrs[c] = &paleo.stroke->pts[i];
-        rtn = 1;
-      }
-    }
-  }
-  return rtn;
-}
-
-// Based on PaleoSketch paper -- 2nd to last and final paragraphs.
-//
-// Finds corners in the paleo stroke.
-static inline void _paulson_corners() {
-  assert(paleo.stroke->num_crnrs == 0);
-  assert(paleo.stroke->crnrs == NULL);
-
-#define _paleo_add_to_corners(i) \
-  (paleo.stroke->crnrs[paleo.stroke->num_crnrs++] = &paleo.stroke->pts[(i)])
-
-  // init corners with 0th point.
-  paleo.stroke->num_crnrs = 0;
-  paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
-      paleo.stroke->num_pts * sizeof(paleo_point_t*));
-  _paleo_add_to_corners(0);
-
-  paleo_point_t* last = &paleo.stroke->pts[0];
-  double px_length = 0;
-  for (int i = 1; i < paleo.stroke->num_pts - 1; i++) {
-    px_length += point2d_distance(
-        (point2d_t*)&paleo.stroke->pts[i-1], (point2d_t*)&paleo.stroke->pts[i]);
-
-    // Are we un-line-like enough?
-    if (point2d_distance((point2d_t*)last, (point2d_t*)&paleo.stroke->pts[i])
-        > PALEO_THRESH_Y) {
-      _paleo_add_to_corners(i-1);
-      last = &paleo.stroke->pts[i];
-      px_length = 0;
-    }
-  }
-
-  _paleo_add_to_corners(paleo.stroke->num_pts-1);
-  paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
-      paleo.stroke->num_crnrs * sizeof(paleo_point_t*));
-
-#undef _paleo_add_to_corners
-
-  // Merge corners and replace with highest in region until no change.
-  while(_paulson_merge_corners() || _paulson_replace_corners());
-}
-
-#define K 3  // The default K used in the below computation.
+static inline double _yu_direction(const point2d_t* a, const point2d_t* b);
 
 // Based on paper by Bo Yu & Shijie Cai in 2003 entitled:
 //   "A Domain-Independent System for Sketch Recognition"
@@ -181,73 +72,28 @@ static inline void _paulson_corners() {
 // This finds the curvature given a section of a stroke defined by the window
 // size parameter "k" (see the paper for a full definition).  This function
 // assumes that there are 2k+1 points in 'sub_strk'.
-static inline double _yu_curvature(int k, const paleo_point_t* sub_strk) {
-  const int NUM = 2*k+1;
+static inline double _yu_curvature(int k, const paleo_point_t* sub_strk);
 
-  double diff_sum = 0;  // sum of direction differences.
-  double len = 0;       // substroke length
-  for (int i = 0; i < NUM; i++) {
-    // Add next sub-segment length.
-    len += point2d_distance(
-        (point2d_t*)&sub_strk[i], (point2d_t*)&sub_strk[i+1]);
+// Determines the simple dy/dx for b given a was the last point in the
+// stroke.
+//   a: The first point.
+//   b: The second point.
+static inline double _dy_dx_direction(const point2d_t* a, const point2d_t* b);
 
-    // Find direction difference, normalize, and add to diff_sum.
-    double diff = sub_strk[i+1].dir - sub_strk[i].dir;
-    while (diff >  M_PI) { diff -= M_PI; }
-    while (diff < -M_PI) { diff += M_PI; }
-    diff_sum += diff;
-  }
+// Based on PaleoSketch paper -- 2nd to last and final paragraphs.
+//
+// Finds corners in the paleo stroke by iteratively merging close corners and finding the most curved region to reassign the corner to.
+static inline void _paulson_corners();
 
-  return diff_sum / len;
-}
+#define K 3  // The default K used in the below computation.
 
 // Computes DCR of paleo.stroke.
-static inline void _compute_dcr() {
-  assert(paleo.stroke != NULL);
-
-  double prog = 0;  // length-based progress along the stroke
-  double first_i = -1, last_i = -1;  // portion of stroke we use
-  double avg_d_dir = 0;  // average change in direction
-  double max_d_dir = 0;  // maximum change in direction
-  for (int i = 1; i < paleo.stroke->num_pts; i++) {
-    prog += point2d_distance(
-        (point2d_t*)&paleo.stroke->pts[i-1], (point2d_t*)&paleo.stroke->pts[i]);
-
-    if (prog / paleo.stroke->px_length <= 0.05) { continue; }
-    if (first_i < 0) { first_i = i; }
-    if (prog / paleo.stroke->px_length >= 0.95) {
-      last_i = i;
-      break;
-    }
-
-    double d_dir = abs(paleo.stroke->pts[i-1].dir - paleo.stroke->pts[i].dir);
-    if (d_dir > max_d_dir) { max_d_dir = d_dir; }
-    avg_d_dir += d_dir;
-  }
-  avg_d_dir /= last_i - first_i + 1;
-  paleo.stroke->dcr = max_d_dir / avg_d_dir;
-}
+static inline void _compute_dcr();
 
 // Breaks the stroke's tails off.
 //   first_i: The index of the first point (incl.).
 //   last_i: The index of the last point (incl.).
-static inline void _break_stroke(int first_i, int last_i) {
-  // Sanity check.
-  assert(0 <= first_i && first_i < last_i && last_i < paleo.stroke->num_pts);
-
-  // Trim off tails.
-  paleo.stroke->num_pts = last_i - first_i + 1;
-  memmove(paleo.stroke->pts, &paleo.stroke->pts[first_i],
-      paleo.stroke->num_pts * sizeof(paleo_point_t));
-  paleo.stroke->pts = realloc(paleo.stroke->pts,
-      paleo.stroke->num_pts * sizeof(paleo_point_t));
-
-  // Correct point index's.
-  for (int i = 0; i < paleo.stroke->num_pts; i++) {
-    paleo.stroke->pts[i].p.i = i;
-  }
-}
-
+static inline void _break_stroke(int first_i, int last_i);
 
 // Does pre-processing on a stroke to create a paleo stroke: a stroke with more
 // information, used by the individual recognizers.
@@ -381,6 +227,176 @@ static void _process_stroke(const stroke_t* strk) {
         (point2d_t*)&ps->pts[0], (point2d_t*)&ps->pts[ps->num_pts-1]) /
       ps->px_length) < PALEO_THRESH_E && ps->tot_revs > PALEO_THRESH_F;
 }
+
+static inline double _yu_direction(const point2d_t* a, const point2d_t* b) {
+  return atan((b->y - a->y) / (b->x - a->x));
+}
+
+static inline double _yu_curvature(int k, const paleo_point_t* sub_strk) {
+  const int NUM = 2*k+1;
+
+  double diff_sum = 0;  // sum of direction differences.
+  double len = 0;       // substroke length
+  for (int i = 0; i < NUM; i++) {
+    // Add next sub-segment length.
+    len += point2d_distance(
+        (point2d_t*)&sub_strk[i], (point2d_t*)&sub_strk[i+1]);
+
+    // Find direction difference, normalize, and add to diff_sum.
+    double diff = sub_strk[i+1].dir - sub_strk[i].dir;
+    while (diff >  M_PI) { diff -= M_PI; }
+    while (diff < -M_PI) { diff += M_PI; }
+    diff_sum += diff;
+  }
+
+  return diff_sum / len;
+}
+
+static inline double _dy_dx_direction(const point2d_t* a, const point2d_t* b) {
+  return (b->y - a->y) / (b->x - a->x);
+}
+
+// Merges corners sufficiently close together.  Returns whether something was
+// changed in the crnrs array.
+static inline short _paulson_merge_corners();
+
+// Find highest curvature in each corner's neighbor hood and set that as the
+// corner.  Returns whether something was changed in the crnrs array.
+static inline short _paulson_replace_corners();
+
+static inline void _paulson_corners() {
+  assert(paleo.stroke->num_crnrs == 0);
+  assert(paleo.stroke->crnrs == NULL);
+
+#define _paleo_add_to_corners(i) \
+  (paleo.stroke->crnrs[paleo.stroke->num_crnrs++] = &paleo.stroke->pts[(i)])
+
+  // init corners with 0th point.
+  paleo.stroke->num_crnrs = 0;
+  paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
+      paleo.stroke->num_pts * sizeof(paleo_point_t*));
+  _paleo_add_to_corners(0);
+
+  paleo_point_t* last = &paleo.stroke->pts[0];
+  double px_length = 0;
+  for (int i = 1; i < paleo.stroke->num_pts - 1; i++) {
+    px_length += point2d_distance(
+        (point2d_t*)&paleo.stroke->pts[i-1], (point2d_t*)&paleo.stroke->pts[i]);
+
+    // Are we un-line-like enough?
+    if (point2d_distance((point2d_t*)last, (point2d_t*)&paleo.stroke->pts[i])
+        > PALEO_THRESH_Y) {
+      _paleo_add_to_corners(i-1);
+      last = &paleo.stroke->pts[i];
+      px_length = 0;
+    }
+  }
+
+  _paleo_add_to_corners(paleo.stroke->num_pts-1);
+  paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
+      paleo.stroke->num_crnrs * sizeof(paleo_point_t*));
+
+#undef _paleo_add_to_corners
+
+  // Merge corners and replace with highest in region until no change.
+  while(_paulson_merge_corners() || _paulson_replace_corners());
+}
+
+static inline short _paulson_merge_corners() {
+  short rtn = 0;
+  for (int c = 1; c < paleo.stroke->num_crnrs; c++) {
+    if (paleo.stroke->crnrs[c-1]->p.i + PALEO_THRESH_Z * paleo.stroke->num_pts <=
+        paleo.stroke->crnrs[c]->p.i) {  // Sufficiently close to be merged.
+      rtn = 1;
+      if (c == 1) {   // 0th point: just remove other point.
+        memmove(&paleo.stroke->crnrs[1], &paleo.stroke->crnrs[2],
+            (paleo.stroke->num_crnrs-2) * sizeof(paleo_point_t*));
+        paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
+            --paleo.stroke->num_crnrs * sizeof(paleo_point_t*));
+        c--;
+      } else if (c == paleo.stroke->num_crnrs - 1) {  // Last point:
+        // Just remove other point.
+        memmove(&paleo.stroke->crnrs[paleo.stroke->num_crnrs-2],
+            &paleo.stroke->crnrs[paleo.stroke->num_crnrs-1],
+            sizeof(paleo_point_t*));
+        paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
+            --paleo.stroke->num_crnrs * sizeof(paleo_point_t*));
+        c--;
+      } else if (c >= paleo.stroke->num_crnrs) {
+        assert(0);
+      } else {
+        const int avg_i =
+          (paleo.stroke->crnrs[c-1]->p.i + paleo.stroke->crnrs[c]->p.i) / 2;
+        paleo.stroke->crnrs[c-1] = &paleo.stroke->pts[avg_i];
+        memmove(&paleo.stroke->crnrs[c], &paleo.stroke->crnrs[c+1],
+            (paleo.stroke->num_crnrs - c - 1) * sizeof(paleo_point_t*));
+        paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
+            --paleo.stroke->num_crnrs * sizeof(paleo_point_t*));
+        c--;
+      }
+    }
+  }
+  return rtn;
+}
+
+static inline short _paulson_replace_corners() {
+  const int range = (int)ceil(paleo.stroke->num_pts * PALEO_THRESH_Z);
+  short rtn = 0;
+  for (int c = 0; c < paleo.stroke->num_crnrs; c++) {
+    paleo_point_t* corner = paleo.stroke->crnrs[c];
+    for (int i = corner->p.i - range; i < MIN(corner->p.i + range, paleo.stroke->num_pts); i++) {
+      if (paleo.stroke->pts[i].curv > paleo.stroke->crnrs[c]->curv) {
+        paleo.stroke->crnrs[c] = &paleo.stroke->pts[i];
+        rtn = 1;
+      }
+    }
+  }
+  return rtn;
+}
+
+static inline void _compute_dcr() {
+  assert(paleo.stroke != NULL);
+
+  double prog = 0;  // length-based progress along the stroke
+  double first_i = -1, last_i = -1;  // portion of stroke we use
+  double avg_d_dir = 0;  // average change in direction
+  double max_d_dir = 0;  // maximum change in direction
+  for (int i = 1; i < paleo.stroke->num_pts; i++) {
+    prog += point2d_distance(
+        (point2d_t*)&paleo.stroke->pts[i-1], (point2d_t*)&paleo.stroke->pts[i]);
+
+    if (prog / paleo.stroke->px_length <= 0.05) { continue; }
+    if (first_i < 0) { first_i = i; }
+    if (prog / paleo.stroke->px_length >= 0.95) {
+      last_i = i;
+      break;
+    }
+
+    double d_dir = abs(paleo.stroke->pts[i-1].dir - paleo.stroke->pts[i].dir);
+    if (d_dir > max_d_dir) { max_d_dir = d_dir; }
+    avg_d_dir += d_dir;
+  }
+  avg_d_dir /= last_i - first_i + 1;
+  paleo.stroke->dcr = max_d_dir / avg_d_dir;
+}
+
+static inline void _break_stroke(int first_i, int last_i) {
+  // Sanity check.
+  assert(0 <= first_i && first_i < last_i && last_i < paleo.stroke->num_pts);
+
+  // Trim off tails.
+  paleo.stroke->num_pts = last_i - first_i + 1;
+  memmove(paleo.stroke->pts, &paleo.stroke->pts[first_i],
+      paleo.stroke->num_pts * sizeof(paleo_point_t));
+  paleo.stroke->pts = realloc(paleo.stroke->pts,
+      paleo.stroke->num_pts * sizeof(paleo_point_t));
+
+  // Correct point index's.
+  for (int i = 0; i < paleo.stroke->num_pts; i++) {
+    paleo.stroke->pts[i].p.i = i;
+  }
+}
+
 
 paleo_type_e paleo_recognize(const stroke_t* stroke) {
   _process_stroke(stroke);

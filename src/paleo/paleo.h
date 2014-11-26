@@ -14,7 +14,15 @@
 
 // A paleo point; just like a normal point, but with paleo-specific info.
 typedef struct {
-  point_t p;
+  union {
+    point_t p;
+    struct {
+      long x;
+      long y;
+      long t;
+      long i;
+    };
+  };
   int corner;    // Is this a corner?
   double dir;    // Direction of stroke here.
   double dy_dx;  // dy/dx wrt last point.
