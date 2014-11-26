@@ -26,6 +26,6 @@
 #define PALEO_THRESH_W   9.0
 #define PALEO_THRESH_X  10.0
 #define PALEO_THRESH_Y   0.99    // Corner detection.
-#define PALEO_THRESH_Z   0.06
+#define PALEO_THRESH_Z   0.06    // Corner merge percentage.
 
 #endif  // __paleo_thresh_h__

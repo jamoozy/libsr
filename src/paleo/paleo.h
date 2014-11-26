@@ -26,8 +26,8 @@ typedef struct {
 typedef struct {
   int num_pts;         // Number of points.
   paleo_point_t* pts;  // Points.
-  int num_corners;     // Number of corners.
-  paleo_point_t** corners;
+  int num_crnrs;       // Number of corners.
+  paleo_point_t** crnrs;  // Corners.
   double px_length;    // Length of the stroke in pixels.
   double ndde;         // Normalized Distance between Direction Extremes.
   double dcr;          // Direction Change Ratio.
