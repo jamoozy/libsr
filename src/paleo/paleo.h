@@ -14,15 +14,7 @@
 
 // A paleo point; just like a normal point, but with paleo-specific info.
 typedef struct {
-  union {
-    point_t p;
-    struct {
-      long x;
-      long y;
-      long t;
-      long i;
-    };
-  };
+  POINT_UNION;   // Inheriting from points.
   int corner;    // Is this a corner?
   double dir;    // Direction of stroke here.
   double dy_dx;  // dy/dx wrt last point.
@@ -45,9 +37,16 @@ typedef struct {
 } paleo_stroke_t;
 
 // Common result info for all tests.
-typedef struct {
-} paleo_test_result_t;
-
+//   possible: Whether the stroke is possible.
+//   lse: Least squares error.
+//   fa: Feature Area.
+#define PALEO_TEST_RESULT_STRUCT \
+struct {            \
+  char   possible;  \
+  double lse;       \
+  double fa;        \
+}
+typedef PALEO_TEST_RESULT_STRUCT paleo_test_result_t;
 
 
 
