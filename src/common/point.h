@@ -6,25 +6,31 @@
 #include <math.h>
 
 // A simple 2D point.
-typedef struct {
-  long x;  // X-coord.
-  long y;  // Y-coord.
-} point2d_t;
+//   x: The X-coordinate.
+//   y: The Y-coordinate.
+#define POINT2D_BODY long x; long y;
+#define POINT2D_STRUCT struct { POINT2D_BODY }
+#define POINT2D_UNION union { point2d_t p2d; POINT2D_STRUCT; };
+typedef POINT2D_STRUCT point2d_t;
 
 // A 2D point with timestamp;
-typedef struct {
-  long x;  // X-coord.
-  long y;  // Y-coord.
-  long t;  // Unix time created (for drawn points)
-} point2dt_t;
+//   x: The X-coordinate.
+//   y: The Y-coordinate.
+//   t: Unix time of creation (for drawn points)
+#define POINT2DT_BODY POINT2D_UNION long t;
+#define POINT2DT_STRUCT struct { POINT2DT_BODY }
+#define POINT2DT_UNION union { point2dt_t p2dt; POINT2DT_STRUCT; };
+typedef POINT2DT_STRUCT point2dt_t;
 
 // A point structure with coordinates in space, time, and index.
-typedef struct {
-  long x;  // X-coord.
-  long y;  // Y-coord.
-  long t;  // unix time created (for drawn points)
-  long i;  // Index (for strokes)
-} point_t;
+//   x: The X-coordinate.
+//   y: The Y-coordinate.
+//   t: Unix time of creation (for drawn points)
+//   i: Index (for strokes)
+#define POINT_BODY POINT2DT_UNION long i;
+#define POINT_STRUCT struct { POINT_BODY }
+#define POINT_UNION union { point_t p; POINT_STRUCT; };
+typedef POINT_STRUCT point_t;
 
 // Creates a point.
 point_t* point_create();
