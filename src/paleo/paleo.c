@@ -140,13 +140,11 @@ static void _process_stroke(const stroke_t* strk) {
 
   // First compute the direction as in Yu et al.'s paper:
   for (int i = 0; i < ps->num_pts - 1; i++) {
-    ps->pts[i].dir = _yu_direction(
-        (point2d_t*)&ps->pts[i], (point2d_t*)&ps->pts[i+1]);
+    ps->pts[i].dir = _yu_direction(&ps->pts[i].p2d, &ps->pts[i+1].p2d);
 
     // I wasn't sure about how to compute speed (I'll have to look more
     // carefully at the Sezgin paper), so I just figured it should be in px/s.
-    ps->pts[i].sp = _speed(
-        (point2dt_t*)&ps->pts[i], (point2dt_t*)&ps->pts[i+i]);
+    ps->pts[i].sp = _speed(&ps->pts[i].p2dt, &ps->pts[i+i].p2dt);
   }
 
   // Next compute the curvature (based on direction).
@@ -165,16 +163,14 @@ static void _process_stroke(const stroke_t* strk) {
   // Compute length.
   ps->px_length = 0;
   for (int i = 1; i < ps->num_pts; i++) {
-    ps->px_length += point2d_distance(
-        (point2d_t*)&ps->pts[i-1], (point2d_t*)&ps->pts[i]);
+    ps->px_length += point2d_distance(&ps->pts[i-1].p2d, &ps->pts[i].p2d);
   }
 
   // Compute dy/dx for each point (to compute NDDE).
   int max_i = 1;
   int min_i = 1;
   for (int i = 1; i < ps->num_pts; i++) {
-    ps->pts[i].dy_dx = _dy_dx_direction(
-        (point2d_t*)&ps->pts[i-1], (point2d_t*)&ps->pts[i]);
+    ps->pts[i].dy_dx = _dy_dx_direction(&ps->pts[i-1].p2d, &ps->pts[i].p2d);
     if (ps->pts[i].dy_dx > ps->pts[max_i].dy_dx) { max_i = i; }
     if (ps->pts[i].dy_dx < ps->pts[min_i].dy_dx) { min_i = i; }
   }
@@ -183,8 +179,7 @@ static void _process_stroke(const stroke_t* strk) {
   double sub_length = 0;
   if (max_i < min_i) { swap(int, max_i, min_i); }
   for (int i = min_i + 1; i < max_i; i++) {
-    sub_length += point2d_distance(
-        (point2d_t*)&ps->pts[i-1], (point2d_t*)&ps->pts[i]);
+    sub_length += point2d_distance(&ps->pts[i-1].p2d, &ps->pts[i].p2d);
   }
   ps->ndde = sub_length / ps->px_length;
 
@@ -200,8 +195,7 @@ static void _process_stroke(const stroke_t* strk) {
   int first_i = 0, last_i = ps->num_pts - 1;
   double prog = 0;
   for (int i = 1; i < ps->num_pts - 1; i++) {
-    prog += point2d_distance(
-        (point2d_t*)&ps->pts[i-1], (point2d_t*)&ps->pts[i]);
+    prog += point2d_distance(&ps->pts[i-1].p2d, &ps->pts[i].p2d);
     double prog_pct = prog / ps->px_length;
 
     if (prog_pct < 0.20) {  // Scanning for first tail ...
@@ -223,8 +217,7 @@ static void _process_stroke(const stroke_t* strk) {
   ps->overtraced = ps->tot_revs > PALEO_THRESH_D;
 
   // Compute closed-ness.
-  ps->closed = (point2d_distance(
-        (point2d_t*)&ps->pts[0], (point2d_t*)&ps->pts[ps->num_pts-1]) /
+  ps->closed = (point2d_distance(&ps->pts[0].p2d, &ps->pts[ps->num_pts-1].p2d) /
       ps->px_length) < PALEO_THRESH_E && ps->tot_revs > PALEO_THRESH_F;
 }
 
@@ -281,11 +274,11 @@ static inline void _paulson_corners() {
   double px_length = 0;
   for (int i = 1; i < paleo.stroke->num_pts - 1; i++) {
     px_length += point2d_distance(
-        (point2d_t*)&paleo.stroke->pts[i-1], (point2d_t*)&paleo.stroke->pts[i]);
+        &paleo.stroke->pts[i-1].p2d, &paleo.stroke->pts[i].p2d);
 
     // Are we un-line-like enough?
-    if (point2d_distance((point2d_t*)last, (point2d_t*)&paleo.stroke->pts[i])
-        > PALEO_THRESH_Y) {
+    if (point2d_distance(
+          &last->p2d, &paleo.stroke->pts[i].p2d) > PALEO_THRESH_Y) {
       _paleo_add_to_corners(i-1);
       last = &paleo.stroke->pts[i];
       px_length = 0;
@@ -363,7 +356,7 @@ static inline void _compute_dcr() {
   double max_d_dir = 0;  // maximum change in direction
   for (int i = 1; i < paleo.stroke->num_pts; i++) {
     prog += point2d_distance(
-        (point2d_t*)&paleo.stroke->pts[i-1], (point2d_t*)&paleo.stroke->pts[i]);
+        &paleo.stroke->pts[i-1].p2d, &paleo.stroke->pts[i].p2d);
 
     if (prog / paleo.stroke->px_length <= 0.05) { continue; }
     if (first_i < 0) { first_i = i; }
