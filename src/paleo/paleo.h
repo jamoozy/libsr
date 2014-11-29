@@ -47,6 +47,8 @@ struct {            \
   double fa;        \
 }
 typedef PALEO_TEST_RESULT_STRUCT paleo_test_result_t;
+#define PALEO_TEST_RESULT_UNION \
+  union { paleo_test_result_t ptr; PALEO_TEST_RESULT_STRUCT; };
 
 
 
