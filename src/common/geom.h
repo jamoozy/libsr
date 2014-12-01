@@ -28,24 +28,21 @@ inline void vec_sub(point2d_t* rtn, const point2d_t* u, const point2d_t* v) {
 
 
 // Computes area of triangle using Heron's Formula.
-double
-geom_triangle_area(const point2d_t* p1, const point2d_t* p2,
-                   const point2d_t* p3);
+double geom_triangle_area(const point2d_t* p1, const point2d_t* p2,
+                          const point2d_t* p3);
 
 // Computes the area of an arbitrary quadrilateral defined by a,b,c,d.  The
 // order of the point determines the shape of the quadrilateral -- a is
 // connected to be and d, b is connected to a and c, and so on.  Should be able
 // to handle "folded" quads.
-double
-geom_quad_area(const point2d_t* p1, const point2d_t* p2, const point2d_t* p3,
-               const point2d_t* p4);
+double geom_quad_area(const point2d_t* p1, const point2d_t* p2,
+                      const point2d_t* p3, const point2d_t* p4);
 
 
 
 // Determines if the line a1 -> a2 intersects the line b1 -> b2.
-char
-geom_segs_intersect(const point2d_t* a1, const point2d_t* a2,
-                    const point2d_t* b1, const point2d_t* b2);
+char geom_segs_intersect(const point2d_t* a1, const point2d_t* a2,
+                         const point2d_t* b1, const point2d_t* b2);
 
 #endif  // __common_geom_h__
 
