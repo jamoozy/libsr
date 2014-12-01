@@ -7,7 +7,7 @@
 #define PALEO_THRESH_D   1.31     // Overtraced revolution percentage.
 #define PALEO_THRESH_E   0.16     // Closedness dist/len ratio.
 #define PALEO_THRESH_F   0.75     // Closedness min revolutions.
-#define PALEO_THRESH_G   2.0
+#define PALEO_THRESH_G   2.0      // Line seg straightness.
 #define PALEO_THRESH_H  10.25
 #define PALEO_THRESH_I   0.0036
 #define PALEO_THRESH_J   6.0

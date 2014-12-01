@@ -42,9 +42,10 @@ typedef struct {
 //   fa: Feature Area.
 #define PALEO_TEST_RESULT_STRUCT \
 struct {            \
-  char   possible;  \
   double lse;       \
   double fa;        \
+  char*  fmsg;      \
+  char   possible;  \
 }
 typedef PALEO_TEST_RESULT_STRUCT paleo_test_result_t;
 #define PALEO_TEST_RESULT_UNION \
