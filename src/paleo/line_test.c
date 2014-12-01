@@ -81,6 +81,12 @@ static inline line_test_result_t* _line_segment_test(int first_i, int last_i) {
         &context.stroke->pts[i-1].p2d, &context.stroke->pts[i].p2d);
   }
 
+  if (context.result->fa / context.stroke->px_length >= PALEO_THRESH_H) {
+    SET_FAIL_RTN("FA too large: %.2f / %.2f = %.2f >= %.2f",
+        context.result->fa, context.stroke->px_length,
+        context.result->fa / context.stroke->px_length, PALEO_THRESH_H);
+  }
+
   return context.result;
 }
 
