@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <values.h>
 #include <math.h>
 #include <assert.h>
@@ -7,36 +8,7 @@
 #include "common/geom.h"
 #include "line_test.h"
 
-// The line test's context (used by most functions here).
-static line_test_context_t context;
 
-// Resets the context for testing.
-static void _reset(const paleo_stroke_t* stroke) {
-  context.stroke = stroke;
-}
-
-// Does the line segment test on the ranges provided.
-//   first_i: Index (incl.) of the first point to use.
-//   last_i: Index (excl.) of the last point to use.
-static inline line_test_result_t* _line_segment_test(int first_i, int last_i);
-
-line_test_result_t* line_test(const paleo_stroke_t* stroke) {
-  _reset(stroke);
-
-  return NULL;
-}
-
-// Creates the best fit line segment between the two point indexes and stores it
-// in the context.
-static inline void _best_fit_line_seg(int first_i, int last_i);
-
-// Computes the projection of p to the ideal line.
-//   proj: Return value (projection)
-//   p: The point to project.
-static inline void _projection_to_ideal(point2d_t* proj, const point2d_t* p);
-
-// Computes the orthogonal distance from the point to the ideal line.
-static inline double _distance_to_ideal(const point2d_t* p);
 
 // Convenience macro to set up the context's result as having failed.
 #define SET_FAIL(msg, args...) { \
@@ -51,19 +23,120 @@ static inline double _distance_to_ideal(const point2d_t* p);
 }
 
 // Convenience macro that does the same as SET_FAIL and then returns the result.
-#define SET_FAIL_RTN(msg, args...) SET_FAIL(msg, args) return context.result;
+#define SET_FAIL_RTN(msg, args...) SET_FAIL(msg, args) return;
 
-static inline line_test_result_t* _line_segment_test(int first_i, int last_i) {
-  context.result = calloc(1, sizeof(line_test_result_t));
+
+
+////////////////////////////////////////////////////////////////////////////////
+// ------------------------------- Up & Down -------------------------------- //
+////////////////////////////////////////////////////////////////////////////////
+
+// The line test's context (used by most functions here).
+static line_test_context_t context;
+
+void line_test_init() { bzero(&context, sizeof(line_test_context_t)); }
+
+void line_test_deinit() { free(context.result); }
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// ----------------------------- The line tests ----------------------------- //
+////////////////////////////////////////////////////////////////////////////////
+
+// Resets the context for testing.
+static void _reset(const paleo_stroke_t* stroke) {
+  context.stroke = stroke;
+}
+
+// Does the line segment test on the ranges provided.
+//   first_i: Index (incl.) of the first point to use.
+//   last_i: Index (excl.) of the last point to use.
+static inline void _line_seg_test(int first_i, int last_i);
+
+const line_test_result_t* line_seg_test(const paleo_stroke_t* stroke) {
+  _reset(stroke);
+  context.result = realloc(context.result, sizeof(line_test_result_t));
+  if (stroke->num_crnrs == 2 || stroke->num_crnrs == 3) {
+    _line_seg_test(0, stroke->num_pts);
+  }
+  return context.result;
+}
+
+const line_test_result_t* poly_line_test(const paleo_stroke_t* stroke) {
+  _reset(stroke);
+
+  // Check DCR value.
+  if (stroke->dcr < PALEO_THRESH_J) {
+    SET_FAIL("Stroke DCR val too low: %.2f < %.2f", stroke->dcr, PALEO_THRESH_J);
+    return context.result;
+  }
+
+  // Do the line test for each sub-line.
+  context.result = realloc(context.result,
+      stroke->num_crnrs * sizeof(line_test_result_t));
+  double avg_lse = 0;   // also compute average LSE
+  for (int i = 1; i < stroke->num_crnrs; i++) {
+    _line_seg_test(stroke->crnrs[i-1]->i, stroke->crnrs[i]->i);
+    if (!context.result->possible) {  // Each sub-seg must pass.
+      SET_FAIL("Does not pass line test in sub-seg %d", i);
+      return context.result;
+    }
+
+    memcpy(&context.result[i], context.result, sizeof(line_test_result_t));
+    avg_lse += context.result->lse;
+  }
+
+  // Compute avg LSE and verify it's okay.
+  bzero(context.result, sizeof(line_test_result_t));
+  context.result->lse = avg_lse / stroke->num_crnrs;
+  if (context.result->lse >= PALEO_THRESH_I) {
+    SET_FAIL("Avg LSE too high: %.2f >= %.2f",
+        context.result->lse, PALEO_THRESH_I);
+    return context.result;
+  }
+
+  // Everything checks out.  Create the line and return it.
+  context.result->possible = 1;
+  context.result->line.num = stroke->num_crnrs;
+  context.result->line.pts = calloc(
+      context.result->line.num, sizeof(point2d_t));
+  for (int i = 0; i < stroke->num_crnrs; i++) {
+    memcpy(&context.result->line.pts[i], stroke->crnrs[i], sizeof(point2d_t));
+  }
+  return context.result;
+}
+
+// Creates the best fit line segment between the two point indexes and stores it
+// in the context.
+static inline void _best_fit_line_seg(int first_i, int last_i);
+
+// Computes the projection of p to the ideal line.
+//   proj: Return value (projection)
+//   p: The point to project.
+static inline void _projection_to_ideal(point2d_t* proj, const point2d_t* p);
+
+// Computes the orthogonal distance from the point to the ideal line.
+static inline double _distance_to_ideal(const point2d_t* p);
+
+static inline void  _line_seg_test(int first_i, int last_i) {
+  // Reset 0th 
+  bzero(context.result, sizeof(line_test_result_t));
   context.result->possible = 1;
 
   _best_fit_line_seg(first_i, last_i);
 
-  double od2 = 0;  // Orthogonal distance squared.
+  double px_len = 0;  // Length of this sub-stroke.
+  double od2 = 0;     // Orthogonal distance squared.
   for (int i = first_i; i < last_i; i++) {
-    od2 += _distance_to_ideal(&context.stroke->pts[i].p2d);
+    double d = _distance_to_ideal(&context.stroke->pts[i].p2d);
+    od2 += d * d;
+    if (i > first_i) {
+      px_len += point2d_distance(
+          &context.stroke->pts[i-1].p2d, &context.stroke->pts[i].p2d);
+    }
   }
-  context.result->lse = od2 / context.stroke->px_length;
+  context.result->lse = od2 / px_len;
   if (context.result->lse >= PALEO_THRESH_G) {
     SET_FAIL_RTN("Line LSE too large: %.2f >= %.2f",
         context.result->lse, PALEO_THRESH_G);
@@ -81,13 +154,18 @@ static inline line_test_result_t* _line_segment_test(int first_i, int last_i) {
         &context.stroke->pts[i-1].p2d, &context.stroke->pts[i].p2d);
   }
 
-  if (context.result->fa / context.stroke->px_length >= PALEO_THRESH_H) {
-    SET_FAIL_RTN("FA too large: %.2f / %.2f = %.2f >= %.2f",
-        context.result->fa, context.stroke->px_length,
-        context.result->fa / context.stroke->px_length, PALEO_THRESH_H);
+  if (context.result->fa / px_len >= PALEO_THRESH_H) {
+    SET_FAIL_RTN("FA too large: %.2f / %.2f = %.2f >= %.2f", context.result->fa,
+        px_len, context.result->fa / px_len, PALEO_THRESH_H);
   }
 
-  return context.result;
+  // Everything checks out.  Create the line and return.
+  context.result->line.num = 2;
+  context.result->line.pts = calloc(2, sizeof(point2d_t));
+  memcpy(&context.result->line.pts[0],
+      &context.stroke->pts[first_i], sizeof(point2d_t));
+  memcpy(&context.result->line.pts[1],
+      &context.stroke->pts[last_i-1], sizeof(point2d_t));
 }
 
 static inline void _best_fit_line_seg(int first_i, int last_i) {
@@ -162,8 +240,4 @@ static inline void _projection_to_ideal(point2d_t* proj, const point2d_t* p) {
 #undef P
 #undef S
   }
-}
-
-void line_test_deinit() {
-
 }
