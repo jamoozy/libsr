@@ -62,11 +62,23 @@ void point_destroy(point_t* self);
 // ------------------------------ Point Utils ------------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
 
-double inline point2d_distance(const point2d_t* a, const point2d_t* b) {
+// Computes the distance from a to b.
+static inline double point2d_distance(const point2d_t* a, const point2d_t* b) {
   const long diff_x = a->x - b->x;
   const long diff_y = a->y - b->y;
   return sqrt(diff_x * diff_x + diff_y * diff_y);
 }
 
-#endif // __point_h__
+// Accumulates the value of b into a.
+static inline void point2d_accum(point2d_t* a, const point2d_t* b) {
+  a->x += b->x;
+  a->y += b->y;
+}
 
+// Divides a point2d_t by a scalar.
+static inline void point2d_div(point2d_t* a, double s) {
+  a->x /= s;
+  a->y /= s;
+}
+
+#endif // __point_h__
