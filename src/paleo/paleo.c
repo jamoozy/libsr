@@ -27,6 +27,8 @@ static paleo_context_t paleo;
 void paleo_init() {
   memset(&paleo, 0, sizeof(paleo_context_t));
   paleo.type = PALEO_TYPE_UNRUN;
+
+  line_test_init();
 }
 
 void paleo_deinit() {
