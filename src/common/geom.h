@@ -31,9 +31,17 @@ inline void vec_sub(point2d_t* rtn, const point2d_t* u, const point2d_t* v) {
 char geom_segs_intersect(const point2d_t* a1, const point2d_t* a2,
                          const point2d_t* b1, const point2d_t* b2);
 
+// Computes a line segment's intersection with an infinite line's.
+//   s1: First point in line segment.
+//   s2: Second point in line segment.
+//   l1: A point in the (infinitely long) line.
+//   l2: A point in the (infinitely long) line.
+char geom_seg_line_intersect(const point2d_t* s1, const point2d_t* s2,
+                             const point2d_t* l1, const point2d_t* l2);
 
 
-// Computes area of triangle using Heron's Formula.
+
+// Computes area of triangle.
 double geom_triangle_area(const point2d_t* p1, const point2d_t* p2,
                           const point2d_t* p3);
 
