@@ -3,34 +3,8 @@
 #include "geom.h"
 #include "point.h"
 
-
-double
-geom_triangle_area(const point2d_t* p1, const point2d_t* p2,
-                   const point2d_t* p3) {
-  const double a = point2d_distance(p1, p2);
-  const double b = point2d_distance(p2, p3);
-  const double c = point2d_distance(p3, p1);
-  const double s = (a + b + c) / 2;
-  return sqrt(s * (s-a) * (s-b) * (s-c));
-}
-
-double
-geom_quad_area(const point2d_t* p1, const point2d_t* p2, const point2d_t* p3,
-               const point2d_t* p4) {
-  double area = geom_triangle_area(p1, p2, p3) + geom_triangle_area(p1, p3, p4);
-  if (geom_segs_intersect(p1, p3, p2, p4)) {
-    area /= 2;
-  }
-  return area;
-}
-
-
-
-
-
-char
-geom_segs_intersect(const point2d_t* a1, const point2d_t* a2,
-                    const point2d_t* b1, const point2d_t* b2) {
+char geom_segs_intersect(const point2d_t* a1, const point2d_t* a2,
+                         const point2d_t* b1, const point2d_t* b2) {
 
   // Method taken from:
   // http://stackoverflow.com/questions/563198/
@@ -66,4 +40,24 @@ geom_segs_intersect(const point2d_t* a1, const point2d_t* a2,
 
   // Intersects the line, not the segment.
   return 0;
+}
+
+
+
+double geom_triangle_area(const point2d_t* p1, const point2d_t* p2,
+                          const point2d_t* p3) {
+  const double a = point2d_distance(p1, p2);
+  const double b = point2d_distance(p2, p3);
+  const double c = point2d_distance(p3, p1);
+  const double s = (a + b + c) / 2;
+  return sqrt(s * (s-a) * (s-b) * (s-c));
+}
+
+double geom_quad_area(const point2d_t* p1, const point2d_t* p2,
+                      const point2d_t* p3, const point2d_t* p4) {
+  double area = geom_triangle_area(p1, p2, p3) + geom_triangle_area(p1, p3, p4);
+  if (geom_segs_intersect(p1, p3, p2, p4)) {
+    area /= 2;
+  }
+  return area;
 }
