@@ -40,10 +40,10 @@ geom_segs_intersect(const point2d_t* a1, const point2d_t* a2,
   point2d_t s = { b2->x - b1->x, b2->y - b1->y };
 
   // Some pre-computing.
-  const double r_s = vec_cross_prod_mag(&r, &s);   // r x s
+  const double r_s = vec_cross_prod(&r, &s);   // r x s
   point2d_t q_p;
   vec_sub(&q_p, b1, a1);                         // q - p
-  double q_p_r = vec_cross_prod_mag(&q_p, &r);
+  double q_p_r = vec_cross_prod(&q_p, &r);
 
   // Preliminary checks.
   if (GEOM_EQ_0(r_s)) {
@@ -56,7 +56,7 @@ geom_segs_intersect(const point2d_t* a1, const point2d_t* a2,
   }
 
   // Rest of the computation.
-  double t = vec_cross_prod_mag(&q_p, &s) / r_s;
+  double t = vec_cross_prod(&q_p, &s) / r_s;
   double u = q_p_r / r_s;
 
   // Remaining checks.

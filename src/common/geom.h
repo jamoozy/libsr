@@ -15,7 +15,7 @@
 #define GEOM_IN_R(x,a,z) ((a) - GEOM_ERR < (x) && (x) < (z) + GEOM_ERR)
 
 // Finds the cross-product of the two lines.
-inline double vec_cross_prod_mag(const point2d_t* u, const point2d_t* v) {
+inline double vec_cross_prod(const point2d_t* u, const point2d_t* v) {
   return u->x * v->y - v->x * u->y;
 }
 
