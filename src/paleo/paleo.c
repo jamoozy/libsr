@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <string.h>
+#include <strings.h>
 #include <math.h>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -8,10 +9,12 @@
 #include "common/util.h"
 #include "paleo.h"
 #include "line.h"
-#include "line_test.h"
 #include "circle.h"
-//#include "arc.h"
 #include "curve.h"
+
+#include "line_test.h"
+#include "ellipse_test.h"
+//#include "arc.h"
 //#include "spiral.h"
 //#include "helix.h"
 //#include "complex.h"
@@ -25,14 +28,17 @@
 static paleo_context_t paleo;
 
 void paleo_init() {
-  memset(&paleo, 0, sizeof(paleo_context_t));
+  bzero(&paleo, sizeof(paleo_context_t));
   paleo.type = PALEO_TYPE_UNRUN;
 
   line_test_init();
+  ellipse_test_init();
 }
 
 void paleo_deinit() {
   line_test_deinit();
+  ellipse_test_deinit();
+
   //circle_rec_deinit();
   //ellipse_rec_deinit();
   //arc_rec_deinit();
