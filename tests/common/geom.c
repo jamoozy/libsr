@@ -13,11 +13,12 @@
 static inline void _test_vec_cross_prod(double e,
     double x1, double y1, double x2, double y2) {
   point2d_t a = { x1, y1 }, b = { x2, y2 };
-  ck_assert(vec_cross_prod(&a, &b) == e);
+  double r = vec_cross_prod(&a, &b);
+  ck_assert_msg(r == e, "Expected %.2f, got %.2f", e, r);
 }
 
 START_TEST(c_vec_cross_prod) {
-  _test_vec_cross_prod(0, 20, 40, 90, -40);
+  _test_vec_cross_prod(-4400, 20, 40, 90, -40);
 } END_TEST
 
 START_TEST(c_vec_cross_prod_same) {
@@ -31,22 +32,22 @@ START_TEST(c_vec_cross_prod_opp) {
 
 static inline void _test_vec_sub(double xe, double ye,
     double x1, double y1, double x2, double y2) {
-  point2d_t a = { x1, y1 }, b = { x2, y2 }, e;
-  vec_sub(&e, &a, &b);
-  ck_assert(e.x == xe);
-  ck_assert(e.y == ye);
+  point2d_t a = { x1, y1 }, b = { x2, y2 }, r;
+  vec_sub(&r, &a, &b);
+  ck_assert_msg(r.x == xe, "Expected %.2f, got %.2f", xe, r.x);
+  ck_assert_msg(r.y == ye, "Expected %.2f, got %.2f", ye, r.y);
 }
 
 START_TEST(c_vec_sub) {
-  ck_assert_msg(0, "not impl");
+  _test_vec_sub(60,50, 40,80, -20,30);
 } END_TEST
 
 START_TEST(c_vec_sub_same) {
-  ck_assert_msg(0, "not impl");
+  _test_vec_sub(0,0, 40,-40, 40,-40);
 } END_TEST
 
 START_TEST(c_vec_sub_opp) {
-  ck_assert_msg(0, "not impl");
+  ck_assert_msg(80,-40, -40,20, 40,-20);
 } END_TEST
 
 
@@ -57,47 +58,16 @@ START_TEST(c_vec_sub_opp) {
 static inline void _test_triangle_area(double e,
     double x1, double y1, double x2, double y2, double x3, double y3) {
   point2d_t a = { x1, y1 }, b = { x2, y2 }, c = { x3, y3 };
-  ck_assert(geom_triangle_area(&a, &b, &c) == e);
+  double r = geom_triangle_area(&a, &b, &c);
+  ck_assert_msg(r == e, "Expected %.2f, got %.2f", e, r);
 }
 
 START_TEST(c_triangle_area_0) {
   _test_triangle_area(0, 0,0, 0,0, 0,0);
 } END_TEST
 
-START_TEST(c_quad_area_crossing) {
-  ck_assert_msg(0, "not impl");
-} END_TEST
-
-START_TEST(c_quad_area_square) {
-  ck_assert_msg(0, "not impl");
-} END_TEST
-
-START_TEST(c_quad_area_deg) {
-  ck_assert_msg(0, "not impl");
-} END_TEST
-
-START_TEST(c_quad_area_ovlp) {
-  ck_assert_msg(0, "not impl");
-} END_TEST
-
-START_TEST(c_quad_area_normal) {
-  ck_assert_msg(0, "not impl");
-} END_TEST
-
-
-
-static inline void _test_quad_area(double e,
-    double x1, double y1, double x2, double y2,
-    double x3, double y3, double x4, double y4) {
-  point2d_t a = { x1, y1 }, b = { x2, y2 }, c = { x3, y3 }, d = { x4, y4 };
-  ck_assert(geom_quad_area(&a, &b, &c, &d) == e);
-}
-
-START_TEST(c_quad_area_0) {
-  _test_quad_area(0, 0,0, 0,0, 0,0, 0,0);
-} END_TEST
-
 START_TEST(c_triangle_area_big) {
+  //_test_triangle_area(0, 40,40, 80,90, 200,500);
   ck_assert_msg(0, "not impl");
 } END_TEST
 
@@ -119,11 +89,46 @@ START_TEST(c_triangle_area_eq) {
 
 
 
+static inline void _test_quad_area(double e,
+    double x1, double y1, double x2, double y2,
+    double x3, double y3, double x4, double y4) {
+  point2d_t a = { x1, y1 }, b = { x2, y2 }, c = { x3, y3 }, d = { x4, y4 };
+  double r = geom_quad_area(&a, &b, &c, &d);
+  ck_assert_msg(r == e, "Expected %.2f, got %.2f", e, r);
+}
+
+START_TEST(c_quad_area_0) {
+  _test_quad_area(0, 0,0, 0,0, 0,0, 0,0);
+} END_TEST
+
+START_TEST(c_quad_area_crossing) {
+  _test_quad_area(400, 20,100, 60,60, 60,80, 20,80);
+} END_TEST
+
+START_TEST(c_quad_area_square) {
+  ck_assert_msg(0, "not impl");
+} END_TEST
+
+START_TEST(c_quad_area_deg) {
+  ck_assert_msg(0, "not impl");
+} END_TEST
+
+START_TEST(c_quad_area_ovlp) {
+  ck_assert_msg(0, "not impl");
+} END_TEST
+
+START_TEST(c_quad_area_normal) {
+  ck_assert_msg(0, "not impl");
+} END_TEST
+
+
+
 static inline void _test_segs_intersect(double e,
     double x1, double y1, double x2, double y2,
     double x3, double y3, double x4, double y4) {
   point2d_t a = { x1, y1 }, b = { x2, y2 }, c = { x3, y3 }, d = { x4, y4 };
-  ck_assert(geom_segs_intersect(&a, &b, &c, &d) == e);
+  double r = geom_segs_intersect(&a, &b, &c, &d);
+  ck_assert_msg(r == e, "Expected %.2f, got %.2f", e, r);
 }
 
 START_TEST(c_segs_intersect_parallel) {
