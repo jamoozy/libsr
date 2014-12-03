@@ -29,7 +29,6 @@ typedef struct {
     struct {
       point2d_t a;
       point2d_t b;
-
       double dist;
     } minor;
     point2d_t center;
