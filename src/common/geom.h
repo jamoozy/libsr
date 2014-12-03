@@ -61,7 +61,7 @@ double geom_quad_area(const point2d_t* p1, const point2d_t* p2,
 //   in2: Input point #2.
 //   c: Center point to create output line through.
 void geom_ortho_line(point2d_t* out1, point2d_t* out2,
-    const point2d_t* in1, const point2d_t* in2, const point2d_t* c) {
+    const point2d_t* in1, const point2d_t* in2, const point2d_t* c);
 
 #endif  // __common_geom_h__
 
