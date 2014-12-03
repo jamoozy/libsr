@@ -15,12 +15,12 @@
 #define GEOM_IN_R(x,a,z) ((a) - GEOM_ERR < (x) && (x) < (z) + GEOM_ERR)
 
 // Finds the cross-product of the two lines.
-inline double vec_cross_prod(const point2d_t* u, const point2d_t* v) {
+static inline double vec_cross_prod(const point2d_t* u, const point2d_t* v) {
   return u->x * v->y - v->x * u->y;
 }
 
 // Computes rtn = u (cross) v
-inline void vec_sub(point2d_t* rtn, const point2d_t* u, const point2d_t* v) {
+static inline void vec_sub(point2d_t* rtn, const point2d_t* u, const point2d_t* v) {
   rtn->x = u->x - v->x;
   rtn->y = u->y - v->y;
 }
@@ -51,6 +51,17 @@ double geom_triangle_area(const point2d_t* p1, const point2d_t* p2,
 // to handle "folded" quads.
 double geom_quad_area(const point2d_t* p1, const point2d_t* p2,
                       const point2d_t* p3, const point2d_t* p4);
+
+
+// Computes two points defining the line orthogonal to the input points through
+// the center point.
+//   out1: Output point #1.
+//   out2: Output point #2.
+//   in1: Input point #1.
+//   in2: Input point #2.
+//   c: Center point to create output line through.
+void geom_ortho_line(point2d_t* out1, point2d_t* out2,
+    const point2d_t* in1, const point2d_t* in2, const point2d_t* c) {
 
 #endif  // __common_geom_h__
 
