@@ -28,16 +28,30 @@ static inline void vec_sub(point2d_t* rtn, const point2d_t* u, const point2d_t* 
 
 
 // Determines if the line a1 -> a2 intersects the line b1 -> b2.
-char geom_segs_intersect(const point2d_t* a1, const point2d_t* a2,
-                         const point2d_t* b1, const point2d_t* b2);
+char geom_seg_seg_intersect(const point2d_t* a1, const point2d_t* a2,
+                            const point2d_t* b1, const point2d_t* b2);
 
-// Computes a line segment's intersection with an infinite line's.
+// Determines if the line segment s1 -> s2 intersects the infinite line defined
+// by l1 -> l2.
 //   s1: First point in line segment.
 //   s2: Second point in line segment.
 //   l1: A point in the (infinitely long) line.
 //   l2: A point in the (infinitely long) line.
 char geom_seg_line_intersect(const point2d_t* s1, const point2d_t* s2,
                              const point2d_t* l1, const point2d_t* l2);
+
+// Computes the intersection point between the line segment defined by s1 -> s2
+// and the infinite line defined by l1 -> l2.
+// infinite line's.
+//   isect: Return intersection point.
+//   s1: First point in line segment.
+//   s2: Second point in line segment.
+//   l1: A point in the (infinitely long) line.
+//   l2: A point in the (infinitely long) line.
+// Returns 1 on success and 0 on failure.
+char geom_seg_line_intersection(point2d_t* isect,
+    const point2d_t* s1, const point2d_t* s2,
+    const point2d_t* l1, const point2d_t* l2);
 
 
 
@@ -60,8 +74,11 @@ double geom_quad_area(const point2d_t* p1, const point2d_t* p2,
 //   in1: Input point #1.
 //   in2: Input point #2.
 //   c: Center point to create output line through.
-void geom_ortho_line(point2d_t* out1, point2d_t* out2,
-    const point2d_t* in1, const point2d_t* in2, const point2d_t* c);
+static inline void geom_ortho_line(point2d_t* out1, point2d_t* out2,
+    const point2d_t* in1, const point2d_t* in2, const point2d_t* c) {
+  out1->x = in1->y - c->y + c->x;
+  out2->y = in2->x - c->x + c->y;
+}
 
 #endif  // __common_geom_h__
 

@@ -5,9 +5,30 @@
 #include "geom.h"
 #include "point.h"
 
-char geom_segs_intersect(const point2d_t* a1, const point2d_t* a2,
-                         const point2d_t* b1, const point2d_t* b2) {
 
+
+////////////////////////////////////////////////////////////////////////////////
+// ----------------------- Line/Segment Intersection ------------------------ //
+////////////////////////////////////////////////////////////////////////////////
+
+// Has to do with the intersection technique described in:
+//    http://stackoverflow.com/questions/563198/
+//                 how-do-you-detect-where-two-line-segments-intersect
+typedef struct {
+  double t;
+  double u;
+  char intersects;  // Does this even intersect?
+} intersection_t;
+
+void _intersect(intersection_t*,
+    const point2d_t*, const point2d_t*, const point2d_t*, const point2d_t*);
+
+
+// Computes the intersection struct for the two lines defined by a1 --> a2 and
+// b1 --> b2.  t corresponds to the a's and u to the b's.
+void _intersect(intersection_t* inter,
+    const point2d_t* a1, const point2d_t* a2,
+    const point2d_t* b1, const point2d_t* b2) {
   // Method taken from:
   // http://stackoverflow.com/questions/563198/
   //              how-do-you-detect-where-two-line-segments-intersect
@@ -18,8 +39,13 @@ char geom_segs_intersect(const point2d_t* a1, const point2d_t* a2,
   // Some pre-computing.
   const double r_s = vec_cross_prod(&r, &s);   // r x s
   point2d_t q_p;
-  vec_sub(&q_p, b1, a1);                         // q - p
+  vec_sub(&q_p, b1, a1);                       // q - p
   double q_p_r = vec_cross_prod(&q_p, &r);
+
+  // Rest of the computation.
+  inter->t = vec_cross_prod(&q_p, &s) / r_s;
+  inter->u = q_p_r / r_s;
+  inter->intersects = 1;
 
   // Preliminary checks.
   if (GEOM_EQ_0(r_s)) {
@@ -28,15 +54,23 @@ char geom_segs_intersect(const point2d_t* a1, const point2d_t* a2,
     } else {
       // parallel
     }
+    inter->intersects = 0;
+  }
+}
+
+char geom_seg_seg_intersect(const point2d_t* a1, const point2d_t* a2,
+                            const point2d_t* b1, const point2d_t* b2) {
+  // Compute the intersection
+  intersection_t inter;
+  _intersect(&inter, a1, a2, b1, b2);
+
+  // No intersection;
+  if (!inter.intersects) {
     return 0;
   }
 
-  // Rest of the computation.
-  double t = vec_cross_prod(&q_p, &s) / r_s;
-  double u = q_p_r / r_s;
-
   // Remaining checks.
-  if (GEOM_IN_R(t, 0, 1) && GEOM_IN_R(u, 0, 1)) {
+  if (GEOM_IN_R(inter.t, 0, 1) && GEOM_IN_R(inter.u, 0, 1)) {
     return 1;
   }
 
@@ -44,12 +78,56 @@ char geom_segs_intersect(const point2d_t* a1, const point2d_t* a2,
   return 0;
 }
 
-char geom_seg_line_intersect(const point2d_t* a1, const point2d_t* a2,
-                             const point2d_t* b1, const point2d_t* b2) {
-  fprintf(stderr, "not impl");
-  assert(0);
+char geom_seg_line_intersect(const point2d_t* s1, const point2d_t* s2,
+                             const point2d_t* l1, const point2d_t* l2) {
+  // Compute the intersection
+  intersection_t inter;
+  _intersect(&inter, s1, s2, l1, l2);
+
+  // No intersection;
+  if (!inter.intersects) {
+    return 0;
+  }
+
+  // Remaining checks.
+  if (GEOM_IN_R(inter.t, 0, 1)) {
+    return 1;
+  }
+
+  // Intersects the line, not the segment.
   return 0;
 }
+
+char geom_seg_line_intersection(point2d_t* isect,
+    const point2d_t* s1, const point2d_t* s2,
+    const point2d_t* l1, const point2d_t* l2) {
+  // Compute the intersection
+  intersection_t inter;
+  _intersect(&inter, s1, s2, l1, l2);
+
+  // No intersection;
+  if (!inter.intersects) {
+    return 1;
+  }
+
+  // Remaining checks.
+  if (GEOM_IN_R(inter.t, 0, 1)) {
+    // Compute the intersection point.
+    isect->x = s1->x + inter.t * (s2->x - s1->x);
+    isect->y = s1->y + inter.t * (s2->y - s1->y);
+
+    // Sanity check.
+    assert(isect->x == l1->x + inter.u * (l2->x - l1->x));
+    assert(isect->y == l1->y + inter.u * (l2->y - l1->y));
+
+    // ... and return.
+    return 1;
+  }
+
+  // Intersects the line, not the segment.
+  return 0;
+}
+
 
 
 double geom_triangle_area(const point2d_t* p1, const point2d_t* p2,
