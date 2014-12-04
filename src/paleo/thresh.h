@@ -11,8 +11,8 @@
 #define PALEO_THRESH_H  10.25     // Line FA/len max ratio.
 #define PALEO_THRESH_I   0.0036   // Pline LSE max.
 #define PALEO_THRESH_J   6.0      // min DCR for Pline.
-#define PALEO_THRESH_K   0.8
-#define PALEO_THRESH_L  30.0
+#define PALEO_THRESH_K   0.8      // Ellipse NDDE min
+#define PALEO_THRESH_L  30.0      // Ellipse maj-axis len req.
 #define PALEO_THRESH_M   0.33
 #define PALEO_THRESH_N  16.0
 #define PALEO_THRESH_O   0.425
