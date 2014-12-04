@@ -20,19 +20,20 @@ typedef struct {
 typedef struct {
   char ellipse_run;  // Was ellipse test run?
   const paleo_stroke_t* stroke;
-  struct {  // The ideal ellipse.
+  struct {              // The ideal ellipse.
     struct {
-      long i;
-      long j;
-      double dist;
+      long i;           // Index into stroke of one point.
+      long j;           // Index into stroke of another point.
+      double len;       // Length of major axis.
     } major;
     struct {
-      point2d_t a;
-      point2d_t b;
-      double dist;
+      point2d_t a;      // One minor axis point.
+      point2d_t b;      // Another minor axis point.
+      double len;       // Length of minor axis.
     } minor;
-    point2d_t center;
-  } ideal_ell;
+    double area;        // Area of ideal ellipse.
+    point2d_t center;   // Center of ideal ellipse.
+  } ideal;
   ellipse_test_result_t *result;  // Result of the ellipse test.
 } ellipse_test_context_t;
 
