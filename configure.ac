@@ -21,7 +21,8 @@ PKG_CHECK_MODULES([CHECK], [check >= 0.9], [],
                   [Warning, Check not installed, so tests not run.])
 
 # Checks for header files
-AC_CHECK_HEADERS([stdlib.h math.h stdio.h])
+AC_CHECK_HEADERS([assert.h string.h strings.h stdlib.h stdio.h math.h values.h])
+AC_DEFINE(_GNU_SOURCE, 1, [Define for math.h M_PI (and others) usage.])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
