@@ -7,18 +7,20 @@
 
 #define get_utime() ((long)time(NULL))
 
-// Min and max copied from StackOverflow:
-//   http://stackoverflow.com/questions/3437404/min-and-max-in-c
+// Min and max copied from the GNU manual:
+//    https://gcc.gnu.org/onlinedocs/cpp/
+//          Duplication-of-Side-Effects.html#Duplication-of-Side-Effects
 
-#define MAX(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a > _b ? _a : _b; })
+#define MAX(X, Y)                \
+({ __typeof__ (X) x_ = (X);          \
+   __typeof__ (Y) y_ = (Y);          \
+   (x_ > y_) ? x_ : y_; })
 
-#define MIN(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a < _b ? _a : _b; })
+#define MIN(X, Y)                \
+({ __typeof__ (X) x_ = (X);          \
+   __typeof__ (Y) y_ = (Y);          \
+   (x_ < y_) ? x_ : y_; })
+
 
 #endif  // __util_h__
 
