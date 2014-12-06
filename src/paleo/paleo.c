@@ -1,10 +1,9 @@
+#include <config.h>
+
 #include <assert.h>
 #include <string.h>
 #include <strings.h>
 #include <math.h>
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 #include "common/util.h"
 #include "paleo.h"
@@ -221,7 +220,7 @@ static void _process_stroke(const stroke_t* strk) {
   _break_stroke(first_i, last_i);
 
   // Compute total rotation & whether it's overtraced.
-  ps->tot_revs = (ps->pts[ps->num_pts-1].dir - ps->pts[0].dir) / (2 * M_PI);
+  ps->tot_revs = (ps->pts[ps->num_pts-1].dir - ps->pts[0].dir) / (2 * M_PIl);
   ps->overtraced = ps->tot_revs > PALEO_THRESH_D;
 
   // Compute closed-ness.
@@ -245,8 +244,8 @@ static inline double _yu_curvature(int k, const paleo_point_t* sub_strk) {
 
     // Find direction difference, normalize, and add to diff_sum.
     double diff = sub_strk[i+1].dir - sub_strk[i].dir;
-    while (diff >  M_PI) { diff -= M_PI; }
-    while (diff < -M_PI) { diff += M_PI; }
+    while (diff >  M_PIl) { diff -= M_PIl; }
+    while (diff < -M_PIl) { diff += M_PIl; }
     diff_sum += diff;
   }
 
