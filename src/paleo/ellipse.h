@@ -3,29 +3,26 @@
 
 #include "common/point.h"
 
+// Much of this math is based on what I learned from:
+//    http://mathworld.wolfram.com/Ellipse.html
+
 // A ellipse with some number of joints.
 typedef struct {
-  long r;       // The radius of the ellipse.
-  point2d_t c;  // The center of the ellipse.
+  point2d_t f1;  // The center of the ellipse.
+  point2d_t f2;  // The center of the ellipse.
+  double maj;    // Major axis length.
+  double min;    // Minor axis length.
 } ellipse_t;
 
-// Creates a new ellipse at 0,0 with radius 0.
-ellipse_t* ellipse_create();
+// Creates a new ellipse with the given focci and maj- and min-length
+ellipse_t* ellipse_create(
+    const point2d_t* f1, const point2d_t* f2, double maj, double min);
 
-// Creates a ellipse with the given center and radius.
-//   r: The radius.
-//   x: X coordinate.
-//   y: Y coordinate.
-ellipse_t* ellipse_create_full(long r, long x, long y);
-
-// Creates a ellipse with the given center and radius.  The passed center will
-// be taken over by the ellipse -- in other words, it will not be cloned in
-// this function; it will be freed on a call to ellipse_destroy(ellipse_t*).
-//   r: The radius.
-//   c: The center.
-ellipse_t* ellipse_create_with_point(long r, const point2d_t* c);
+// Populate the already-allocated ellipse.
+void ellipse_populate(ellipse_t* self,
+    const point2d_t* f1, const point2d_t* f2, double maj, double min);
 
 // Destroys the ellipse by freeing its memory.
-void ellipse_destroy(ellipse_t*);
+void ellipse_destroy(ellipse_t* self);
 
 #endif // __ellipse_h__
