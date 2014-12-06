@@ -1,5 +1,7 @@
+#include <config.h>
 #include <strings.h>
 #include <values.h>
+#include <math.h>
 
 #include "common/geom.h"
 #include "test_macros.h"
@@ -108,10 +110,16 @@ const ellipse_test_result_t* ellipse_test(const paleo_stroke_t* stroke) {
   // ellipse.
   context.result->fa = 0;
   for (int i = 1; i < stroke->num_pts; i++) {
-    context.result->fa += ...
+    context.result->fa += geom_triangle_area(
+        &context.ideal.center, &stroke->pts[i-1].p2d, &stroke->pts[i].p2d);
   }
+  double fae = 4 * context.result->fa /
+    (M_PIl * context.ideal.major.len * context.ideal.minor.len);
 
   // If it all checks out, create the ellipse based on maj/min/center.
+  //
+  // This is based on: http://mathworld.wolfram.com/Ellipse.html
+
 
   return context.result;
 }

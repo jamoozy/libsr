@@ -31,7 +31,6 @@ typedef struct {
       point2d_t b;      // Another minor axis point.
       double len;       // Length of minor axis.
     } minor;
-    double area;        // Area of ideal ellipse.
     point2d_t center;   // Center of ideal ellipse.
   } ideal;
   ellipse_test_result_t *result;  // Result of the ellipse test.
