@@ -20,7 +20,16 @@ void ellipse_test_init() { bzero(&context, sizeof(ellipse_test_context_t)); }
 
 void ellipse_test_deinit() { free(context.result); }
 
-static void _reset(const paleo_stroke_t* stroke) { context.stroke = stroke; }
+static void _reset(const paleo_stroke_t* stroke) {
+  // 0-out context (keeping result around);
+  ellipse_test_result_t* result = context.result;
+  bzero(&context, sizeof(ellipse_test_result_t));
+  context.result = realloc(result, sizeof(ellipse_test_result_t));
+
+  // Set stroke and make this
+  context.stroke = stroke;
+  context.result->possible = 1;
+}
 
 
 
@@ -119,7 +128,21 @@ const ellipse_test_result_t* ellipse_test(const paleo_stroke_t* stroke) {
   // If it all checks out, create the ellipse based on maj/min/center.
   //
   // This is based on: http://mathworld.wolfram.com/Ellipse.html
-
+  double f_len = sqrt((context.ideal.major.len * context.ideal.major.len +
+        context.ideal.minor.len * context.ideal.minor.len) / 4);
+  double focal_factor = 2 * f_len / context.ideal.major.len;
+  point2d_t focus_vec = {
+    (stroke->pts[context.ideal.major.i].x - context.ideal.center.x)
+      * focal_factor,
+    (stroke->pts[context.ideal.major.i].y - context.ideal.center.y)
+      * focal_factor,
+  };
+  context.result->ellipse.f1.x = context.ideal.center.x + focus_vec.x;
+  context.result->ellipse.f1.y = context.ideal.center.y + focus_vec.y;
+  context.result->ellipse.f2.x = context.ideal.center.x - focus_vec.x;
+  context.result->ellipse.f2.y = context.ideal.center.y - focus_vec.y;
+  context.result->ellipse.maj = context.ideal.major.len;
+  context.result->ellipse.min = context.ideal.minor.len;
 
   return context.result;
 }
