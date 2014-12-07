@@ -24,16 +24,16 @@ typedef struct {
 
 // A paleo stroke; just like a normal stroke, but some paleo-specific info.
 typedef struct {
-  int num_pts;         // Number of points.
-  paleo_point_t* pts;  // Points.
-  int num_crnrs;       // Number of corners.
+  int num_pts;            // Number of points.
+  paleo_point_t* pts;     // Points.
+  int num_crnrs;          // Number of corners.
   paleo_point_t** crnrs;  // Corners.
-  double px_length;    // Length of the stroke in pixels.
-  double ndde;         // Normalized Distance between Direction Extremes.
-  double dcr;          // Direction Change Ratio.
-  double tot_revs;     // Total revolutions.
-  short overtraced;    // Whether the stroke is overtraced.
-  short closed;        // Whether the shape is closed.
+  double px_length;       // Length of the stroke in pixels.
+  double ndde;            // Normalized Distance between Direction Extremes.
+  double dcr;             // Direction Change Ratio.
+  double tot_revs;        // Total revolutions.
+  short overtraced;       // Whether the stroke is overtraced.
+  short closed;           // Whether the shape is closed.
 } paleo_stroke_t;
 
 // Common result info for all tests.
