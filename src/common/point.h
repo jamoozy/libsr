@@ -69,6 +69,11 @@ static inline double point2d_distance(const point2d_t* a, const point2d_t* b) {
   return sqrt(diff_x * diff_x + diff_y * diff_y);
 }
 
+// Computes the angle from a to b.
+static inline double point2d_angle_to(const point2d_t* a, const point2d_t* b) {
+  return atan2(b->y - a->y, b->x - a->x);
+}
+
 // Accumulates the value of b into a.
 static inline void point2d_accum(point2d_t* a, const point2d_t* b) {
   a->x += b->x;
