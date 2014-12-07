@@ -1,6 +1,8 @@
 #ifndef __util_h__
 #define __util_h__
 
+#include <config.h>
+#include <math.h>
 #include <time.h>
 
 #define swap(type, a, b) { type s = a; a = b; b = s; }
@@ -20,6 +22,17 @@
 ({ __typeof__ (X) x_ = (X);          \
    __typeof__ (Y) y_ = (Y);          \
    (x_ < y_) ? x_ : y_; })
+
+
+// Normalizes an angle to be within [-pi,pi]
+
+#define NORM_ANGLE(angle) do { \
+  if (angle > M_PIl) { \
+    angle += 2 * M_PIl; \
+  } else if (angle < -M_PIl) { \
+    angle -= 2 * M_PIl; \
+  } \
+} while (0)
 
 
 #endif  // __util_h__
