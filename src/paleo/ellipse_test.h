@@ -25,8 +25,8 @@ typedef struct {
 
 // Context needed to perform the ellipse test.
 typedef struct {
-  char run;  // Was ellipse test run?
   const paleo_stroke_t* stroke;
+  double angle;         // Angle traversed about the center with the stroke.
   struct {              // The ideal ellipse.
     struct {
       long i;           // Index into stroke of one point.

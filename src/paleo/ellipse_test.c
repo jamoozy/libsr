@@ -3,6 +3,7 @@
 #include <values.h>
 #include <math.h>
 
+#include "common/point.h"
 #include "common/geom.h"
 #include "test_macros.h"
 #include "ellipse_test.h"
@@ -31,7 +32,6 @@ static inline void _reset_el(const paleo_stroke_t* stroke) {
 
   // Set stroke and initialize.
   e_context.stroke = stroke;
-  e_context.run = 1;
   e_context.result->possible = 1;
 }
 
@@ -129,11 +129,36 @@ const ellipse_test_result_t* ellipse_test(const paleo_stroke_t* stroke) {
   // Yu's paper (which is [12]) computes the feature area by summing all the
   // triangles defined by the stroke's sub-segments and the center point of the
   // ellipse.
+  //
+  // Paulson's paper also mentions how to deal with overtraced shapes:
+  //
+  //    If the stroke is overtraced, then it is broken into sub-strokes at each
+  //    2π interval in the direction graph. All of the sub-strokes (minus the
+  //    last sub-stroke, as it may be an incomplete ellipse) are then fit to
+  //    ellipses and the error becomes the average feature area error across
+  //    each sub-ellipse.
+  //
+  // Instead of using this process, the following code just normalizes by the
+  // total angle traversed by the stroke about the center.
+  context.angle = 0;
   e_context.result->fa = 0;
   for (int i = 1; i < stroke->num_pts; i++) {
     e_context.result->fa += geom_triangle_area(
         &e_context.ideal.center, &stroke->pts[i-1].p2d, &stroke->pts[i].p2d);
+
+    double d_angle =
+      point2d_angle_to(&e_context.ideal.center, &stroke->pts[i].p2d) -
+      point2d_angle_to(&e_context.ideal.center, &stroke->pts[i-1].p2d);
+
+    if (d_angle > M_PIl) {
+      d_angle += 2 * M_PIl;
+    } else if (d_angle < -M_PIl) {
+      d_angle -= 2 * M_PIl;
+    }
+    context.angle += d_angle;
   }
+  e_context.result->fa *= abs(context.angle) / (2 * M_PIl);  // Normalization.
+
   double fae = 4 * e_context.result->fa /
     (M_PIl * e_context.ideal.major.len * e_context.ideal.minor.len);
   CHECK_RTN_RESULT(fae < PALEO_THRESH_M,
@@ -158,8 +183,6 @@ const ellipse_test_result_t* ellipse_test(const paleo_stroke_t* stroke) {
   e_context.result->ellipse.maj = e_context.ideal.major.len;
   e_context.result->ellipse.min = e_context.ideal.minor.len;
 
-  assert(0);  // TODO check up on overtraced handling
-
   return e_context.result;
 }
 
@@ -175,7 +198,8 @@ const ellipse_test_result_t* ellipse_test(const paleo_stroke_t* stroke) {
 #define context c_context
 
 const circle_test_result_t* circle_test(const paleo_stroke_t* stroke) {
-  CHECK_RTN_RESULT(e_context.run, "Ellipse not run!  Not running circle test.");
+  CHECK_RTN_RESULT(e_context.stroke == stroke,
+      "Ellipse not run!  Not running circle test.");
   CHECK_RTN_RESULT(stroke->closed, "Stroke not closed.");
 
   c_context.ideal.r = 0;
@@ -204,11 +228,9 @@ const circle_test_result_t* circle_test(const paleo_stroke_t* stroke) {
   }
 
   double area = M_PIl * c_context.ideal.r * c_context.ideal.r;
-  double fae = c_context.result->fa / area;
+  double fae = (c_context.result->fa = e_context.result->fa) / area;
   CHECK_RTN_RESULT(fae < PALEO_THRESH_P,
       "FA error too large: %.2f >= %.2f", fae, PALEO_THRESH_P);
-
-  assert(0);  // TODO check up on overtraced handling
 
   return c_context.result;
 }
