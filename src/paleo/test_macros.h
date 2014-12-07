@@ -25,7 +25,7 @@
 } while (0)
 
 #define CHECK_RTN_RESULT(cond, msg, ...) do { \
-  if (!cond) { \
+  if (!(cond)) { \
     SET_FAIL(msg, ##__VA_ARGS__); \
     return context.result; \
   } \
