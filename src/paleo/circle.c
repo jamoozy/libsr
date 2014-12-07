@@ -10,15 +10,15 @@ circle_t* circle_create() {
 circle_t* circle_create_full(long r, long x, long y) {
   circle_t* self = circle_create();
   self->r = r;
-  self->c.x = x;
-  self->c.y = y;
+  self->center.x = x;
+  self->center.y = y;
   return self;
 }
 
 circle_t* circle_create_with_point(long r, const point2d_t* c) {
   circle_t* self = circle_create();
   self->r = r;
-  memcpy(&self->c, c, sizeof(point2d_t));
+  memcpy(&self->center, c, sizeof(point2d_t));
   return self;
 }
 

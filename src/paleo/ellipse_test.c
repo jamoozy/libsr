@@ -232,6 +232,9 @@ const circle_test_result_t* circle_test(const paleo_stroke_t* stroke) {
   CHECK_RTN_RESULT(fae < PALEO_THRESH_P,
       "FA error too large: %.2f >= %.2f", fae, PALEO_THRESH_P);
 
+  // Create beautified ideal circle & return result.
+  context.result->circle.center = e_context.ideal.center;
+  context.result->circle.r = context.ideal.r;
   return c_context.result;
 }
 

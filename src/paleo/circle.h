@@ -5,8 +5,8 @@
 
 // A circle with some number of joints.
 typedef struct {
-  long r;       // The radius of the circle.
-  point2d_t c;  // The center of the circle.
+  point2d_t center;   // The center of the circle.
+  double r;           // The radius of the circle.
 } circle_t;
 
 // Creates a new circle at 0,0 with radius 0.
