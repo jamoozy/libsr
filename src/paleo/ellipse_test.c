@@ -17,9 +17,6 @@
 // The ellipse context for testing.
 static ellipse_test_context_t e_context;
 
-// The circle context for testing.
-static circle_test_context_t c_context;
-
 void ellipse_test_init() { bzero(&e_context, sizeof(ellipse_test_context_t)); }
 
 void ellipse_test_deinit() { free(e_context.result); }
@@ -34,6 +31,14 @@ static inline void _reset_el(const paleo_stroke_t* stroke) {
   e_context.stroke = stroke;
   e_context.result->possible = 1;
 }
+
+
+// The circle context for testing.
+static circle_test_context_t c_context;
+
+void circle_test_init() { bzero(&c_context, sizeof(circle_test_context_t)); }
+
+void circle_test_deinit() { free(c_context.result); }
 
 static inline void _reset_cir(const paleo_stroke_t* stroke) {
   // 0-out e_context (keeping result around);
