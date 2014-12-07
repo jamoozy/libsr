@@ -3,6 +3,7 @@
 #include <values.h>
 #include <math.h>
 
+#include "common/util.h"
 #include "common/point.h"
 #include "common/geom.h"
 #include "test_macros.h"
@@ -120,8 +121,8 @@ const ellipse_test_result_t* ellipse_test(const paleo_stroke_t* stroke) {
 
   // Check that the NDDE is sufficiently high, or the ellipse is sufficiently
   // small.
-  CHECK_RTN_RESULT(stroke->ndde <= PALEO_THRESH_K &&
-      e_context.ideal.major.len >= PALEO_THRESH_L,
+  CHECK_RTN_RESULT(stroke->ndde > PALEO_THRESH_K ||
+      e_context.ideal.major.len < PALEO_THRESH_L,
           "NDDE (%.2f) too small for maj length (%.2f)",
           stroke->ndde, e_context.ideal.major.len);
 
@@ -155,11 +156,7 @@ const ellipse_test_result_t* ellipse_test(const paleo_stroke_t* stroke) {
       point2d_angle_to(&e_context.ideal.center, &stroke->pts[i].p2d) -
       point2d_angle_to(&e_context.ideal.center, &stroke->pts[i-1].p2d);
 
-    if (d_angle > M_PIl) {
-      d_angle += 2 * M_PIl;
-    } else if (d_angle < -M_PIl) {
-      d_angle -= 2 * M_PIl;
-    }
+    NORM_ANGLE(d_angle);
     context.angle += d_angle;
   }
   e_context.result->fa *= abs(context.angle) / (2 * M_PIl);  // Normalization.
@@ -214,8 +211,8 @@ const circle_test_result_t* circle_test(const paleo_stroke_t* stroke) {
   }
   c_context.ideal.r /= stroke->num_pts;
 
-  CHECK_RTN_RESULT(stroke->ndde <= PALEO_THRESH_K &&
-      c_context.ideal.r >= PALEO_THRESH_N,
+  CHECK_RTN_RESULT(stroke->ndde > PALEO_THRESH_K ||
+      c_context.ideal.r < PALEO_THRESH_N,
           "NDDE (%.2f) too small for radius (%.2f)",
           stroke->ndde, c_context.ideal.r);
 
