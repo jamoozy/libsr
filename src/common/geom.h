@@ -53,6 +53,16 @@ char geom_seg_line_intersection(point2d_t* isect,
     const point2d_t* s1, const point2d_t* s2,
     const point2d_t* l1, const point2d_t* l2);
 
+// Finds the intersection between 2 infinitely long lines.
+//   isect: Return intersection point.
+//   s1: First point in first (infinitely long) line.
+//   s2: Second point in first (infinitely long) line.
+//   l1: A point in the (infinitely long) line.
+//   l2: A point in the (infinitely long) line.
+char geom_line_line_intersection(point2d_t* isect,
+    const point2d_t* s1, const point2d_t* s2,
+    const point2d_t* l1, const point2d_t* l2);
+
 
 
 // Computes area of triangle.

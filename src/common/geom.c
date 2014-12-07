@@ -128,6 +128,30 @@ char geom_seg_line_intersection(point2d_t* isect,
   return 0;
 }
 
+char geom_line_line_intersection(point2d_t* isect,
+    const point2d_t* s1, const point2d_t* s2,
+    const point2d_t* l1, const point2d_t* l2) {
+  // Compute the intersection
+  intersection_t inter;
+  _intersect(&inter, s1, s2, l1, l2);
+
+  // No intersection;
+  if (!inter.intersects) {
+    return 1;
+  }
+
+  // Compute the intersection point.
+  isect->x = s1->x + inter.t * (s2->x - s1->x);
+  isect->y = s1->y + inter.t * (s2->y - s1->y);
+
+  // Sanity check.
+  assert(isect->x == l1->x + inter.u * (l2->x - l1->x));
+  assert(isect->y == l1->y + inter.u * (l2->y - l1->y));
+
+  // ... and return.
+  return 1;
+}
+
 
 
 double geom_triangle_area(const point2d_t* p1, const point2d_t* p2,
