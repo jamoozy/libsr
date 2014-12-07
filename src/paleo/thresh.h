@@ -13,9 +13,9 @@
 #define PALEO_THRESH_J   6.0      // min DCR for Pline.
 #define PALEO_THRESH_K   0.8      // Ellipse NDDE min
 #define PALEO_THRESH_L  30.0      // Ellipse maj-axis len req.
-#define PALEO_THRESH_M   0.33
-#define PALEO_THRESH_N  16.0
-#define PALEO_THRESH_O   0.425
+#define PALEO_THRESH_M   0.33     // Max FA error for ellipse.
+#define PALEO_THRESH_N  16.0      // Circle radius len req.
+#define PALEO_THRESH_O   0.425    // Ellipse/Circle tie-breaker.
 #define PALEO_THRESH_P   0.35
 #define PALEO_THRESH_Q   0.4
 #define PALEO_THRESH_R   0.37
