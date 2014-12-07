@@ -149,6 +149,20 @@ static void _process_stroke(const stroke_t* strk) {
   for (int i = 0; i < ps->num_pts - 1; i++) {
     ps->pts[i].dir = _yu_direction(&ps->pts[i].p2d, &ps->pts[i+1].p2d);
 
+    // Correct, if there's never a jump where, |d jump| > pi.  This
+    // normalization process ensures that the direction graph is as smooth as it
+    // can be given the changes in stroke direction that are common with
+    // freehand drawing.  Shape tests assume that the graph will be smooth in
+    // this way.
+    if (i > 0) {   // else, array O.O.B. error.
+      while (ps->pts[i].dir - ps->pts[i-1].dir > M_PIl) {
+        ps->pts[i].dir += 2 * M_PIl;
+      }
+      while (ps->pts[i].dir - ps->pts[i-1].dir < -M_PIl) {
+        ps->pts[i].dir -= 2 * M_PIl;
+      }
+    }
+
     // I wasn't sure about how to compute speed (I'll have to look more
     // carefully at the Sezgin paper), so I just figured it should be in px/s.
     ps->pts[i].sp = _speed(&ps->pts[i].p2dt, &ps->pts[i+i].p2dt);
