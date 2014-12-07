@@ -25,6 +25,9 @@ curve_t* curve_create_coords(long num, long* xs, long* ys);
 //   points: The points.
 curve_t* curve_create_points(long num, const point2d_t* points);
 
+// Computes 'num' evenly separated points the Bézier curve.
+void curve_compute_points(curve_t* self, point2d_t* out, int num);
+
 // Destroys the curve by freeing its memory.
 void curve_destroy(curve_t*);
 
