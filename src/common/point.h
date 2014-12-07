@@ -1,7 +1,7 @@
 #ifndef __point_h__
 #define __point_h__
 
-
+#include <assert.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -85,5 +85,19 @@ static inline void point2d_div(point2d_t* a, double s) {
   a->x /= s;
   a->y /= s;
 }
+
+// Finds the point between a and b.
+static inline void point2d_center(point2d_t* out,
+    const point2d_t* a, const point2d_t* b) {
+  assert(a->x != b->x || a->y != b->y);
+  out->x = (a->x + b->x) / 2;
+  out->y = (a->y + b->y) / 2;
+}
+
+// Computes 2 points on the perpendicular bisector through the midpoint of the
+// line segment defined by a and b.
+void point2d_bis(point2d_t* o1, point2d_t* o2,
+    const point2d_t* a, const point2d_t* b);
+
 
 #endif // __point_h__

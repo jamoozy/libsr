@@ -28,3 +28,18 @@ point_t* point_create_full(long x, long y, long t, long i) {
 void inline point_destroy(point_t* self) {
   free(self);
 }
+
+void point2d_bis(point2d_t* o1, point2d_t* o2,
+    const point2d_t* a, const point2d_t* b) {
+  point2d_t c;
+  point2d_center(&c, a, b);
+
+  // vec from c to b
+  point2d_t cb = { b->x - c.x, b->y - c.y };
+
+  // The output points.
+  o1->x = c.x + cb.y;
+  o1->y = c.y - cb.x;
+  o2->x = c.x - cb.y;
+  o2->y = c.y + cb.x;
+}
