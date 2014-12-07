@@ -13,6 +13,7 @@
 // The results specific to an arc test.
 typedef struct {
   PALEO_TEST_RESULT_UNION;
+  double fae;     // Feature Area Error.
   arc_t arc;
 } arc_test_result_t;
 
@@ -22,6 +23,7 @@ typedef struct {
   struct {              // The ideal arc.
     point2d_t center;   // Center of arcllipse.
     double r;           // Arc radius.
+    double area;        // Area.
   } ideal;
   arc_test_result_t *result;  // Result of the arc test.
 } arc_test_context_t;

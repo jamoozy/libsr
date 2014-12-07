@@ -3,6 +3,7 @@
 #include <values.h>
 #include <math.h>
 
+#include "common/util.h"
 #include "common/point.h"
 #include "common/geom.h"
 #include "test_macros.h"
@@ -36,8 +37,10 @@ static inline void _reset(const paleo_stroke_t* stroke) {
 ////////////////////////////////////////////////////////////////////////////////
 
 const arc_test_result_t* ellipse_test(const paleo_stroke_t* stroke) {
-  // Extra bit -- stroke shouldn't be closed.
   CHECK_RTN_RESULT(!stroke->closed, "Stroke closed.");
+  CHECK_RTN_RESULT(!stroke->overtraced, "Stroke overtraced.");
+  CHECK_RTN_RESULT(stroke->dcr < PALEO_THRESH_J,
+      "DCR (%.2f) >= J (%.2f)", stroke->dcr, PALEO_THRESH_J);
 
   _reset(stroke);
 
@@ -74,5 +77,44 @@ const arc_test_result_t* ellipse_test(const paleo_stroke_t* stroke) {
   geom_line_line_intersection(&context.ideal.center,
       &pbis[0], &pbis[1], &pbis[2], &pbis[3]);
 
+  // Calculate the radius by finding the average distance to a stroke point.
+  context.ideal.r = 0;
+  for (int i = 0; i < stroke->num_pts; i++) {
+    context.ideal.r += point2d_distance(
+        &context.ideal.center, &stroke->pts[i].p2d);
+  }
+  context.ideal.r /= stroke->num_pts;
+
+  CHECK_RTN_RESULT(stroke->ndde > PALEO_THRESH_K ||
+      context.ideal.r < PALEO_THRESH_N,
+          "NDDE (%.2f) <= K (%.2f) || r (%.2f) >= N (%.2f)",
+              stroke->ndde, PALEO_THRESH_K, context.ideal.r, PALEO_THRESH_N);
+
+  // Compute angle traversed to compute the ideal area.
+  double angle = 0;
+  for (int i = 1; i < stroke->num_pts; i++) {
+    double d_angle = point2d_angle_to(
+        &context.ideal.center, &stroke->pts[i].p2d) -
+      point2d_angle_to(&context.ideal.center, &stroke->pts[i-1].p2d);
+    NORM_ANGLE(d_angle);
+    angle += d_angle;
+  }
+  context.ideal.area = angle * context.ideal.r * context.ideal.r / 2;
+
+  // Compute simple (Yu) feature area.
+  context.result->fa = 0;
+  for (int i = 1; i < stroke->num_pts; i++) {
+    context.result->fa =+ geom_triangle_area(
+        &context.ideal.center, &stroke->pts[i-1].p2d, &stroke->pts[i].p2d);
+  }
+
+  // Compute Paulson FA error.
+  context.result->fae = context.result->fa / context.ideal.area;
+  CHECK_RTN_RESULT(context.result->fae < PALEO_THRESH_Q,
+      "FAE (%.2f) >= Q (%.2f)", context.result->fae, PALEO_THRESH_Q);
+
+  // Everything checks out!  Populate the arc and return the result.
+  arc_populate(&context.result->arc, &stroke->pts[0].p2d, &stroke->pts[1].p2d,
+      &context.ideal.center, angle);
   return context.result;
 }
