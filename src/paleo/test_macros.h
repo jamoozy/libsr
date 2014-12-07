@@ -13,7 +13,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // Convenience macro to set up the context's result as having failed.
-#define SET_FAIL(msg, ...) { \
+#define SET_FAIL(msg, ...) do { \
   const int room = strlen(msg) + 100; \
   context.result->fmsg = realloc( \
       context.result->fmsg, room * sizeof(char)); \
@@ -22,9 +22,20 @@
     assert(0); \
   } \
   context.result->possible = 0; \
-}
+} while (0)
+
+#define CHECK_RTN_RESULT(cond, msg, ...) do { \
+  if (!cond) { \
+    SET_FAIL(msg, ##__VA_ARGS__); \
+    return context.result; \
+  } \
+} while (0)
+
 
 // Convenience macro that does the same as SET_FAIL and then returns the result.
-#define SET_FAIL_RTN(msg, ...) SET_FAIL(msg, ##__VA_ARGS__) return;
+#define SET_FAIL_RTN(msg, ...) do { \
+  SET_FAIL(msg, ##__VA_ARGS__); \
+  return; \
+} while (0)
 
 #endif  // __paleo_test_macros_h__
