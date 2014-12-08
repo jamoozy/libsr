@@ -15,7 +15,7 @@
 // ------------------------------- Up & Down -------------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
 
-// The ellipse context for testing.
+// The arc context for testing.
 static arc_test_context_t context;
 
 void arc_test_init() { bzero(&context, sizeof(arc_test_context_t)); }
@@ -33,10 +33,10 @@ static inline void _reset(const paleo_stroke_t* stroke) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// --------------------------- The Ellipsis Test ---------------------------- //
+// ------------------------------ The Arc Test ------------------------------ //
 ////////////////////////////////////////////////////////////////////////////////
 
-const arc_test_result_t* ellipse_test(const paleo_stroke_t* stroke) {
+const arc_test_result_t* arc_test(const paleo_stroke_t* stroke) {
   CHECK_RTN_RESULT(!stroke->closed, "Stroke closed.");
   CHECK_RTN_RESULT(!stroke->overtraced, "Stroke overtraced.");
   CHECK_RTN_RESULT(stroke->dcr < PALEO_THRESH_J,

@@ -1,5 +1,6 @@
 
 #include <strings.h>
+#include <lapacke.h>
 
 #include "curve_test.h"
 
