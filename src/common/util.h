@@ -34,6 +34,12 @@
   } \
 } while (0)
 
+#define SWAP(x,y) do { \
+  __typeof__ (x) tmp = x; \
+  x = y; \
+  y = tmp; \
+} while (0)
+
 
 #endif  // __util_h__
 
