@@ -1,0 +1,151 @@
+\documentclass{article}
+
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{amssymb}
+\usepackage{amsmath}
+
+\newcommand{\Ith}{\ensuremath{i^\textrm{\footnotesize th}}}
+
+\begin{document}
+
+\section{Introduction}
+
+This is a quick write-up of the method used by my B\'ezier curve fitter.  The following article was copied from:
+\begin{quote}
+  \url{http://jimherold.com/2012/04/20/least-squares-bezier-fit/}
+\end{quote}
+on 2014-12-09, with minor error corrections and modifications to make it more appropriate for a PDF.
+
+\section{Least Squares Bezier Fit}
+
+Posted on \href{http://jimherold.com/2012/04/20/least-squares-bezier-fit/}{April 20, 2012} by \href{jimherold.com/author/jhero}{jhero}
+
+I recently had to solve a fun math problem; I am working with digital ink data, that is time-stamped x-y coordinates of handwritten pen strokes and wanted to the best-fit Bezier curve for a segment of a stroke. In my googling I only came across approximations, e.g., gradient descent, simulated annealing, etc. These types of solutions are typically non-deterministic, slow, and do not guarantee the best solution. For that reason, I worked out a best-fit solution to this problem, very similar to linear regression.
+
+Lets start by defining a cubic Bezier curve,
+
+\[B(t)=c_1(1-t)^3+3c_2t(1-t)^2+3c_3t^2(1-t)+c_4t^3\]
+
+$c_1, c_2, c_3$, and $c_4$ are two dimensional Euclidean points called the control points and $t\in[0,1]$ and are demonstrated in the following curve:
+
+\begin{center}
+  \large
+  Image omitted
+\end{center}
+
+Simple/Intuitive explanation: At $t=0$, $B(0)=c_1$ and the curve follows a trajectory towards the control point $c_2$. As $t$ increases though, the ``influence'' will shift, such that the curve follows a trajectory towards $c_4$ coming from the control point $c_3$ and finally, at $t=1$, $B(1)=c_4$.
+
+To facilitate the least-squares derivation, we express the Bezier function in terms of matrix operations. Namely, given the matrices:
+
+\begin{align*}
+  \mathcal{M} &= \left[
+    \begin{array}{rrrr}
+      -1 &  3 & -3 & 1 \\
+       3 & -6 &  3 & 0 \\
+      -3 &  3 &  0 & 0 \\
+       1 &  0 &  0 & 0
+    \end{array}
+  \right] \\
+  \bar{T} &= \left[\begin{array}{cccc}t^3 & t^2 & t & 1\end{array}\right] \\
+  \bar{C} &= \left[\begin{array}{r}c_1\\c_2\\c_3\\c_4\end{array}\right]
+\end{align*}
+
+We can now write the function for the Bezier curve as:
+
+\[B(t)=\bar{T}\mathcal{M}\bar{C}\]
+
+Next, lets define the input data we are trying to fit. Namely, we have a series of, $n$, Cartesian points comprising a segment of a handwritten stroke:
+
+\[\bar{P}=\left[\begin{array}{c}P_1\\P_2\\\vdots\\P_n\end{array}\right] \qquad \textrm{s.t.}\ P_i=\{x_i,y_i\}\]
+
+If we consider the $x$ values separate from the $y$ values, we effectively have 2 vectors:
+
+\[\bar{X}=\left[\begin{array}{c}x_1\\x_2\\\vdots\\x_n\end{array}\right] \qquad \bar{Y}=\left[\begin{array}{c}y_1\\y_2\\\vdots\\y_n\end{array}\right]\]
+
+We need a way to synchronize the points in the stroke segment with points in the Bezier curve when computing the error of fit. Namely, we need an index into the Bezier curve for each point along the handwritten segment. To do this, we use the path length of the segment, defined at the $\Ith$ point in the stroke as:
+
+\[d_i=\sum_{j=2}^{i}|P_j-P_{j-1}|\]
+
+With $d_1=0$.  We can then define a vector that maps the index, $i$, of each point in the stroke to a corresponding index, $t_i$, in the Bezier curve.
+
+\[\bar{T}'=[\begin{array}{cccc} t_1 & t_2 & \ldots & t_n \end{array}]\]
+
+such that the $\Ith$ element of $\bar{T}'$, $t_i$, is equal to the percentage of path length at point $i$ in the stroke segment.  I.e.,
+
+\[t_i=\frac{\sum_{j=2}^{i}|P_j-P_{j-1}|}{\sum_{j=2}^{n}|P_j-P_{j-1}|}\]
+
+I am going to show how to fit the $y$-values first and the same process may simply and easily be repeated for the $x$-values.
+
+As in any least squares problem, we need an equation that computes the error of fit for a given Bezier curve, defined by its control points $c$ to the given $y$-values, $E(C)$. I use the residual sum of squares, summing the squared distance from each handwritten point to its Bezier curve approximation:
+
+\[E(\bar{C}_y)=\sum_i(y_i-B(t_i))^2\]
+
+If we define the matrix:
+
+\[\mathcal{T}=\left[\begin{array}{rrrr}
+       t_1^3 &  t_1^2 &  t_1   &      1 \\
+       t_2^3 &  t_2^2 &  t_2   &      1 \\
+      \vdots & \vdots & \vdots & \vdots \\
+       t_n^3 &  t_n^2 &  t_n   &      1 \\
+\end{array}\right]\]
+
+Then we can rewrite the error equation:
+
+\[E(\bar{C}_y)=(y-\mathcal{T}M\bar{C}_y)^T(y-\mathcal{T}M\bar{C}_y)\]
+
+And find its maximum by taking the derivative and setting it to zero:
+
+\[\frac{\partial E}{\partial \bar{C}_y} = 0 = -2\mathcal{T}^T(y-\mathcal{T}M\bar{C}_y)\]
+
+Finally, solving for $\bar{C}_y$:
+
+\[\bar{C}_y = \mathcal{M}^{-1}(\mathcal{T}^T\mathcal{T})^{-1}\mathcal{T}^T\bar{Y}\]
+
+And that's Howie do it.  If you want to know the $y$-components of the best fit Bezier curve for our $n$ points, simply apply the transformations shown in the last equations. Similarly, to find the $x$-components, replace the $y$-vector with $x$:
+
+\[\bar{C}_x = \mathcal{M}^{-1}(\mathcal{T}^T\mathcal{T})^{-1}\mathcal{T}^T\bar{X}\]
+
+I have been receiving several requests for code and have thus created \href{http://sourceforge.net/projects/lsbezier/}{this Source Forge project} that hosts a Java implementation of this code.  It requires the \href{http://sourceforge.net/projects/ujmp/}{UJMP} package to work. Please send any feedback you have.
+
+\section{Derivation for 5 Control Points}
+
+This derivation proceeds the same.  The 5-point Bezier function can be written as:
+
+\[B_5(t) = c_1(1-t)^4 + 4c_2t(1-t)^3 + 6c_3t^2(1-t)^2 + 4c_4t^3(1-t) + c_5t^4\]
+
+Giving us the following altered matrices:
+
+\begin{align*}
+  \mathcal{M}_5 &= \left[
+    \begin{array}{rrrrr}
+       1 & - 4 &   6 & -4 & 1 \\
+      -4 &  12 & -12 &  4 & 0 \\
+       6 & -12 &   6 &  0 & 0 \\
+      -4 &   4 &   0 &  0 & 0 \\
+       1 &   0 &   0 &  0 & 0
+    \end{array}
+  \right] \\
+  \bar{T}_5 &= \left[\begin{array}{ccccc}t^4 & t^3 & t^2 & t & 1\end{array}\right] \\
+  \bar{C}_5 &= \left[\begin{array}{r}c_1\\c_2\\c_3\\c_4\\c_5\end{array}\right] \\
+  \mathcal{T}_5 &= \left[
+    \begin{array}{ccccc}
+       t_1^4 &  t_1^3 &  t_1^2 &  t_1   &      1 \\
+       t_2^4 &  t_2^3 &  t_2^2 &  t_2   &      1 \\
+      \vdots & \vdots & \vdots & \vdots & \vdots \\
+       t_n^4 &  t_n^3 &  t_n^2 &  t_n   &      1 \\
+    \end{array}
+  \right]
+\end{align*}
+
+Allowing us to write the Bezier formula analogously to above, as:
+
+\[B_5(t)=\bar{T}_5\mathcal{M}_5\bar{C}_5\]
+
+And the solution for the control points analogously as:
+
+\begin{align*}
+  \bar{C}_y &= \mathcal{M}_5^{-1}(\mathcal{T}_5^T\mathcal{T}_5)^{-1}\mathcal{T}_5^T\bar{Y} \\
+  \bar{C}_x &= \mathcal{M}_5^{-1}(\mathcal{T}_5^T\mathcal{T}_5)^{-1}\mathcal{T}_5^T\bar{X}
+\end{align*}
+
+\end{document}
