@@ -8,6 +8,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror])
 # Checks for programs.
 AM_PROG_AR
 AC_PROG_CC
+AM_PROG_CC_C_O  # complains on 32-bit?
 AC_PROG_CC_C_O
 AC_PROG_CC_C99
 AC_PROG_RANLIB
@@ -29,8 +30,10 @@ AC_SEARCH_LIBS([LAPACKE_dgetri], [lapacke], [], [
 PKG_CHECK_MODULES([CHECK], [check >= 0.9], [],
                   [Warning, Check not installed, so tests not run.])
 
+AC_CHECK_FUNCS_ONCE([bzero memcpy memmove sqrt])
+
 # Checks for header files
-AC_CHECK_HEADERS([assert.h cblas.h lapacke.h math.h openblas/cblas.h string.h strings.h stdlib.h stdio.h values.h])
+AC_CHECK_HEADERS([assert.h cblas.h lapacke.h limits.h math.h openblas/cblas.h string.h strings.h stdlib.h stdio.h values.h])
 AC_DEFINE(_GNU_SOURCE, 1, [Define for math.h M_PI (and others) usage.])
 
 # Checks for typedefs, structures, and compiler characteristics.
