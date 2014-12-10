@@ -15,26 +15,47 @@
 // Convenience macro to set up the context's result as having failed.
 #define SET_FAIL(msg, ...) do { \
   const int room = strlen(msg) + 100; \
-  context.result->fmsg = realloc( \
-      context.result->fmsg, room * sizeof(char)); \
-  if (room <= snprintf(context.result->fmsg, room, msg, ##__VA_ARGS__)) { \
+  context.result.fmsg = realloc( \
+      context.result.fmsg, room * sizeof(char)); \
+  if (room <= snprintf(context.result.fmsg, room, msg, ##__VA_ARGS__)) { \
     fprintf(stderr, "Wrote too many bytes."); \
     assert(0); \
   } \
-  context.result->possible = 0; \
+  context.result.possible = 0; \
+} while (0)
+
+#define SET_FAIL_ARR(i, msg, ...) do { \
+  const int room = strlen(msg) + 100; \
+  context.result[i].fmsg = realloc( \
+      context.result[i].fmsg, room * sizeof(char)); \
+  if (room <= snprintf(context.result[i].fmsg, room, msg, ##__VA_ARGS__)) { \
+    fprintf(stderr, "Wrote too many bytes."); \
+    assert(0); \
+  } \
+  context.result[i].possible = 0; \
 } while (0)
 
 #define CHECK_RTN_RESULT(cond, msg, ...) do { \
   if (!(cond)) { \
     SET_FAIL(msg, ##__VA_ARGS__); \
-    return context.result; \
+    return &context.result; \
   } \
 } while (0)
 
+#define CHECK_RTN_RESULT_ARR(i, cond, msg, ...) do { \
+  if (!(cond)) { \
+    SET_FAIL_ARR(i, msg, ##__VA_ARGS__); \
+    return &context.result[i]; \
+  } \
+} while (0)
 
-// Convenience macro that does the same as SET_FAIL and then returns the result.
 #define SET_FAIL_RTN(msg, ...) do { \
   SET_FAIL(msg, ##__VA_ARGS__); \
+  return; \
+} while (0)
+
+#define SET_FAIL_RTN_ARR(i, msg, ...) do { \
+  SET_FAIL_ARR(i, msg, ##__VA_ARGS__); \
   return; \
 } while (0)
 

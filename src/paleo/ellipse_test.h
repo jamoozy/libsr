@@ -40,7 +40,7 @@ typedef struct {
     } minor;
     point2d_t center;   // Center of ideal ellipse.
   } ideal;
-  ellipse_test_result_t *result;  // Result of the ellipse test.
+  ellipse_test_result_t result;  // Result of the ellipse test.
 } ellipse_test_context_t;
 
 
@@ -57,7 +57,7 @@ typedef struct {
     point2d_t center;   // Center of ideal ellipse.
     double r;           // Radius of ideal circle.
   } ideal;
-  circle_test_result_t *result;  // Result of the ellipse test.
+  circle_test_result_t result;  // Result of the ellipse test.
 } circle_test_context_t;
 
 

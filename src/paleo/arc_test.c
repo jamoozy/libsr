@@ -20,14 +20,12 @@ static arc_test_context_t context;
 
 void arc_test_init() { bzero(&context, sizeof(arc_test_context_t)); }
 
-void arc_test_deinit() { free(context.result); }
+void arc_test_deinit() { }
 
 static inline void _reset(const paleo_stroke_t* stroke) {
-  void* result = context.result;
   bzero(&context, sizeof(arc_test_context_t));
-  context.result = realloc(result, sizeof(arc_test_result_t));
   context.stroke = stroke;
-  context.result->possible = 1;
+  context.result.possible = 1;
 }
 
 
@@ -102,19 +100,19 @@ const arc_test_result_t* arc_test(const paleo_stroke_t* stroke) {
   context.ideal.area = angle * context.ideal.r * context.ideal.r / 2;
 
   // Compute simple (Yu) feature area.
-  context.result->fa = 0;
+  context.result.fa = 0;
   for (int i = 1; i < stroke->num_pts; i++) {
-    context.result->fa =+ geom_triangle_area(
+    context.result.fa =+ geom_triangle_area(
         &context.ideal.center, &stroke->pts[i-1].p2d, &stroke->pts[i].p2d);
   }
 
   // Compute Paulson FA error.
-  context.result->fae = context.result->fa / context.ideal.area;
-  CHECK_RTN_RESULT(context.result->fae < PALEO_THRESH_Q,
-      "FAE (%.2f) >= Q (%.2f)", context.result->fae, PALEO_THRESH_Q);
+  context.result.fae = context.result.fa / context.ideal.area;
+  CHECK_RTN_RESULT(context.result.fae < PALEO_THRESH_Q,
+      "FAE (%.2f) >= Q (%.2f)", context.result.fae, PALEO_THRESH_Q);
 
   // Everything checks out!  Populate the arc and return the result.
-  arc_populate(&context.result->arc, &stroke->pts[0].p2d, &stroke->pts[1].p2d,
+  arc_populate(&context.result.arc, &stroke->pts[0].p2d, &stroke->pts[1].p2d,
       &context.ideal.center, angle);
-  return context.result;
+  return &context.result;
 }

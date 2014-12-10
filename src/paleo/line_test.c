@@ -22,16 +22,16 @@ void line_test_init() { bzero(&context, sizeof(line_test_context_t)); }
 
 void line_test_deinit() { free(context.result); }
 
+// Resets the context for testing.
+static inline void _reset(const paleo_stroke_t* stroke) {
+  context.stroke = stroke;
+}
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
 // ----------------------------- The line tests ----------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
-
-// Resets the context for testing.
-static inline void _reset(const paleo_stroke_t* stroke) {
-  context.stroke = stroke;
-}
 
 // Does the line segment test on the ranges provided.
 //   first_i: Index (incl.) of the first point to use.
@@ -52,7 +52,7 @@ const line_test_result_t* poly_line_test(const paleo_stroke_t* stroke) {
 
   // Check DCR value.
   if (stroke->dcr < PALEO_THRESH_J) {
-    SET_FAIL("Stroke DCR val too low: %.2f < %.2f", stroke->dcr, PALEO_THRESH_J);
+    SET_FAIL_ARR(0, "Stroke DCR val too low: %.2f < %.2f", stroke->dcr, PALEO_THRESH_J);
     return context.result;
   }
 
@@ -63,7 +63,7 @@ const line_test_result_t* poly_line_test(const paleo_stroke_t* stroke) {
   for (int i = 1; i < stroke->num_crnrs; i++) {
     _line_seg_test(stroke->crnrs[i-1]->i, stroke->crnrs[i]->i);
     if (!context.result->possible) {  // Each sub-seg must pass.
-      SET_FAIL("Does not pass line test in sub-seg %d", i);
+      SET_FAIL_ARR(0, "Does not pass line test in sub-seg %d", i);
       return context.result;
     }
 
@@ -75,7 +75,7 @@ const line_test_result_t* poly_line_test(const paleo_stroke_t* stroke) {
   bzero(context.result, sizeof(line_test_result_t));
   context.result->lse = avg_lse / stroke->num_crnrs;
   if (context.result->lse >= PALEO_THRESH_I) {
-    SET_FAIL("Avg LSE too high: %.2f >= %.2f",
+    SET_FAIL_ARR(0, "Avg LSE too high: %.2f >= %.2f",
         context.result->lse, PALEO_THRESH_I);
     return context.result;
   }
@@ -122,7 +122,7 @@ static inline void  _line_seg_test(int first_i, int last_i) {
   }
   context.result->lse = od2 / px_len;
   if (context.result->lse >= PALEO_THRESH_G) {
-    SET_FAIL_RTN("Line LSE too large: %.2f >= %.2f",
+    SET_FAIL_RTN_ARR(0, "Line LSE too large: %.2f >= %.2f",
         context.result->lse, PALEO_THRESH_G);
   }
 
@@ -139,7 +139,7 @@ static inline void  _line_seg_test(int first_i, int last_i) {
   }
 
   if (context.result->fa / px_len >= PALEO_THRESH_H) {
-    SET_FAIL_RTN("FA too large: %.2f / %.2f = %.2f >= %.2f", context.result->fa,
+    SET_FAIL_RTN_ARR(0, "FA too large: %.2f / %.2f = %.2f >= %.2f", context.result->fa,
         px_len, context.result->fa / px_len, PALEO_THRESH_H);
   }
 

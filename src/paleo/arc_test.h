@@ -25,7 +25,7 @@ typedef struct {
     double r;           // Arc radius.
     double area;        // Area.
   } ideal;
-  arc_test_result_t *result;  // Result of the arc test.
+  arc_test_result_t result;  // Result of the arc test.
 } arc_test_context_t;
 
 

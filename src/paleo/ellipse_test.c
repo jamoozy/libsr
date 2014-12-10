@@ -20,17 +20,15 @@ static ellipse_test_context_t e_context;
 
 void ellipse_test_init() { bzero(&e_context, sizeof(ellipse_test_context_t)); }
 
-void ellipse_test_deinit() { free(e_context.result); }
+void ellipse_test_deinit() { }
 
 static inline void _reset_el(const paleo_stroke_t* stroke) {
-  // 0-out e_context (keeping result around);
-  ellipse_test_result_t* result = e_context.result;
+  // 0-out e_context.
   bzero(&e_context, sizeof(ellipse_test_result_t));
-  e_context.result = realloc(result, sizeof(ellipse_test_result_t));
 
   // Set stroke and initialize.
   e_context.stroke = stroke;
-  e_context.result->possible = 1;
+  e_context.result.possible = 1;
 }
 
 
@@ -39,17 +37,15 @@ static circle_test_context_t c_context;
 
 void circle_test_init() { bzero(&c_context, sizeof(circle_test_context_t)); }
 
-void circle_test_deinit() { free(c_context.result); }
+void circle_test_deinit() { }
 
 static inline void _reset_cir(const paleo_stroke_t* stroke) {
-  // 0-out e_context (keeping result around);
-  circle_test_result_t* result = c_context.result;
+  // 0-out e_context.
   bzero(&c_context, sizeof(ellipse_test_result_t));
-  c_context.result = realloc(result, sizeof(ellipse_test_result_t));
 
   // Set stroke and make this
   c_context.stroke = stroke;
-  c_context.result->possible = 1;
+  c_context.result.possible = 1;
 }
 
 
@@ -89,7 +85,7 @@ const ellipse_test_result_t* ellipse_test(const paleo_stroke_t* stroke) {
 
     // Also compute the Yu feature area.
     if (i == 0) { continue; }
-    e_context.result->fa += geom_triangle_area(
+    e_context.result.fa += geom_triangle_area(
         &e_context.ideal.center, &stroke->pts[i].p2d, &stroke->pts[i-1].p2d);
   }
   point2d_div(&e_context.ideal.center, stroke->num_pts);
@@ -147,9 +143,9 @@ const ellipse_test_result_t* ellipse_test(const paleo_stroke_t* stroke) {
   // Instead of using this process, the following code just normalizes by the
   // total angle traversed by the stroke about the center.
   context.angle = 0;
-  e_context.result->fa = 0;
+  e_context.result.fa = 0;
   for (int i = 1; i < stroke->num_pts; i++) {
-    e_context.result->fa += geom_triangle_area(
+    e_context.result.fa += geom_triangle_area(
         &e_context.ideal.center, &stroke->pts[i-1].p2d, &stroke->pts[i].p2d);
 
     double d_angle =
@@ -159,9 +155,9 @@ const ellipse_test_result_t* ellipse_test(const paleo_stroke_t* stroke) {
     NORM_ANGLE(d_angle);
     context.angle += d_angle;
   }
-  e_context.result->fa *= abs(context.angle) / (2 * M_PIl);  // Normalization.
+  e_context.result.fa *= abs(context.angle) / (2 * M_PIl);  // Normalization.
 
-  double fae = 4 * e_context.result->fa /
+  double fae = 4 * e_context.result.fa /
     (M_PIl * e_context.ideal.major.len * e_context.ideal.minor.len);
   CHECK_RTN_RESULT(fae < PALEO_THRESH_M,
       "FAE too large: %.2f >= %.2f", fae, PALEO_THRESH_M);
@@ -178,14 +174,14 @@ const ellipse_test_result_t* ellipse_test(const paleo_stroke_t* stroke) {
     (stroke->pts[e_context.ideal.major.i].y - e_context.ideal.center.y)
       * focal_factor,
   };
-  e_context.result->ellipse.f1.x = e_context.ideal.center.x + focus_vec.x;
-  e_context.result->ellipse.f1.y = e_context.ideal.center.y + focus_vec.y;
-  e_context.result->ellipse.f2.x = e_context.ideal.center.x - focus_vec.x;
-  e_context.result->ellipse.f2.y = e_context.ideal.center.y - focus_vec.y;
-  e_context.result->ellipse.maj = e_context.ideal.major.len;
-  e_context.result->ellipse.min = e_context.ideal.minor.len;
+  e_context.result.ellipse.f1.x = e_context.ideal.center.x + focus_vec.x;
+  e_context.result.ellipse.f1.y = e_context.ideal.center.y + focus_vec.y;
+  e_context.result.ellipse.f2.x = e_context.ideal.center.x - focus_vec.x;
+  e_context.result.ellipse.f2.y = e_context.ideal.center.y - focus_vec.y;
+  e_context.result.ellipse.maj = e_context.ideal.major.len;
+  e_context.result.ellipse.min = e_context.ideal.minor.len;
 
-  return e_context.result;
+  return &e_context.result;
 }
 
 #undef context
@@ -223,21 +219,21 @@ const circle_test_result_t* circle_test(const paleo_stroke_t* stroke) {
       1 - (e_context.ideal.major.len / e_context.ideal.minor.len),
       PALEO_THRESH_O);
 
-  c_context.result->fa = 0;
+  c_context.result.fa = 0;
   for (int i = 1; stroke->num_pts; i++) {
-    c_context.result->fa += geom_triangle_area(
+    c_context.result.fa += geom_triangle_area(
         &stroke->pts[i-1].p2d, &stroke->pts[i].p2d, &c_context.ideal.center);
   }
 
   double area = M_PIl * c_context.ideal.r * c_context.ideal.r;
-  double fae = (c_context.result->fa = e_context.result->fa) / area;
+  double fae = (c_context.result.fa = e_context.result.fa) / area;
   CHECK_RTN_RESULT(fae < PALEO_THRESH_P,
       "FA error too large: %.2f >= %.2f", fae, PALEO_THRESH_P);
 
   // Create beautified ideal circle & return result.
-  context.result->circle.center = e_context.ideal.center;
-  context.result->circle.r = context.ideal.r;
-  return c_context.result;
+  context.result.circle.center = e_context.ideal.center;
+  context.result.circle.r = context.ideal.r;
+  return &c_context.result;
 }
 
 #undef context
