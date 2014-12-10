@@ -3,10 +3,13 @@
 
 #include "common/point.h"
 
+
+#define CURVE_CONTROL_POINT_CAP 5
+
 // A Bezier curve with some number of control points.
 typedef struct {
-  long num;        // The number of control points
-  point2d_t* pts;  // The control points.
+  point2d_t pts[CURVE_CONTROL_POINT_CAP];   // The control points.
+  int num;                                  // The number of control points
 } curve_t;
 
 // Creates a new curve at with the specified number of points, all of which
@@ -29,6 +32,14 @@ curve_t* curve_create_points(long num, const point2d_t* points);
 void curve_compute_points(curve_t* self, point2d_t* out, int num);
 
 // Destroys the curve by freeing its memory.
-void curve_destroy(curve_t*);
+static inline void curve_destroy(curve_t* self) { free(self); }
+
+// Recursively computes a point on a Bézier curve.
+//    p: The return point.
+//    pts: The control points.
+//    num_pts: The number of control points.
+//    t: The parameter to the Bézier function.
+void curve_util_compute_point(point2d_t *p,
+    const point2d_t* pts, int num_pts, double t);
 
 #endif // __curve_h__

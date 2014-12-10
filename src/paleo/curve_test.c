@@ -29,7 +29,7 @@ void curve_test_init() { bzero(&context, sizeof(curve_test_context_t)); }
 
 void curve_test_deinit() { }
 
-void _reset(const paleo_stroke_t* stroke) {
+void    _reset(const paleo_stroke_t* stroke) {
   bzero(&context, sizeof(curve_test_result_t));
   context.stroke = stroke;
   context.result.possible = 1;
@@ -59,6 +59,14 @@ static const double M5_INV[] = {
 // Attempt to fit the stroke to a Bezier curve of degree d.
 void _fit(const double* m_inv, const int d);
 
+// Compute the squared distance between two points (for square error
+// calculation).
+static inline double _sq_err(const point2d_t a, const point2d_t b) {
+  double dx = b.x-a.x;
+  double dy = b.y-a.y;
+  return dx*dx+dy*dy;
+}
+
 const curve_test_result_t* curve_test(const paleo_stroke_t* stroke) {
   CHECK_RTN_RESULT(stroke->dcr < PALEO_THRESH_J,
       "DCR too high: %.2f >= %.2f", stroke->dcr, PALEO_THRESH_J);
@@ -80,6 +88,39 @@ const curve_test_result_t* curve_test(const paleo_stroke_t* stroke) {
   _fit(M4_INV, 4);
   _fit(M5_INV, 5);
 
+  free(context.Xs);
+  free(context.Ys);
+
+  // Compute the LSE for each type of curve.
+  context.ideal_4.lse = _sq_err(context.ideal_4.Cs[0], stroke->pts[0].p2d);
+  context.ideal_5.lse = _sq_err(context.ideal_5.Cs[0], stroke->pts[0].p2d);
+  double px_len = 0;
+  for (int i = 1; i < stroke->num_pts; i++) {
+    px_len += point2d_distance(&stroke->pts[i-1].p2d, &stroke->pts[i].p2d);
+    double t = px_len / stroke->px_length;
+
+    // Compute the B_4, then the B_5 point.
+    point2d_t a;
+    curve_util_compute_point(&a, context.ideal_4.Cs, 4, t);
+    context.ideal_4.lse += _sq_err(stroke->pts[i].p2d, a);
+    curve_util_compute_point(&a, context.ideal_5.Cs, 5, t);
+    context.ideal_5.lse += _sq_err(stroke->pts[i].p2d, a);
+  }
+
+  if (context.ideal_4.lse < PALEO_THRESH_R) {
+    context.result.curve.num = 4;
+    memcpy(context.result.curve.pts, context.ideal_4.Cs,
+        4 * sizeof(point2d_t));
+    return &context.result;
+  }
+
+  CHECK_RTN_RESULT(context.ideal_5.lse < PALEO_THRESH_R,
+      "LSE's too high: 4 (%.2f) & 5 (%.2f) >= %.2f",
+      context.ideal_4.lse, context.ideal_5.lse, PALEO_THRESH_R);
+
+  context.result.curve.num = 5;
+  memcpy(context.result.curve.pts, context.ideal_5.Cs,
+      5 * sizeof(point2d_t));
   return &context.result;
 }
 

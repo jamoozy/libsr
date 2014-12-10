@@ -6,7 +6,6 @@
 
 typedef struct {
   PALEO_TEST_RESULT_UNION;
-  double fae;
   curve_t curve;
 } curve_test_result_t;
 

@@ -18,7 +18,7 @@
 #define PALEO_THRESH_O   0.425    // Ellipse/Circle tie-breaker.
 #define PALEO_THRESH_P   0.35     // Max FAE for Circle.
 #define PALEO_THRESH_Q   0.4      // Max FAE for Arc.
-#define PALEO_THRESH_R   0.37
+#define PALEO_THRESH_R   0.37     // Max LSE for Bézier curves.
 #define PALEO_THRESH_S   0.9
 #define PALEO_THRESH_T   0.25
 #define PALEO_THRESH_U   0.2
