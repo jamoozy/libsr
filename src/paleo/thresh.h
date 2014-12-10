@@ -10,7 +10,7 @@
 #define PALEO_THRESH_G   2.0      // Line seg straightness.
 #define PALEO_THRESH_H  10.25     // Line FA/len max ratio.
 #define PALEO_THRESH_I   0.0036   // Pline LSE max.
-#define PALEO_THRESH_J   6.0      // Min DCR for Pline/Arc.
+#define PALEO_THRESH_J   6.0      // Min DCR for Pline/Arc/Curve.
 #define PALEO_THRESH_K   0.8      // Ellipse/Arc NDDE min.
 #define PALEO_THRESH_L  30.0      // Ellipse maj-axis len req.
 #define PALEO_THRESH_M   0.33     // Max FA error for ellipse.

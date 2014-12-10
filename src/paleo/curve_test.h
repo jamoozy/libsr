@@ -12,9 +12,17 @@ typedef struct {
 
 typedef struct {
   const paleo_stroke_t* stroke;
-  curve_test_result_t result;
+  double* Xs;
+  double* Ys;
   struct {
-  } ideal;
+    point2d_t Cs[4];    // Computed control points
+    double lse;         // Least Squares Error
+  } ideal_4;
+  struct {
+    point2d_t Cs[5];    // Computed control points
+    double lse;         // Least Squares Error
+  } ideal_5;
+  curve_test_result_t result;   // Both results, 4 then 5.
 } curve_test_context_t;
 
 
