@@ -1,0 +1,95 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{xspace}
+
+\parskip=1em
+\parindent=0pt
+
+\newcommand{\lfrac}[2]{\ensuremath{^#1/_#2}}
+
+\begin{document}
+
+\section{Introduction}
+
+This document describes the reasoning behind creating the ideal spiral in the PaleoSketch implementation.
+
+\section{Archimedes Spirals}
+
+An Archimedes spiral is defined in polar coordinates as:
+\[r = a\theta\]
+From Paulson's PaleoSketch paper:
+\begin{quote}
+  We set [$a$] to be the bounding box radius divided by $2\pi$ times the number of revolutions. To generate the spiral we continuously increment (or decrement) the theta value until the radius value reaches the bounding box radius.
+\end{quote}
+Let $r_b$ be the radius of the bounding box and $n_r$ be the number of rotations made by the stroke.  We can write the above equation as:
+\begin{align*}
+  r &= a\theta = \frac{r_b}{2\pi \cdot n_r}\theta & \forall \theta&\in[0,2\pi\cdot n_r]
+\end{align*}
+as $r=r_b$ when $\theta=2\pi\cdot n_r$.
+
+We can convert this to Cartesian coordinates with some simple trigonometric functions:
+\begin{align*}
+  x &= r                               \cos(\theta)
+     = \frac{r_b}{2\pi \cdot n_r}\theta\cos(\theta) &
+  y &= r                               \sin(\theta)
+     = \frac{r_b}{2\pi \cdot n_r}\theta\sin(\theta)
+\end{align*}
+again, where $\theta$ must be in the range $[0,2\pi\cdot n_r]$.
+
+Now we're almost done deriving the full Cartesian $x$- and $y$ coordinates of the spiral; we just need to lift a few assumptions.  These assumptions are:
+\begin{enumerate}
+  \item The spiral is centered at the origin.
+  \item The spiral always goes clockwise about its center.
+  \item The spiral is aligned to the coordinate system such that $\theta$ always starts out at 0 and ends at $2\pi\cdot n_r$.
+\end{enumerate}
+
+We can lift the first assumption by defining the center of the spiral to be $c=(c_x,c_y)$. adding the center to each coordinate like so:
+\begin{align*}
+  x &= c_x + \frac{r_b}{2\pi \cdot n_r}\theta\cos(\theta) &
+  y &= c_y + \frac{r_b}{2\pi \cdot n_r}\theta\sin(\theta)
+\end{align*}
+
+Lifting the second assumption is nearly as easy, since in the Cartesian function, there are two instances of $\theta$---one that determines the length of $r$, and one that determines the angle of the point.  Changing the sign of the $\theta$ in the $\sin$ and $\cos$ functions changes the direction of the spiral.  To keep the function general, we use the ``$\pm$'' symbol:
+\begin{align*}
+  x &= c_x + \frac{r_b}{2\pi \cdot n_r}\theta\cos(\pm\theta) &
+  y &= c_y + \frac{r_b}{2\pi \cdot n_r}\theta\sin(\pm\theta)
+\end{align*}
+
+Lifting the final assumption takes a bit more thought.  We'd like the spiral to end at the angle of the stroke's final point, $\theta_f$, instead of where it will by definition, $2\pi\cdot n_r$.  The way to do this, is to add the difference between where the function would end by definition and where we'd like it to end.  Call this quantity $\Delta\theta_f=\theta_f-2\pi\cdot n_r$.  After updating the functions, we get:
+\begin{align*}
+  x &= c_x + \frac{r_b}{2\pi \cdot n_r}\theta\cos(\Delta\theta_f\pm\theta) &
+  y &= c_y + \frac{r_b}{2\pi \cdot n_r}\theta\sin(\Delta\theta_f\pm\theta)
+\end{align*}
+
+Writing out the final equations fully, we get the $x$- and $y$-coordinates in terms of the stroke's final point, $p_f=(p_{f_x},p_{f_y})$, the center of the spiral, $c=(c_x,c_y)$, the radius of the stroke's bounding box, $r_b$, and the number of rotations, $n_r$.
+\begin{align*}
+  x &= c_x + \frac{r_b}{2\pi \cdot n_r}\theta\cos(\tan^{-1}(p_{f_y}-c_y,p_{f_x}-c_x)-2\pi\cdot n_r\pm\theta) \\
+  y &= c_y + \frac{r_b}{2\pi \cdot n_r}\theta\sin(\tan^{-1}(p_{f_y}-c_y,p_{f_x}-c_x)-2\pi\cdot n_r\pm\theta)
+\end{align*}
+$\forall\theta\in[0,2\pi\cdot n_r]$, where $\tan^{-1}(y,x)$ is a function commonly found in computer libraries capable of returning a number in $[-\pi,\pi]$ (as opposed to $\tan^{-1}(\cdot)$, which returns a number in $\left[\lfrac{{-\pi}}{2}, \lfrac{\pi}{2}\right]$).
+
+\section{The Ideal Spiral}
+
+The ideal spiral can be simplified to depend on 5 variables:
+\begin{description}
+  \item[$t$] A parameter in $[0,1]$ defining progress along the spiral, where 0 is the beginning of the spiral and 1 is the end.
+  \item[$c$] The center of the spiral.
+  \item[$r$] The radius of the spiral.
+  \item[$\theta_t$] The total angle traversed.
+  \item[$\theta_f$] The desired angle of the spiral's final point.
+  \item[$\mathrm{cw}$] $-1$ when the spiral is going counter clockwise\footnote{Do you prefer ``anti-clockwise''?  Well, that works, too.} and $1$ when the spiral is going clockwise.
+\end{description}
+in the following equations:
+\begin{align*}
+  x(t) &= c_x+rt\cos\left(\theta_f-\theta_t(1+\textrm{cw}\cdot t)\right) \\
+  y(t) &= c_y+rt\sin\left(\theta_f-\theta_t(1+\textrm{cw}\cdot t)\right)
+\end{align*}
+If we set the variables in this equation to the following values:
+\begin{align*}
+  t &= \frac{\theta}{\theta_t} & r &= r_b & \theta_t &= 2\pi\cdot n_r & \theta_f &= \tan^{-1}(p_{f_y}-c_y,p_{f_x}-c_x)
+\end{align*}
+then we get the equations we ended with in the previous section.
+
+\end{document}
