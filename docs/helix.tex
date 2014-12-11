@@ -1,0 +1,45 @@
+\documentclass{article}
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+
+\parskip=1em
+\parindent=0pt
+
+\begin{document}
+
+\section{Introduction}
+
+This goes through the derivation of the helix equation used in the PaleoSketch implementation.
+
+\section{A Moving-Center Circle}
+
+The helix here is modeled as a circle with a moving center.  Think of the smallest rectangle that can fit around the helix; it will be $2r$ wide and some distance $d>2r$ long.  The center point of the moving circle starts at one end of the rectangle at the point, $c_i=(c_{i_x},c_{i_y})$, $r$ away from the edge and moves smoothly as the helix is drawn until the center point is $r$ away from the other end of the rectangle, at $c_f=(c_{f_x},c_{f_y})$.  The equation describing this shape's $x$- and $y$-coordinates can be written:
+\begin{align*}
+  x &= c_x + r\cos(\theta) & y &= c_y + r\sin(\theta) & \forall\theta\in[0,2\pi\cdot n_r]
+\end{align*}
+where $c=(c_x,c_y)$ is the center point of the moving circle, and $n_r$ is the number of rotations the helix has.
+
+Now, these equations assume a few things:
+\begin{enumerate}
+  \item The helix always starts drawing at the right of the first center point.
+  \item The helix always rotates clockwise.
+\end{enumerate}
+We can fix the first assumption by adding the angle of the stroke's first point from the center, $\theta_i$, to $\theta$, and the second assumption by adding a ``$\pm$'' to the angle depending on which direction we should draw in.  Making these updates gives us:
+\begin{align*}
+  x &= c_x + r\cos(\theta_i\pm\theta) & y &= c_y + r\sin(\theta_i\pm\theta) & \forall\theta\in[i,2\pi\cdot n_r]
+\end{align*}
+
+For convenience, it would be nice to have this function parameterized by $t\in[0,1]$ as with the B\'ezier curve and the spiral.  This makes computing the center point easier, and gives us:
+\begin{align*}
+  x &= c_x(t) + r\cos(\theta_i\pm\theta_t t) & y &= c_y(t) + r\sin(\theta_i\pm\theta_t t) & \forall t\in[0,1]
+\end{align*}
+where the angle traversed is $\theta_t=2\pi\cdot n_r$.
+
+We can model the movement of the center point as a B\'ezier curve with 2 control points.  The final equation for the helix becomes:
+\begin{align*}
+  x &= c_{i_x}(1-t)+c_{f_x}t + r\cos(\theta_i\pm\theta_t t) & \forall t\in[0,1] \\
+  y &= c_{i_y}(1-t)+c_{f_y}t + r\sin(\theta_i\pm\theta_t t)
+\end{align*}
+
+\end{document}
