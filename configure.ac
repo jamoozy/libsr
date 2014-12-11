@@ -30,7 +30,7 @@ AC_SEARCH_LIBS([LAPACKE_dgetri], [lapacke], [], [
 PKG_CHECK_MODULES([CHECK], [check >= 0.9], [],
                   [Warning, Check not installed, so tests not run.])
 
-AC_CHECK_FUNCS_ONCE([bzero memcpy memmove sqrt])
+AC_CHECK_FUNCS_ONCE([abs assert bzero memcpy memmove floor sqrt])
 
 # Checks for header files
 AC_CHECK_HEADERS([assert.h cblas.h lapacke.h limits.h math.h openblas/cblas.h string.h strings.h stdlib.h stdio.h values.h])
