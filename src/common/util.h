@@ -13,14 +13,14 @@
 //    https://gcc.gnu.org/onlinedocs/cpp/
 //          Duplication-of-Side-Effects.html#Duplication-of-Side-Effects
 
-#define MAX(X, Y)                \
-({ __typeof__ (X) x_ = (X);          \
-   __typeof__ (Y) y_ = (Y);          \
+#define MAX(X, Y)           \
+({ __typeof__ (X) x_ = (X); \
+   __typeof__ (Y) y_ = (Y); \
    (x_ > y_) ? x_ : y_; })
 
-#define MIN(X, Y)                \
-({ __typeof__ (X) x_ = (X);          \
-   __typeof__ (Y) y_ = (Y);          \
+#define MIN(X, Y)           \
+({ __typeof__ (X) x_ = (X); \
+   __typeof__ (Y) y_ = (Y); \
    (x_ < y_) ? x_ : y_; })
 
 
@@ -40,6 +40,11 @@
   y = tmp; \
 } while (0)
 
+
+// Find the sign of a number:
+#define SGN(X)              \
+({ __typeof__ (X) x_ = (X); \
+   x_ / abs(x_); })
 
 #endif  // __util_h__
 
