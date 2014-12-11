@@ -6,8 +6,8 @@
 typedef struct {
   point2d_t center;
   double r;
-  double theta_f;
   double theta_t;
+  double theta_f;
   int cw;
 } spiral_t;
 
