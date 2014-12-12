@@ -31,6 +31,13 @@ paleo_spiral_test(const paleo_stroke_t* stroke) {
   CHECK_RTN_RESULT(stroke->ndde > PALEO_THRESH_K,
       "NDDE too low: %.2f <= K (%.2f)", stroke->ndde, PALEO_THRESH_K);
 
+  // Check that this doesn't look too helix-like.
+  double ep_dist = point2d_distance(
+      &stroke->pts[0].p2d, &stroke->pts[stroke->num_pts-1].p2d);
+  CHECK_RTN_RESULT(ep_dist / stroke->px_length < PALEO_THRESH_U,
+      "ep_dist (%.2f) / px_len (%.2f) >= U (%.2f)",
+      ep_dist, stroke->px_length, PALEO_THRESH_U);
+
   _reset(stroke);
 
   // Calculate center (center of bbox).
@@ -130,13 +137,6 @@ paleo_spiral_test(const paleo_stroke_t* stroke) {
   // Ensure the centers aren't too far apart.
   CHECK_RTN_RESULT(max_dist < 2 * context.ideal.r,
       "dist (%2.f) >= diam. (%.2f)", max_dist, 2 * context.ideal.r);
-
-  // Check that this doesn't look too helix-like.
-  double ep_dist = point2d_distance(
-      &stroke->pts[0].p2d, &stroke->pts[NP-1].p2d);
-  CHECK_RTN_RESULT(ep_dist / stroke->px_length < PALEO_THRESH_U,
-      "ep_dist (%.2f) / px_len (%.2f) >= U (%.2f)",
-      ep_dist, stroke->px_length, PALEO_THRESH_U);
 
   // Seems to check out.  Populate the spiral.
   spiral_t* sp = &context.result.spiral;
