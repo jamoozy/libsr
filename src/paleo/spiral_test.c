@@ -140,12 +140,13 @@ paleo_spiral_test(const paleo_stroke_t* stroke) {
 
   // Seems to check out.  Populate the spiral.
   spiral_t* sp = &context.result.spiral;
-  paleo_point_t* p = &stroke->pts[NP-1];
-  point2d_t* c = &context.ideal.center;
+  const paleo_point_t* p_i = &stroke->pts[0];
+  const paleo_point_t* p_f = &stroke->pts[NP-1];
+  const point2d_t* c = &context.ideal.center;
   memcpy(&sp->center, c, sizeof(point2d_t));
   sp->r = bbox_rad;
-  sp->theta_t = p->dir - stroke->pts[0].dir;
-  sp->theta_f = atan2(p->y - c->y, p->x - c->x);
+  sp->theta_t = p_f->dir - p_i->dir;
+  sp->theta_f = atan2(p_f->y - c->y, p_f->x - c->x);
   while (sp->theta_f < 0) { sp->theta_f += 2 * M_PIl; }
   sp->cw = SGN(sp->theta_t);
   sp->theta_t = abs(sp->theta_t);
