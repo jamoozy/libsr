@@ -1,5 +1,5 @@
-#ifndef __helix_h__
-#define __helix_h__
+#ifndef __paleo_helix_h__
+#define __paleo_helix_h__
 
 #include "common/point.h"
 
@@ -12,4 +12,4 @@ helix_t* helix_create();
 // Destroys the helix by freeing its memory.
 void helix_destroy(helix_t*);
 
-#endif // __helix_h__
+#endif // __paleo_helix_h__
