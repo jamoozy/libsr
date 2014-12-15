@@ -38,8 +38,9 @@ where the angle traversed is $\theta_t=2\pi\cdot n_r$.
 
 We can model the movement of the center point as a B\'ezier curve with 2 control points.  The final equation for the helix becomes:
 \begin{align*}
-  x &= c_{i_x}(1-t)+c_{f_x}t + r\cos(\theta_i\pm\theta_t t) & \forall t\in[0,1] \\
-  y &= c_{i_y}(1-t)+c_{f_y}t + r\sin(\theta_i\pm\theta_t t)
+  x &= c_{i_x}(1-t)+c_{f_x}t + r\cos(\theta_i+\mathrm{cw}\cdot\theta_t t) & \forall t\in[0,1] \\
+  y &= c_{i_y}(1-t)+c_{f_y}t + r\sin(\theta_i+\mathrm{cw}\cdot\theta_t t)
 \end{align*}
+where $\mathrm{cw}$ is the clockwise term: 1 for clockwise and -1 for counter-clockwise.
 
 \end{document}
