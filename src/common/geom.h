@@ -3,6 +3,7 @@
 
 #include <math.h>
 
+#include "util.h"
 #include "point.h"
 
 // Error used to handle number rounding errors.
@@ -88,6 +89,15 @@ static inline void geom_ortho_line(point2d_t* out1, point2d_t* out2,
     const point2d_t* in1, const point2d_t* in2, const point2d_t* c) {
   out1->x = in1->y - c->y + c->x;
   out2->y = in2->x - c->x + c->y;
+}
+
+
+
+// Computes the distance from a point, p, to a line defined by a and b.
+static inline double geom_point_dist_to_line(const point2d_t* p,
+    const point2d_t* a, const point2d_t* b) {
+  double angle = point2d_angle_to(a, p) - point2d_angle_to(a, b);
+  return abs(point2d_distance(a, p) * sin(angle));
 }
 
 #endif  // __common_geom_h__
