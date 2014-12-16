@@ -17,4 +17,10 @@ helix_t* helix_create();
 // Destroys the helix by freeing its memory.
 void helix_destroy(helix_t*);
 
+// Computes 'num' evenly spaced points.
+void helix_compute_points(const helix_t* self, point2d_t* p, int num);
+
+// Computes a single point at the parametric value 't'.
+void helix_compute_point(const helix_t* self, point2d_t* p, double t);
+
 #endif // __paleo_helix_h__
