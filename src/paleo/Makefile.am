@@ -17,4 +17,4 @@ libpaleo_a_SOURCES = \
 	spiral_test.c spiral_test.h \
 	helix.h helix.c \
 	helix_test.c helix_test.h \
-	spiral.h
+	composite.c composite.h
