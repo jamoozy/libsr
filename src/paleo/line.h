@@ -14,13 +14,13 @@ typedef struct {
 
 // The results specific to a line test.
 typedef struct {
-  PALEO_TEST_RESULT_UNION;
+  PAL_TEST_RESULT_UNION;
   pal_line_t line;
 } pal_line_result_t;
 
 // Context needed to perform the line test.
 typedef struct {
-  const paleo_stroke_t* stroke;
+  const pal_stroke_t* stroke;
   struct {  // The ideal line.
     double slope;  // slope
     double y_int;  // Y-intercept
@@ -78,10 +78,10 @@ const pal_line_result_t* pal_line_test(const pal_stroke_t* stroke);
 const pal_line_result_t* pal_pline_test(const pal_stroke_t* stroke);
 
 // Initialize the line test.
-static inline void line_init() { bzero(&context, sizeof(line_test_context_t)); }
+void pal_line_init();
 
 // De-initializes the line test by freeing its memory.
-static inline void line_deinit() { free(context.result); }
+void pal_line_deinit();
 
 
 #endif // __pal_line_h__

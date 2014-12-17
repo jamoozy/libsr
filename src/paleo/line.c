@@ -48,6 +48,11 @@ pal_line_t* pal_line_create_points_with_longs(
 // The line test's context (used by most functions here).
 static pal_line_context_t context;
 
+void line_init() { bzero(&context, sizeof(pal_line_context_t)); }
+
+void line_deinit() { free(context.result); }
+
+
 // Does the line segment test on the ranges provided.
 //   first_i: Index (incl.) of the first point to use.
 //   last_i: Index (excl.) of the last point to use.
