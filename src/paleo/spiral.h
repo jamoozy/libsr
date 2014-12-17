@@ -42,4 +42,14 @@ void pal_spiral_points(const pal_spiral_t* self, point2d_t *pts, int n);
 // Computes a single point t% of the way through the spiral.
 void pal_spiral_point_at(const pal_spiral_t* self, point2d_t* p, double t);
 
+
+
+// Initialize the curve test.
+void pal_spiral_init();
+
+// De-initializes the curve test.
+void pal_spiral_deinit();
+
+const pal_spiral_result_t* pal_spiral_test(const pal_stroke_t* stroke);
+
 #endif // __pal_spiral_h__
