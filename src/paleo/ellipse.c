@@ -163,8 +163,8 @@ const pal_ellipse_result_t* pal_ellipse_test(const paleo_stroke_t* stroke) {
 
   // Check that the NDDE is sufficiently high, or the ellipse is sufficiently
   // small.
-  CHECK_RTN_RESULT(stroke->ndde > PALEO_THRESH_K ||
-      e_context.ideal.major.len < PALEO_THRESH_L,
+  CHECK_RTN_RESULT(stroke->ndde > PAL_THRESH_K ||
+      e_context.ideal.major.len < PAL_THRESH_L,
           "NDDE (%.2f) too small for maj length (%.2f)",
           stroke->ndde, e_context.ideal.major.len);
 
@@ -205,8 +205,8 @@ const pal_ellipse_result_t* pal_ellipse_test(const paleo_stroke_t* stroke) {
 
   double fae = 4 * e_context.result.fa /
     (M_PIl * e_context.ideal.major.len * e_context.ideal.minor.len);
-  CHECK_RTN_RESULT(fae < PALEO_THRESH_M,
-      "FAE too large: %.2f >= %.2f", fae, PALEO_THRESH_M);
+  CHECK_RTN_RESULT(fae < PAL_THRESH_M,
+      "FAE too large: %.2f >= %.2f", fae, PAL_THRESH_M);
 
   // If it all checks out, create the ellipse based on maj/min/center.
   //
@@ -253,17 +253,17 @@ const pal_circle_result_t* pal_circle_test(const paleo_stroke_t* stroke) {
   }
   c_context.ideal.r /= stroke->num_pts;
 
-  CHECK_RTN_RESULT(stroke->ndde > PALEO_THRESH_K ||
-      c_context.ideal.r < PALEO_THRESH_N,
+  CHECK_RTN_RESULT(stroke->ndde > PAL_THRESH_K ||
+      c_context.ideal.r < PAL_THRESH_N,
           "NDDE (%.2f) too small for radius (%.2f)",
           stroke->ndde, c_context.ideal.r);
 
   CHECK_RTN_RESULT(1 - (e_context.ideal.major.len / e_context.ideal.minor.len) <
-      PALEO_THRESH_O,
+      PAL_THRESH_O,
       "More ellipse-like: 1 - Maj(%.2f) / Min(%.2f) = %.2f >= %.2f",
       e_context.ideal.major.len, e_context.ideal.minor.len,
       1 - (e_context.ideal.major.len / e_context.ideal.minor.len),
-      PALEO_THRESH_O);
+      PAL_THRESH_O);
 
   c_context.result.fa = 0;
   for (int i = 1; stroke->num_pts; i++) {
@@ -273,8 +273,8 @@ const pal_circle_result_t* pal_circle_test(const paleo_stroke_t* stroke) {
 
   double area = M_PIl * c_context.ideal.r * c_context.ideal.r;
   double fae = (c_context.result.fa = e_context.result.fa) / area;
-  CHECK_RTN_RESULT(fae < PALEO_THRESH_P,
-      "FA error too large: %.2f >= %.2f", fae, PALEO_THRESH_P);
+  CHECK_RTN_RESULT(fae < PAL_THRESH_P,
+      "FA error too large: %.2f >= %.2f", fae, PAL_THRESH_P);
 
   // Create beautified ideal circle & return result.
   context.result.circle.center = e_context.ideal.center;

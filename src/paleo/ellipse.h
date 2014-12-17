@@ -24,7 +24,7 @@ typedef struct {
 
 // The results specific to an ellipse test.
 typedef struct {
-  PALEO_TEST_RESULT_UNION;
+  PAL_TEST_RESULT_UNION;
   pal_ellipse_t ellipse;
 } pal_ellipse_result_t;
 
@@ -58,7 +58,7 @@ typedef struct {
 
 // The results specific to an ellipse test.
 typedef struct {
-  PALEO_TEST_RESULT_UNION;
+  PAL_TEST_RESULT_UNION;
   pal_circle_t circle;
 } pal_circle_result_t;
 
