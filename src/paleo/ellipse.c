@@ -68,7 +68,7 @@ void pal_ellipse_init() { bzero(&e_context, sizeof(pal_ellipse_context_t)); }
 
 void pal_ellipse_deinit() { }
 
-static inline void _reset_el(const paleo_stroke_t* stroke) {
+static inline void _reset_el(const pal_stroke_t* stroke) {
   // 0-out e_context.
   bzero(&e_context, sizeof(pal_ellipse_result_t));
 
@@ -85,7 +85,7 @@ void pal_circle_init() { bzero(&c_context, sizeof(pal_circle_context_t)); }
 
 void pal_circle_deinit() { }
 
-static inline void _reset_cir(const paleo_stroke_t* stroke) {
+static inline void _reset_cir(const pal_stroke_t* stroke) {
   // 0-out e_context.
   bzero(&c_context, sizeof(pal_ellipse_result_t));
 
@@ -103,7 +103,7 @@ static inline void _reset_cir(const paleo_stroke_t* stroke) {
 // Make macros work for e_context.
 #define context e_context
 
-const pal_ellipse_result_t* pal_ellipse_test(const paleo_stroke_t* stroke) {
+const pal_ellipse_result_t* pal_ellipse_test(const pal_stroke_t* stroke) {
   CHECK_RTN_RESULT(stroke->closed, "Stroke not closed.");
 
   _reset_el(stroke);
@@ -241,7 +241,7 @@ const pal_ellipse_result_t* pal_ellipse_test(const paleo_stroke_t* stroke) {
 // Make macros work for c_context.
 #define context c_context
 
-const pal_circle_result_t* pal_circle_test(const paleo_stroke_t* stroke) {
+const pal_circle_result_t* pal_circle_test(const pal_stroke_t* stroke) {
   CHECK_RTN_RESULT(e_context.stroke == stroke,
       "Ellipse not run!  Not running circle test.");
   CHECK_RTN_RESULT(stroke->closed, "Stroke not closed.");

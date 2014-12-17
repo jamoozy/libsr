@@ -42,24 +42,23 @@ void pal_helix_init() {
 void pal_helix_deinit() { }
 
 static inline void _reset(const pal_stroke_t* stroke) {
-  _RESET(stroke);
-  //bzero(&context, sizeof(pal_helix_context_t));
-  //context.stroke = stroke;
+  bzero(&context, sizeof(pal_helix_context_t));
+  RESET(stroke);
 }
 
 const pal_helix_result_t* pal_helix_test(const pal_stroke_t* stroke) {
   _reset(stroke);
 
   CHECK_RTN_RESULT(stroke->overtraced, "Stroke not overtraced.");
-  CHECK_RTN_RESULT(stroke->ndde > PALEO_THRESH_K,
-      "NDDE too low: %.2f <= K (%.2f)", stroke->ndde, PALEO_THRESH_K);
+  CHECK_RTN_RESULT(stroke->ndde > PAL_THRESH_K,
+      "NDDE too low: %.2f <= K (%.2f)", stroke->ndde, PAL_THRESH_K);
 
   // Check that this looks helix-like.
   double ep_dist = point2d_distance(
       &stroke->pts[0].p2d, &stroke->pts[stroke->num_pts-1].p2d);
-  CHECK_RTN_RESULT(ep_dist / stroke->px_length >= PALEO_THRESH_U,
+  CHECK_RTN_RESULT(ep_dist / stroke->px_length >= PAL_THRESH_U,
       "ep_dist (%.2f) / px_len (%.2f) >= U (%.2f)",
-      ep_dist, stroke->px_length, PALEO_THRESH_U);
+      ep_dist, stroke->px_length, PAL_THRESH_U);
 
   // All tests pass, build the helix.
 
@@ -84,26 +83,25 @@ const pal_helix_result_t* pal_helix_test(const pal_stroke_t* stroke) {
       &stroke->pts[maj.i].p2d, &stroke->pts[maj.j].p2d);
 
   // Compute radius.
-  context.ideal.r = 0;
+  context.result.helix.r = 0;
   for (int i = 0; i < stroke->num_pts; i++) {
-    context.ideal.r += geom_point_dist_to_line(
+    context.result.helix.r += geom_point_dist_to_line(
         &stroke->pts[i].p2d, &stroke->pts[maj.i].p2d, &stroke->pts[maj.j].p2d);
   }
-  context.ideal.r /= stroke->num_pts;
+  context.result.helix.r /= stroke->num_pts;
 
   point2d_t vec = {
     stroke->pts[maj.j].x - stroke->pts[maj.i].x,
     stroke->pts[maj.j].y - stroke->pts[maj.i].y
   };
   context.result.helix.c[0].x =
-    stroke->pts[maj.i].x + vec.x * context.ideal.r / maj.dist;
+    stroke->pts[maj.i].x + vec.x * context.result.helix.r / maj.dist;
   context.result.helix.c[0].y =
-    stroke->pts[maj.i].x + vec.y * context.ideal.r / maj.dist;
+    stroke->pts[maj.i].x + vec.y * context.result.helix.r / maj.dist;
   context.result.helix.c[1].x =
-    stroke->pts[maj.j].x - vec.x * context.ideal.r / maj.dist;
+    stroke->pts[maj.j].x - vec.x * context.result.helix.r / maj.dist;
   context.result.helix.c[1].y =
-    stroke->pts[maj.j].x - vec.y * context.ideal.r / maj.dist;
-  context.result.helix.r = context.ideal.r;
+    stroke->pts[maj.j].x - vec.y * context.result.helix.r / maj.dist;
   context.result.helix.theta_i = point2d_angle_to(
       &context.result.helix.c[0], &stroke->pts[0].p2d);
   context.result.helix.theta_t =

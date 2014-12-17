@@ -23,7 +23,7 @@ pal_line_t* pal_line_create() {
 
 pal_line_t* pal_line_create_points_with_points(
     const point2d_t* a, const point2d_t* b) {
-  pal_line_t* self = line_create();
+  pal_line_t* self = pal_line_create();
   memcpy(&(self->pts[0]), a, sizeof(point2d_t));
   memcpy(&(self->pts[1]), b, sizeof(point2d_t));
   return self;
@@ -31,7 +31,7 @@ pal_line_t* pal_line_create_points_with_points(
 
 pal_line_t* pal_line_create_points_with_longs(
     long ax, long ay, long bx, long by) {
-  pal_line_t* self = line_create();
+  pal_line_t* self = pal_line_create();
   self->pts[0].x = ax;
   self->pts[0].y = ay;
   self->pts[1].x = bx;
@@ -48,9 +48,14 @@ pal_line_t* pal_line_create_points_with_longs(
 // The line test's context (used by most functions here).
 static pal_line_context_t context;
 
-void line_init() { bzero(&context, sizeof(pal_line_context_t)); }
+void pal_line_init() { bzero(&context, sizeof(pal_line_context_t)); }
 
-void line_deinit() { free(context.result); }
+void pal_line_deinit() { free(context.result); }
+
+static inline void _reset(const pal_stroke_t* stroke) {
+  context.stroke = stroke;
+  context.result->possible = 1;
+}
 
 
 // Does the line segment test on the ranges provided.
@@ -60,7 +65,7 @@ static inline void _line_test(int first_i, int last_i);
 
 const pal_line_result_t* pal_line_test(const pal_stroke_t* stroke) {
   _reset(stroke);
-  context.result = realloc(context.result, sizeof(line_result_t));
+  context.result = realloc(context.result, sizeof(pal_line_result_t));
   if (stroke->num_crnrs == 2 || stroke->num_crnrs == 3) {
     _line_test(0, stroke->num_pts);
   }
@@ -82,7 +87,7 @@ const pal_line_result_t* pal_pline_test(const pal_stroke_t* stroke) {
       stroke->num_crnrs * sizeof(pal_line_result_t));
   double avg_lse = 0;   // also compute average LSE
   for (int i = 1; i < stroke->num_crnrs; i++) {
-    _line_seg_test(stroke->crnrs[i-1]->i, stroke->crnrs[i]->i);
+    _line_test(stroke->crnrs[i-1]->i, stroke->crnrs[i]->i);
     if (!context.result->possible) {  // Each sub-seg must pass.
       SET_FAIL_ARR(0, "Does not pass line test in sub-seg %d", i);
       return context.result;
@@ -124,7 +129,7 @@ static inline void _projection_to_ideal(point2d_t* proj, const point2d_t* p);
 // Computes the orthogonal distance from the point to the ideal line.
 static inline double _distance_to_ideal(const point2d_t* p);
 
-static inline void  _line_seg_test(int first_i, int last_i) {
+static inline void  _line_test(int first_i, int last_i) {
   // Reset 0th 
   bzero(context.result, sizeof(pal_line_result_t));
   context.result->possible = 1;

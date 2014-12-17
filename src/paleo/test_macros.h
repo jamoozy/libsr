@@ -13,7 +13,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // Resets the context for testing.
-#define _RESET(stroke) do {    \
+#define RESET(stroke) do {    \
   context.stroke = stroke;     \
   context.result.possible = 1; \
 } while (0)

@@ -8,15 +8,12 @@
 #include "common/util.h"
 #include "paleo.h"
 #include "line.h"
-#include "circle.h"
+#include "ellipse.h"
+#include "arc.h"
 #include "curve.h"
-
-#include "line_test.h"
-#include "ellipse_test.h"
-//#include "arc.h"
-//#include "spiral.h"
-//#include "helix.h"
-//#include "complex.h"
+#include "spiral.h"
+#include "helix.h"
+#include "composite.h"
 
 
 
@@ -24,27 +21,31 @@
 // ---------------------------- Paleo Up/Down ----------------------------- //
 //////////////////////////////////////////////////////////////////////////////
 
-static paleo_context_t paleo;
+static pal_context_t paleo;
 
-void paleo_init() {
-  bzero(&paleo, sizeof(paleo_context_t));
-  paleo.type = PALEO_TYPE_UNRUN;
+void pal_init() {
+  bzero(&paleo, sizeof(pal_context_t));
+  paleo.type = PAL_TYPE_UNRUN;
 
-  line_test_init();
-  ellipse_test_init();
+  pal_line_init();
+  pal_ellipse_init();
+  pal_circle_init();
+  pal_arc_init();
+  //pal_curve_init();
+  //pal_spiral_init();
+  //pal_helix_init();
+  //pal_composite_init();
 }
 
-void paleo_deinit() {
-  line_test_deinit();
-  ellipse_test_deinit();
-
-  //circle_rec_deinit();
-  //ellipse_rec_deinit();
-  //arc_rec_deinit();
-  //curve_rec_deinit();
-  //spiral_rec_deinit();
-  //helix_rec_deinit();
-  //complex_rec_deinit();
+void pal_deinit() {
+  pal_line_deinit();
+  pal_ellipse_deinit();
+  pal_circle_deinit();
+  pal_arc_deinit();
+  //pal_curve_deinit();
+  //pal_spiral_deinit();
+  //pal_helix_deinit();
+  //pal_composite_deinit();
 
   free(paleo.stroke->pts);
   free(paleo.stroke->crnrs);
@@ -79,7 +80,7 @@ static inline double _yu_direction(const point2d_t* a, const point2d_t* b);
 // This finds the curvature given a section of a stroke defined by the window
 // size parameter "k" (see the paper for a full definition).  This function
 // assumes that there are 2k+1 points in 'sub_strk'.
-static inline double _yu_curvature(int k, const paleo_point_t* sub_strk);
+static inline double _yu_curvature(int k, const pal_point_t* sub_strk);
 
 // Determines the simple dy/dx for b given a was the last point in the
 // stroke.
@@ -105,15 +106,15 @@ static inline void _break_stroke(int first_i, int last_i);
 // Does pre-processing on a stroke to create a paleo stroke: a stroke with more
 // information, used by the individual recognizers.
 static void _process_stroke(const stroke_t* strk) {
-  paleo_stroke_t* ps = paleo.stroke = calloc(1, sizeof(paleo_stroke_t));
-  ps->pts = calloc(strk->num, sizeof(paleo_point_t));
+  pal_stroke_t* ps = paleo.stroke = calloc(1, sizeof(pal_stroke_t));
+  ps->pts = calloc(strk->num, sizeof(pal_point_t));
 
   // PaleoSketch, pg 3, para 1:
   //    "If two consecutive points either have the same x and y values or if
   //     they have the same time value then the second point is removed."
   for (int i = 0; i < strk->num; i++) {
     if (i > 0) {
-      paleo_point_t* last = &ps->pts[ps->num_pts-1];
+      pal_point_t* last = &ps->pts[ps->num_pts-1];
       if (last->p.t == strk->pts[i].t ||
           (last->p.x == strk->pts[i].x && last->p.y == strk->pts[i].y)) {
         continue;  // Same time or same coords, so skipping.
@@ -126,7 +127,7 @@ static void _process_stroke(const stroke_t* strk) {
 
   // Cut down on memory use (there may have been removed points).
   if (ps->num_pts < strk->num) {
-    ps->pts = realloc(ps->pts, ps->num_pts * sizeof(paleo_point_t));
+    ps->pts = realloc(ps->pts, ps->num_pts * sizeof(pal_point_t));
   }
 
   // PaleoSketch, pg 3, para 2:
@@ -207,7 +208,7 @@ static void _process_stroke(const stroke_t* strk) {
   // Compute DCR.
   _compute_dcr();
 
-  if (ps->num_pts < PALEO_THRESH_B || ps->px_length < PALEO_THRESH_C) {
+  if (ps->num_pts < PAL_THRESH_B || ps->px_length < PAL_THRESH_C) {
     // Stroke too small to warrant tail removal.
     return;
   }
@@ -235,18 +236,18 @@ static void _process_stroke(const stroke_t* strk) {
 
   // Compute total rotation & whether it's overtraced.
   ps->tot_revs = (ps->pts[ps->num_pts-1].dir - ps->pts[0].dir) / (2 * M_PIl);
-  ps->overtraced = ps->tot_revs > PALEO_THRESH_D;
+  ps->overtraced = ps->tot_revs > PAL_THRESH_D;
 
   // Compute closed-ness.
   ps->closed = (point2d_distance(&ps->pts[0].p2d, &ps->pts[ps->num_pts-1].p2d) /
-      ps->px_length) < PALEO_THRESH_E && ps->tot_revs > PALEO_THRESH_F;
+      ps->px_length) < PAL_THRESH_E && ps->tot_revs > PAL_THRESH_F;
 }
 
 static inline double _yu_direction(const point2d_t* a, const point2d_t* b) {
   return atan((b->y - a->y) / (b->x - a->x));
 }
 
-static inline double _yu_curvature(int k, const paleo_point_t* sub_strk) {
+static inline double _yu_curvature(int k, const pal_point_t* sub_strk) {
   const int NUM = 2*k+1;
 
   double diff_sum = 0;  // sum of direction differences.
@@ -288,10 +289,10 @@ static inline void _paulson_corners() {
   // init corners with 0th point.
   paleo.stroke->num_crnrs = 0;
   paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
-      paleo.stroke->num_pts * sizeof(paleo_point_t*));
+      paleo.stroke->num_pts * sizeof(pal_point_t*));
   _paleo_add_to_corners(0);
 
-  paleo_point_t* last = &paleo.stroke->pts[0];
+  pal_point_t* last = &paleo.stroke->pts[0];
   double px_length = 0;
   for (int i = 1; i < paleo.stroke->num_pts - 1; i++) {
     px_length += point2d_distance(
@@ -299,7 +300,7 @@ static inline void _paulson_corners() {
 
     // Are we un-line-like enough?
     if (point2d_distance(
-          &last->p2d, &paleo.stroke->pts[i].p2d) > PALEO_THRESH_Y) {
+          &last->p2d, &paleo.stroke->pts[i].p2d) > PAL_THRESH_Y) {
       _paleo_add_to_corners(i-1);
       last = &paleo.stroke->pts[i];
       px_length = 0;
@@ -308,7 +309,7 @@ static inline void _paulson_corners() {
 
   _paleo_add_to_corners(paleo.stroke->num_pts-1);
   paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
-      paleo.stroke->num_crnrs * sizeof(paleo_point_t*));
+      paleo.stroke->num_crnrs * sizeof(pal_point_t*));
 
 #undef _paleo_add_to_corners
 
@@ -319,22 +320,22 @@ static inline void _paulson_corners() {
 static inline short _paulson_merge_corners() {
   short rtn = 0;
   for (int c = 1; c < paleo.stroke->num_crnrs; c++) {
-    if (paleo.stroke->crnrs[c-1]->p.i + PALEO_THRESH_Z * paleo.stroke->num_pts <=
+    if (paleo.stroke->crnrs[c-1]->p.i + PAL_THRESH_Z * paleo.stroke->num_pts <=
         paleo.stroke->crnrs[c]->p.i) {  // Sufficiently close to be merged.
       rtn = 1;
       if (c == 1) {   // 0th point: just remove other point.
         memmove(&paleo.stroke->crnrs[1], &paleo.stroke->crnrs[2],
-            (paleo.stroke->num_crnrs-2) * sizeof(paleo_point_t*));
+            (paleo.stroke->num_crnrs-2) * sizeof(pal_point_t*));
         paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
-            --paleo.stroke->num_crnrs * sizeof(paleo_point_t*));
+            --paleo.stroke->num_crnrs * sizeof(pal_point_t*));
         c--;
       } else if (c == paleo.stroke->num_crnrs - 1) {  // Last point:
         // Just remove other point.
         memmove(&paleo.stroke->crnrs[paleo.stroke->num_crnrs-2],
             &paleo.stroke->crnrs[paleo.stroke->num_crnrs-1],
-            sizeof(paleo_point_t*));
+            sizeof(pal_point_t*));
         paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
-            --paleo.stroke->num_crnrs * sizeof(paleo_point_t*));
+            --paleo.stroke->num_crnrs * sizeof(pal_point_t*));
         c--;
       } else if (c >= paleo.stroke->num_crnrs) {
         assert(0);
@@ -343,9 +344,9 @@ static inline short _paulson_merge_corners() {
           (paleo.stroke->crnrs[c-1]->p.i + paleo.stroke->crnrs[c]->p.i) / 2;
         paleo.stroke->crnrs[c-1] = &paleo.stroke->pts[avg_i];
         memmove(&paleo.stroke->crnrs[c], &paleo.stroke->crnrs[c+1],
-            (paleo.stroke->num_crnrs - c - 1) * sizeof(paleo_point_t*));
+            (paleo.stroke->num_crnrs - c - 1) * sizeof(pal_point_t*));
         paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
-            --paleo.stroke->num_crnrs * sizeof(paleo_point_t*));
+            --paleo.stroke->num_crnrs * sizeof(pal_point_t*));
         c--;
       }
     }
@@ -354,10 +355,10 @@ static inline short _paulson_merge_corners() {
 }
 
 static inline short _paulson_replace_corners() {
-  const int range = (int)ceil(paleo.stroke->num_pts * PALEO_THRESH_Z);
+  const int range = (int)ceil(paleo.stroke->num_pts * PAL_THRESH_Z);
   short rtn = 0;
   for (int c = 0; c < paleo.stroke->num_crnrs; c++) {
-    paleo_point_t* corner = paleo.stroke->crnrs[c];
+    pal_point_t* corner = paleo.stroke->crnrs[c];
     for (int i = corner->p.i - range; i < MIN(corner->p.i + range, paleo.stroke->num_pts); i++) {
       if (paleo.stroke->pts[i].curv > paleo.stroke->crnrs[c]->curv) {
         paleo.stroke->crnrs[c] = &paleo.stroke->pts[i];
@@ -401,9 +402,9 @@ static inline void _break_stroke(int first_i, int last_i) {
   // Trim off tails.
   paleo.stroke->num_pts = last_i - first_i + 1;
   memmove(paleo.stroke->pts, &paleo.stroke->pts[first_i],
-      paleo.stroke->num_pts * sizeof(paleo_point_t));
+      paleo.stroke->num_pts * sizeof(pal_point_t));
   paleo.stroke->pts = realloc(paleo.stroke->pts,
-      paleo.stroke->num_pts * sizeof(paleo_point_t));
+      paleo.stroke->num_pts * sizeof(pal_point_t));
 
   // Correct point index's.
   for (int i = 0; i < paleo.stroke->num_pts; i++) {
@@ -412,7 +413,7 @@ static inline void _break_stroke(int first_i, int last_i) {
 }
 
 
-paleo_type_e paleo_recognize(const stroke_t* stroke) {
+pal_type_e pal_recognize(const stroke_t* stroke) {
   _process_stroke(stroke);
 
   // TODO continue
@@ -420,6 +421,6 @@ paleo_type_e paleo_recognize(const stroke_t* stroke) {
   return paleo.type;
 }
 
-paleo_type_e paleo_last_type() { return paleo.type; }
+pal_type_e pal_last_type() { return paleo.type; }
 
-const paleo_stroke_t* paleo_last_stroke() { return paleo.stroke; }
+const pal_stroke_t* pal_last_stroke() { return paleo.stroke; }

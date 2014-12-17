@@ -1,5 +1,5 @@
-#ifndef  __paleo_h__
-#define  __paleo_h__
+#ifndef  __pal_h__
+#define  __pal_h__
 
 #include "common/point.h"
 #include "common/stroke.h"
@@ -20,36 +20,36 @@ typedef struct {
   double dy_dx;  // dy/dx wrt last point.
   double sp;     // Speed of pen when drawing this point.
   double curv;   // Curvature at this point.
-} paleo_point_t;
+} pal_point_t;
 
 // A paleo stroke; just like a normal stroke, but some paleo-specific info.
 typedef struct {
   int num_pts;            // Number of points.
-  paleo_point_t* pts;     // Points.
+  pal_point_t* pts;       // Points.
   int num_crnrs;          // Number of corners.
-  paleo_point_t** crnrs;  // Corners.
+  pal_point_t** crnrs;    // Corners.
   double px_length;       // Length of the stroke in pixels.
   double ndde;            // Normalized Distance between Direction Extremes.
   double dcr;             // Direction Change Ratio.
   double tot_revs;        // Total revolutions.
   short overtraced;       // Whether the stroke is overtraced.
   short closed;           // Whether the shape is closed.
-} paleo_stroke_t;
+} pal_stroke_t;
 
 // Common result info for all tests.
 //   possible: Whether the stroke is possible.
 //   lse: Least squares error.
 //   fa: Feature Area.
-#define PALEO_TEST_RESULT_STRUCT \
+#define PAL_TEST_RESULT_STRUCT \
 struct {            \
   double lse;       \
   double fa;        \
   char*  fmsg;      \
   char   possible;  \
 }
-typedef PALEO_TEST_RESULT_STRUCT paleo_test_result_t;
-#define PALEO_TEST_RESULT_UNION \
-  union { paleo_test_result_t ptr; PALEO_TEST_RESULT_STRUCT; };
+typedef PAL_TEST_RESULT_STRUCT pal_test_result_t;
+#define PAL_TEST_RESULT_UNION \
+  union { pal_test_result_t ptr; PAL_TEST_RESULT_STRUCT; };
 
 
 
@@ -57,26 +57,26 @@ typedef PALEO_TEST_RESULT_STRUCT paleo_test_result_t;
 // ------------------------- Paleo Context & Values ------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Types of recognitions returned by paleo_process & paleo_last_type.
+// Types of recognitions returned by pal_process & pal_last_type.
 typedef enum {
-  PALEO_TYPE_UNRUN = -1,
-  PALEO_TYPE_DOT,
-  PALEO_TYPE_LINE,
-  PALEO_TYPE_CIRCLE,
-  PALEO_TYPE_ELLIPSE,
-  PALEO_TYPE_ARC,
-  PALEO_TYPE_CURVE,
-  PALEO_TYPE_SPIRAL,
-  PALEO_TYPE_HELIX,
-  PALEO_TYPE_COMPLEX,
-  PALEO_TYPE_INDET
-} paleo_type_e;
+  PAL_TYPE_UNRUN = -1,
+  PAL_TYPE_DOT,
+  PAL_TYPE_LINE,
+  PAL_TYPE_CIRCLE,
+  PAL_TYPE_ELLIPSE,
+  PAL_TYPE_ARC,
+  PAL_TYPE_CURVE,
+  PAL_TYPE_SPIRAL,
+  PAL_TYPE_HELIX,
+  PAL_TYPE_COMPLEX,
+  PAL_TYPE_INDET
+} pal_type_e;
 
 // The main paleo object.  Keeps track of context.
 typedef struct {
-  paleo_type_e type;
-  paleo_stroke_t* stroke;
-} paleo_context_t;
+  pal_type_e type;
+  pal_stroke_t* stroke;
+} pal_context_t;
 
 
 
@@ -85,17 +85,17 @@ typedef struct {
 ////////////////////////////////////////////////////////////////////////////////
 
 // Initialize paleo.
-void paleo_init();
+void pal_init();
 
 // De-initialize paleo (free its memory).
-void paleo_deinit();
+void pal_deinit();
 
 // Processes the stroke, attempting to recognize it as one of the recognizers
 // here.
 //   stroke: The stroke to recognize.
-paleo_type_e paleo_recognize(const stroke_t* stroke);
+pal_type_e pal_recognize(const stroke_t* stroke);
 
-// Returns the last-returned value from paleo_process(const stroke_t*)
-paleo_type_e paleo_last_type();
+// Returns the last-returned value from pal_process(const stroke_t*)
+pal_type_e pal_last_type();
 
-#endif  //__paleo_h__
+#endif  //__pal_h__

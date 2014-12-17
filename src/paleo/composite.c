@@ -4,29 +4,29 @@
 #include "composite.h"
 
 
-void paleo_composite_init() {
+void pal_composite_init() {
 }
 
-void paleo_composite_deinit() { }
+void pal_composite_deinit() { }
 
 static void _reset(
-    paleo_composite_context_t* context, const paleo_stroke_t* stroke) {
-  bzero(context, sizeof(paleo_composite_context_t));
+    pal_composite_context_t* context, const pal_stroke_t* stroke) {
+  bzero(context, sizeof(pal_composite_context_t));
   context->stroke = stroke;
   context->result.possible = 1;
 }
 
 
 
-paleo_composite_result_t* paleo_composite_test(const paleo_stroke_t* stroke) {
+pal_composite_result_t* pal_composite_test(const pal_stroke_t* stroke) {
   assert(0);  // still have to figure out how to implement this ...
 
-  paleo_composite_context_t context;
-  bzero(&context, sizeof(paleo_composite_context_t));
+  pal_composite_context_t context;
+  bzero(&context, sizeof(pal_composite_context_t));
   _reset(&context, stroke);
 
   // Find highest curvature.
-  paleo_point_t* max = &stroke->pts[0];
+  pal_point_t* max = &stroke->pts[0];
   for (int i = 1; i < stroke->num_pts; i++) {
     if (stroke->pts[i].curv > max->curv) {
       max = &stroke->pts[i];
@@ -48,8 +48,8 @@ paleo_composite_result_t* paleo_composite_test(const paleo_stroke_t* stroke) {
   }
 
   // Test each individually.
-  &context, paleo_recognize(&subs[0]);
-  &context, paleo_recognize(&subs[1]);
+  &context, pal_recognize(&subs[0]);
+  &context, pal_recognize(&subs[1]);
 
   // 
 }

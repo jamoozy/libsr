@@ -29,20 +29,20 @@ void pal_spiral_point_at(const pal_spiral_t* self, point2d_t* p, double t) {
 
 
 
-static pal_spiral_test_context_t context;
+static pal_spiral_context_t context;
 
-void pal_spiral_test_init() {
-  bzero(&context, sizeof(pal_spiral_test_context_t));
+void pal_spiral_init() {
+  bzero(&context, sizeof(pal_spiral_context_t));
 }
 
-void pal_spiral_test_deinit() { }
+void pal_spiral_deinit() { }
 
 void _reset(const pal_stroke_t* stroke) {
-  bzero(&context, sizeof(pal_spiral_test_context_t));
+  bzero(&context, sizeof(pal_spiral_context_t));
   context.stroke = stroke;
 }
 
-const pal_spiral_test_result_t*
+const pal_spiral_result_t*
 pal_spiral_test(const pal_stroke_t* stroke) {
   CHECK_RTN_RESULT(stroke->overtraced, "Stroke not overtraced.");
   CHECK_RTN_RESULT(stroke->ndde > PAL_THRESH_K,

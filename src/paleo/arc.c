@@ -50,7 +50,7 @@ void pal_arc_init() { bzero(&context, sizeof(pal_arc_context_t)); }
 void pal_arc_deinit() { }
 
 static inline void _reset(const pal_stroke_t* stroke) {
-  _RESET(stroke);
+  RESET(stroke);
   //bzero(&context, sizeof(pal_arc_test_context_t));
   //context.stroke = stroke;
   //context.result.possible = 1;
