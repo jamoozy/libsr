@@ -1,16 +1,22 @@
-#ifndef __paleo_test_macros_h__
-#define __paleo_test_macros_h__
+#ifndef __pal_test_macros_h__
+#define __pal_test_macros_h__
 
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 
 ////////////////////////////////////////////////////////////////////////////////
-//    These macros are to be used for convenience in paleo test files.  They  //
+//    These macros are to be used for convenience in Paleo test files.  They  //
 //       assume you have a global "context" struct that contains a "result"   //
 //            struct which inherits from Paleo results by including the       //
 //                      PALEO_RESULT_UNION macro at its top.                  //
 ////////////////////////////////////////////////////////////////////////////////
+
+// Resets the context for testing.
+#define _RESET(stroke) do {    \
+  context.stroke = stroke;     \
+  context.result.possible = 1; \
+} while (0)
 
 // Convenience macro to set up the context's result as having failed.
 #define SET_FAIL(msg, ...) do { \
@@ -59,4 +65,4 @@
   return; \
 } while (0)
 
-#endif  // __paleo_test_macros_h__
+#endif  // __pal_test_macros_h__
