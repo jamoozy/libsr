@@ -12,6 +12,37 @@
 // ------------------------- Special Paleo Geometry ------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
 
+// Common result info for all tests.
+//   lse: Least squares error.
+//   fa: Feature Area.
+//   fmsg: Failure message.
+//   possible: Whether the stroke is possible.
+#define PAL_TEST_RESULT_STRUCT \
+struct {            \
+  double lse;       \
+  double fa;        \
+  char*  fmsg;      \
+  char   possible;  \
+}
+typedef PAL_TEST_RESULT_STRUCT pal_test_result_t;
+#define PAL_TEST_RESULT_UNION \
+  union { pal_test_result_t ptr; PAL_TEST_RESULT_STRUCT; };
+
+// Types of recognitions returned by pal_process & pal_last_type.
+typedef enum {
+  PAL_TYPE_UNRUN = -1,
+  PAL_TYPE_DOT,
+  PAL_TYPE_LINE,
+  PAL_TYPE_CIRCLE,
+  PAL_TYPE_ELLIPSE,
+  PAL_TYPE_ARC,
+  PAL_TYPE_CURVE,
+  PAL_TYPE_SPIRAL,
+  PAL_TYPE_HELIX,
+  PAL_TYPE_COMPLEX,
+  PAL_TYPE_INDET
+} pal_type_e;
+
 // A paleo point; just like a normal point, but with paleo-specific info.
 typedef struct {
   POINT_UNION;   // Inheriting from points.
@@ -36,45 +67,8 @@ typedef struct {
   short closed;           // Whether the shape is closed.
 } pal_stroke_t;
 
-// Common result info for all tests.
-//   possible: Whether the stroke is possible.
-//   lse: Least squares error.
-//   fa: Feature Area.
-#define PAL_TEST_RESULT_STRUCT \
-struct {            \
-  double lse;       \
-  double fa;        \
-  char*  fmsg;      \
-  char   possible;  \
-}
-typedef PAL_TEST_RESULT_STRUCT pal_test_result_t;
-#define PAL_TEST_RESULT_UNION \
-  union { pal_test_result_t ptr; PAL_TEST_RESULT_STRUCT; };
-
-
-
-////////////////////////////////////////////////////////////////////////////////
-// ------------------------- Paleo Context & Values ------------------------- //
-////////////////////////////////////////////////////////////////////////////////
-
-// Types of recognitions returned by pal_process & pal_last_type.
-typedef enum {
-  PAL_TYPE_UNRUN = -1,
-  PAL_TYPE_DOT,
-  PAL_TYPE_LINE,
-  PAL_TYPE_CIRCLE,
-  PAL_TYPE_ELLIPSE,
-  PAL_TYPE_ARC,
-  PAL_TYPE_CURVE,
-  PAL_TYPE_SPIRAL,
-  PAL_TYPE_HELIX,
-  PAL_TYPE_COMPLEX,
-  PAL_TYPE_INDET
-} pal_type_e;
-
-// The main paleo object.  Keeps track of context.
+// The main Paleo object.  Keeps track of context.
 typedef struct {
-  pal_type_e type;
   pal_stroke_t* stroke;
 } pal_context_t;
 

@@ -51,7 +51,16 @@ pal_composite_result_t* pal_composite_test(const pal_stroke_t* stroke) {
   &context, pal_recognize(&subs[0]);
   &context, pal_recognize(&subs[1]);
 
-  // 
+  // - TODO -
+  // write me
+
+
+  // - TODO -
+  // Check for extra composite "shape tails" and rank the composite sans the
+  // these to see if it truly belongs at the top.
+  //
+  // This was originally meant as a step after the hierarchy, but I don't see
+  // why it shouldn't be put here, so here it goes.
 }
 
 static void _split(stroke_t stroke[2], int x) {

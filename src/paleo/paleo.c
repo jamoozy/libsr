@@ -31,10 +31,10 @@ void pal_init() {
   pal_ellipse_init();
   pal_circle_init();
   pal_arc_init();
-  //pal_curve_init();
-  //pal_spiral_init();
-  //pal_helix_init();
-  //pal_composite_init();
+  pal_curve_init();
+  pal_spiral_init();
+  pal_helix_init();
+  pal_composite_init();
 }
 
 void pal_deinit() {
@@ -42,10 +42,10 @@ void pal_deinit() {
   pal_ellipse_deinit();
   pal_circle_deinit();
   pal_arc_deinit();
-  //pal_curve_deinit();
-  //pal_spiral_deinit();
-  //pal_helix_deinit();
-  //pal_composite_deinit();
+  pal_curve_deinit();
+  pal_spiral_deinit();
+  pal_helix_deinit();
+  pal_composite_deinit();
 
   free(paleo.stroke->pts);
   free(paleo.stroke->crnrs);
@@ -283,14 +283,14 @@ static inline void _paulson_corners() {
   assert(paleo.stroke->num_crnrs == 0);
   assert(paleo.stroke->crnrs == NULL);
 
-#define _paleo_add_to_corners(i) \
+#define _pal_add_to_corners(i) \
   (paleo.stroke->crnrs[paleo.stroke->num_crnrs++] = &paleo.stroke->pts[(i)])
 
   // init corners with 0th point.
   paleo.stroke->num_crnrs = 0;
   paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
       paleo.stroke->num_pts * sizeof(pal_point_t*));
-  _paleo_add_to_corners(0);
+  _pal_add_to_corners(0);
 
   pal_point_t* last = &paleo.stroke->pts[0];
   double px_length = 0;
@@ -301,17 +301,17 @@ static inline void _paulson_corners() {
     // Are we un-line-like enough?
     if (point2d_distance(
           &last->p2d, &paleo.stroke->pts[i].p2d) > PAL_THRESH_Y) {
-      _paleo_add_to_corners(i-1);
+      _pal_add_to_corners(i-1);
       last = &paleo.stroke->pts[i];
       px_length = 0;
     }
   }
 
-  _paleo_add_to_corners(paleo.stroke->num_pts-1);
+  _pal_add_to_corners(paleo.stroke->num_pts-1);
   paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
       paleo.stroke->num_crnrs * sizeof(pal_point_t*));
 
-#undef _paleo_add_to_corners
+#undef _pal_add_to_corners
 
   // Merge corners and replace with highest in region until no change.
   while(_paulson_merge_corners() || _paulson_replace_corners());
@@ -414,9 +414,47 @@ static inline void _break_stroke(int first_i, int last_i) {
 
 
 pal_type_e pal_recognize(const stroke_t* stroke) {
+  // Process simple stroke to create Paleo stroke.
   _process_stroke(stroke);
 
-  // TODO continue
+  // Create a structure to hold all the 
+  struct {
+    pal_line_result_t line;
+    pal_line_result_t pline;
+    pal_ellipse_result_t ellipse;
+    pal_circle_result_t circle;
+    pal_arc_result_t arc;
+    pal_curve_result_t curve;
+    pal_spiral_result_t spiral;
+    pal_helix_result_t helix;
+    pal_composite_result_t composite;
+  } r;
+
+  // Run each test in turn, copying over the result into the Paleo object.
+  memcpy(&r.line, pal_line_test(paleo.stroke), sizeof(pal_line_result_t));
+  memcpy(&r.pline, pal_pline_test(paleo.stroke), sizeof(pal_line_result_t));
+  memcpy(&r.ellipse, pal_ellipse_test(paleo.stroke),
+      sizeof(pal_ellipse_result_t));
+  memcpy(&r.circle, pal_circle_test(paleo.stroke), sizeof(pal_circle_result_t));
+  memcpy(&r.arc, pal_arc_test(paleo.stroke), sizeof(pal_arc_result_t));
+  memcpy(&r.curve, pal_curve_test(paleo.stroke), sizeof(pal_curve_result_t));
+  memcpy(&r.spiral, pal_spiral_test(paleo.stroke), sizeof(pal_spiral_result_t));
+  memcpy(&r.helix, pal_helix_test(paleo.stroke), sizeof(pal_helix_result_t));
+  memcpy(&r.composite, pal_composite_test(paleo.stroke),
+      sizeof(pal_composite_result_t));
+
+  // Go through a hierarchy to determine which shape should be the final one.
+  //
+  // XXX -- A shortcut is taken w.r.t. how spirals and helices are handled; from
+  // the paper:
+  //
+  //    Helixes and spirals are hard to assign scores because they are
+  //    arbitrarily large and the number of rotations differs across each
+  //    occurrence. Therefore, we gave them a default score of 5.
+  //
+  // Future versions of this library should improve upon this method.
+
+  // Do hierarchy.
 
   return paleo.type;
 }
