@@ -6,9 +6,11 @@
 #include <math.h>
 
 #include "common/util.h"
+
 #include "paleo.h"
-#include "line.h"
-#include "ellipse.h"
+
+#include "line.h"     // Also poly-line.
+#include "ellipse.h"  // Also circle.
 #include "arc.h"
 #include "curve.h"
 #include "spiral.h"
@@ -17,15 +19,61 @@
 
 
 
+// Finds the type that Paleo thinks the stroke is.
+#define TYPE() (paleo.h.r[0].type)
+
+#define TYPE_ADDED(type) (paleo.h.mask & PAL_MASK(type))
+
+// Adds the result to the hierarchy at the specified location without doing any
+// checks.
+//    i: The index to add the result at.
+//    type: The type of the result.
+//    res: The result.
+#define Add_H_AT(i, type, res) do {             \
+  paleo.h.r[i].res = calloc(1, sizeof(res));    \
+  memcpy(&paleo.h.r[i].res, &res, sizeof(res)); \
+  paleo.h.mask &= PAL_MASK(type);               \
+  paleo.h.num++;                                \
+} while (0)
+
+// Checks that the type of the result hasn't already been added before adding it
+// to the top of the hierarchy.
+//    type: The type of the result.
+//    res: The result.
+#define PUSH_H(type, res) do {                        \
+  if (!TYPE_ADDED(type)) {                            \
+    memmove(&paleo.h.r[1], &paleo.h.r[0],             \
+        (PAL_TYPE(NUM)-1) * sizeof(pal_hier_elem_t)); \
+    ADD_H_AT(0, type, res);                           \
+  }                                                   \
+} while (0)
+
+// Checks that the type of the result hasn't already been added before adding it
+// to the end of the hierarchy.
+//    type: The type of the result.
+//    res: The result.
+#define ENQ_H(type, res) do {         \
+  if (!TYPE_ADDED(type)) {            \
+    ADD_H_AT(paleo.h.num, type, res); \
+  }                                   \
+} while(0)
+
+
 //////////////////////////////////////////////////////////////////////////////
 // ---------------------------- Paleo Up/Down ----------------------------- //
 //////////////////////////////////////////////////////////////////////////////
 
 static pal_context_t paleo;
 
+void _hier_init(pal_hier_t* h) {
+  bzero(h, sizeof(pal_hier_t));
+  for (int i = 0; i < PAL_TYPE_NUM; i++) {
+    paleo.h.r[i].type = PAL_TYPE_UNRUN;
+  }
+}
+
 void pal_init() {
   bzero(&paleo, sizeof(pal_context_t));
-  paleo.type = PAL_TYPE_UNRUN;
 
   pal_line_init();
   pal_ellipse_init();
@@ -47,8 +95,8 @@ void pal_deinit() {
   pal_helix_deinit();
   pal_composite_deinit();
 
-  free(paleo.stroke->pts);
-  free(paleo.stroke->crnrs);
+  free(paleo.stroke.pts);
+  free(paleo.stroke.crnrs);
 }
 
 
@@ -106,7 +154,7 @@ static inline void _break_stroke(int first_i, int last_i);
 // Does pre-processing on a stroke to create a paleo stroke: a stroke with more
 // information, used by the individual recognizers.
 static void _process_stroke(const stroke_t* strk) {
-  pal_stroke_t* ps = paleo.stroke = calloc(1, sizeof(pal_stroke_t));
+  pal_stroke_t* ps = &paleo.stroke;
   ps->pts = calloc(strk->num, sizeof(pal_point_t));
 
   // PaleoSketch, pg 3, para 1:
@@ -280,36 +328,36 @@ static inline short _paulson_merge_corners();
 static inline short _paulson_replace_corners();
 
 static inline void _paulson_corners() {
-  assert(paleo.stroke->num_crnrs == 0);
-  assert(paleo.stroke->crnrs == NULL);
+  assert(paleo.stroke.num_crnrs == 0);
+  assert(paleo.stroke.crnrs == NULL);
 
 #define _pal_add_to_corners(i) \
-  (paleo.stroke->crnrs[paleo.stroke->num_crnrs++] = &paleo.stroke->pts[(i)])
+  (paleo.stroke.crnrs[paleo.stroke.num_crnrs++] = &paleo.stroke.pts[(i)])
 
   // init corners with 0th point.
-  paleo.stroke->num_crnrs = 0;
-  paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
-      paleo.stroke->num_pts * sizeof(pal_point_t*));
+  paleo.stroke.num_crnrs = 0;
+  paleo.stroke.crnrs = realloc(paleo.stroke.crnrs,
+      paleo.stroke.num_pts * sizeof(pal_point_t*));
   _pal_add_to_corners(0);
 
-  pal_point_t* last = &paleo.stroke->pts[0];
+  pal_point_t* last = &paleo.stroke.pts[0];
   double px_length = 0;
-  for (int i = 1; i < paleo.stroke->num_pts - 1; i++) {
+  for (int i = 1; i < paleo.stroke.num_pts - 1; i++) {
     px_length += point2d_distance(
-        &paleo.stroke->pts[i-1].p2d, &paleo.stroke->pts[i].p2d);
+        &paleo.stroke.pts[i-1].p2d, &paleo.stroke.pts[i].p2d);
 
     // Are we un-line-like enough?
     if (point2d_distance(
-          &last->p2d, &paleo.stroke->pts[i].p2d) > PAL_THRESH_Y) {
+          &last->p2d, &paleo.stroke.pts[i].p2d) > PAL_THRESH_Y) {
       _pal_add_to_corners(i-1);
-      last = &paleo.stroke->pts[i];
+      last = &paleo.stroke.pts[i];
       px_length = 0;
     }
   }
 
-  _pal_add_to_corners(paleo.stroke->num_pts-1);
-  paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
-      paleo.stroke->num_crnrs * sizeof(pal_point_t*));
+  _pal_add_to_corners(paleo.stroke.num_pts-1);
+  paleo.stroke.crnrs = realloc(paleo.stroke.crnrs,
+      paleo.stroke.num_crnrs * sizeof(pal_point_t*));
 
 #undef _pal_add_to_corners
 
@@ -319,34 +367,34 @@ static inline void _paulson_corners() {
 
 static inline short _paulson_merge_corners() {
   short rtn = 0;
-  for (int c = 1; c < paleo.stroke->num_crnrs; c++) {
-    if (paleo.stroke->crnrs[c-1]->p.i + PAL_THRESH_Z * paleo.stroke->num_pts <=
-        paleo.stroke->crnrs[c]->p.i) {  // Sufficiently close to be merged.
+  for (int c = 1; c < paleo.stroke.num_crnrs; c++) {
+    if (paleo.stroke.crnrs[c-1]->p.i + PAL_THRESH_Z * paleo.stroke.num_pts <=
+        paleo.stroke.crnrs[c]->p.i) {  // Sufficiently close to be merged.
       rtn = 1;
       if (c == 1) {   // 0th point: just remove other point.
-        memmove(&paleo.stroke->crnrs[1], &paleo.stroke->crnrs[2],
-            (paleo.stroke->num_crnrs-2) * sizeof(pal_point_t*));
-        paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
-            --paleo.stroke->num_crnrs * sizeof(pal_point_t*));
+        memmove(&paleo.stroke.crnrs[1], &paleo.stroke.crnrs[2],
+            (paleo.stroke.num_crnrs-2) * sizeof(pal_point_t*));
+        paleo.stroke.crnrs = realloc(paleo.stroke.crnrs,
+            --paleo.stroke.num_crnrs * sizeof(pal_point_t*));
         c--;
-      } else if (c == paleo.stroke->num_crnrs - 1) {  // Last point:
+      } else if (c == paleo.stroke.num_crnrs - 1) {  // Last point:
         // Just remove other point.
-        memmove(&paleo.stroke->crnrs[paleo.stroke->num_crnrs-2],
-            &paleo.stroke->crnrs[paleo.stroke->num_crnrs-1],
+        memmove(&paleo.stroke.crnrs[paleo.stroke.num_crnrs-2],
+            &paleo.stroke.crnrs[paleo.stroke.num_crnrs-1],
             sizeof(pal_point_t*));
-        paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
-            --paleo.stroke->num_crnrs * sizeof(pal_point_t*));
+        paleo.stroke.crnrs = realloc(paleo.stroke.crnrs,
+            --paleo.stroke.num_crnrs * sizeof(pal_point_t*));
         c--;
-      } else if (c >= paleo.stroke->num_crnrs) {
+      } else if (c >= paleo.stroke.num_crnrs) {
         assert(0);
       } else {
         const int avg_i =
-          (paleo.stroke->crnrs[c-1]->p.i + paleo.stroke->crnrs[c]->p.i) / 2;
-        paleo.stroke->crnrs[c-1] = &paleo.stroke->pts[avg_i];
-        memmove(&paleo.stroke->crnrs[c], &paleo.stroke->crnrs[c+1],
-            (paleo.stroke->num_crnrs - c - 1) * sizeof(pal_point_t*));
-        paleo.stroke->crnrs = realloc(paleo.stroke->crnrs,
-            --paleo.stroke->num_crnrs * sizeof(pal_point_t*));
+          (paleo.stroke.crnrs[c-1]->p.i + paleo.stroke.crnrs[c]->p.i) / 2;
+        paleo.stroke.crnrs[c-1] = &paleo.stroke.pts[avg_i];
+        memmove(&paleo.stroke.crnrs[c], &paleo.stroke.crnrs[c+1],
+            (paleo.stroke.num_crnrs - c - 1) * sizeof(pal_point_t*));
+        paleo.stroke.crnrs = realloc(paleo.stroke.crnrs,
+            --paleo.stroke.num_crnrs * sizeof(pal_point_t*));
         c--;
       }
     }
@@ -355,13 +403,14 @@ static inline short _paulson_merge_corners() {
 }
 
 static inline short _paulson_replace_corners() {
-  const int range = (int)ceil(paleo.stroke->num_pts * PAL_THRESH_Z);
+  const int range = (int)ceil(paleo.stroke.num_pts * PAL_THRESH_Z);
   short rtn = 0;
-  for (int c = 0; c < paleo.stroke->num_crnrs; c++) {
-    pal_point_t* corner = paleo.stroke->crnrs[c];
-    for (int i = corner->p.i - range; i < MIN(corner->p.i + range, paleo.stroke->num_pts); i++) {
-      if (paleo.stroke->pts[i].curv > paleo.stroke->crnrs[c]->curv) {
-        paleo.stroke->crnrs[c] = &paleo.stroke->pts[i];
+  for (int c = 0; c < paleo.stroke.num_crnrs; c++) {
+    pal_point_t* corner = paleo.stroke.crnrs[c];
+    for (int i = corner->p.i - range;
+        i < MIN(corner->p.i + range, paleo.stroke.num_pts); i++) {
+      if (paleo.stroke.pts[i].curv > paleo.stroke.crnrs[c]->curv) {
+        paleo.stroke.crnrs[c] = &paleo.stroke.pts[i];
         rtn = 1;
       }
     }
@@ -370,45 +419,43 @@ static inline short _paulson_replace_corners() {
 }
 
 static inline void _compute_dcr() {
-  assert(paleo.stroke != NULL);
-
   double prog = 0;  // length-based progress along the stroke
   double first_i = -1, last_i = -1;  // portion of stroke we use
   double avg_d_dir = 0;  // average change in direction
   double max_d_dir = 0;  // maximum change in direction
-  for (int i = 1; i < paleo.stroke->num_pts; i++) {
+  for (int i = 1; i < paleo.stroke.num_pts; i++) {
     prog += point2d_distance(
-        &paleo.stroke->pts[i-1].p2d, &paleo.stroke->pts[i].p2d);
+        &paleo.stroke.pts[i-1].p2d, &paleo.stroke.pts[i].p2d);
 
-    if (prog / paleo.stroke->px_length <= 0.05) { continue; }
+    if (prog / paleo.stroke.px_length <= 0.05) { continue; }
     if (first_i < 0) { first_i = i; }
-    if (prog / paleo.stroke->px_length >= 0.95) {
+    if (prog / paleo.stroke.px_length >= 0.95) {
       last_i = i;
       break;
     }
 
-    double d_dir = abs(paleo.stroke->pts[i-1].dir - paleo.stroke->pts[i].dir);
+    double d_dir = abs(paleo.stroke.pts[i-1].dir - paleo.stroke.pts[i].dir);
     if (d_dir > max_d_dir) { max_d_dir = d_dir; }
     avg_d_dir += d_dir;
   }
   avg_d_dir /= last_i - first_i + 1;
-  paleo.stroke->dcr = max_d_dir / avg_d_dir;
+  paleo.stroke.dcr = max_d_dir / avg_d_dir;
 }
 
 static inline void _break_stroke(int first_i, int last_i) {
   // Sanity check.
-  assert(0 <= first_i && first_i < last_i && last_i < paleo.stroke->num_pts);
+  assert(0 <= first_i && first_i < last_i && last_i < paleo.stroke.num_pts);
 
   // Trim off tails.
-  paleo.stroke->num_pts = last_i - first_i + 1;
-  memmove(paleo.stroke->pts, &paleo.stroke->pts[first_i],
-      paleo.stroke->num_pts * sizeof(pal_point_t));
-  paleo.stroke->pts = realloc(paleo.stroke->pts,
-      paleo.stroke->num_pts * sizeof(pal_point_t));
+  paleo.stroke.num_pts = last_i - first_i + 1;
+  memmove(paleo.stroke.pts, &paleo.stroke.pts[first_i],
+      paleo.stroke.num_pts * sizeof(pal_point_t));
+  paleo.stroke.pts = realloc(paleo.stroke.pts,
+      paleo.stroke.num_pts * sizeof(pal_point_t));
 
   // Correct point index's.
-  for (int i = 0; i < paleo.stroke->num_pts; i++) {
-    paleo.stroke->pts[i].p.i = i;
+  for (int i = 0; i < paleo.stroke.num_pts; i++) {
+    paleo.stroke.pts[i].p.i = i;
   }
 }
 
@@ -431,17 +478,15 @@ pal_type_e pal_recognize(const stroke_t* stroke) {
   } r;
 
   // Run each test in turn, copying over the result into the Paleo object.
-  memcpy(&r.line, pal_line_test(paleo.stroke), sizeof(pal_line_result_t));
-  memcpy(&r.pline, pal_pline_test(paleo.stroke), sizeof(pal_line_result_t));
-  memcpy(&r.ellipse, pal_ellipse_test(paleo.stroke),
-      sizeof(pal_ellipse_result_t));
-  memcpy(&r.circle, pal_circle_test(paleo.stroke), sizeof(pal_circle_result_t));
-  memcpy(&r.arc, pal_arc_test(paleo.stroke), sizeof(pal_arc_result_t));
-  memcpy(&r.curve, pal_curve_test(paleo.stroke), sizeof(pal_curve_result_t));
-  memcpy(&r.spiral, pal_spiral_test(paleo.stroke), sizeof(pal_spiral_result_t));
-  memcpy(&r.helix, pal_helix_test(paleo.stroke), sizeof(pal_helix_result_t));
-  memcpy(&r.composite, pal_composite_test(paleo.stroke),
-      sizeof(pal_composite_result_t));
+  pal_line_result_cpy(&r.line, pal_line_test(&paleo.stroke));
+  pal_line_result_cpy(&r.pline, pal_pline_test(&paleo.stroke));
+  pal_ellipse_result_cpy(&r.ellipse, pal_ellipse_test(&paleo.stroke));
+  pal_circle_result_cpy(&r.circle, pal_circle_test(&paleo.stroke));
+  pal_arc_result_cpy(&r.arc, pal_arc_test(&paleo.stroke));
+  pal_curve_result_cpy(&r.curve, pal_curve_test(&paleo.stroke));
+  pal_spiral_result_cpy(&r.spiral, pal_spiral_test(&paleo.stroke));
+  pal_helix_result_cpy(&r.helix, pal_helix_test(&paleo.stroke));
+  pal_composite_result_cpy(&r.composite, pal_composite_test(&paleo.stroke));
 
   // Go through a hierarchy to determine which shape should be the final one.
   //
@@ -455,10 +500,15 @@ pal_type_e pal_recognize(const stroke_t* stroke) {
   // Future versions of this library should improve upon this method.
 
   // Do hierarchy.
+  _hier_init(&paleo.h);
 
-  return paleo.type;
+  ENQ_H(LINE, r.line);
+  ENQ_H(PLINE, r.pline);
+//  ENQ_H(
+
+  return TYPE();
 }
 
-pal_type_e pal_last_type() { return paleo.type; }
+pal_type_e pal_last_type() { return TYPE(); }
 
-const pal_stroke_t* pal_last_stroke() { return paleo.stroke; }
+const pal_stroke_t* pal_last_stroke() { return &paleo.stroke; }

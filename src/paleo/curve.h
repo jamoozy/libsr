@@ -15,9 +15,10 @@ typedef struct {
   int num;                                  // The number of control points
 } pal_curve_t;
 
+// The recognition result for the curve test.
 typedef struct {
-  PAL_TEST_RESULT_UNION;
-  pal_curve_t curve;
+  PAL_RESULT_UNION;
+  pal_curve_t curve;    // The built curve.
 } pal_curve_result_t;
 
 typedef struct {
@@ -60,6 +61,11 @@ pal_curve_t* pal_curve_create_points(long num, const point2d_t* points);
 // Computes 'num' evenly separated points the Bézier curve.
 void pal_curve_compute_points(pal_curve_t* self, point2d_t* out, int num);
 
+// Does a deep copy of an curve.
+//    dst: The destination curve .
+//    src: The source curve.
+#define pal_curve_cpy(dst,src) memcpy(dst, src, sizeof(pal_curve _t));
+
 // Destroys the curve by freeing its memory.
 static inline void pal_curve_destroy(pal_curve_t* self) { free(self); }
 
@@ -82,6 +88,14 @@ void pal_curve_deinit();
 // Does the curve test on the Paleo stroke.
 //   stroke: The stroke to test.
 const pal_curve_result_t* pal_curve_test(const pal_stroke_t* stroke);
+
+// Does a deep copy of a curve.
+//    dst: The destination curve.
+//    src: The source curve.
+static inline void
+pal_curve_result_cpy(pal_curve_result_t* dst, const pal_curve_result_t* src) {
+  memcpy(dst, src, sizeof(pal_curve_t));
+}
 
 
 #endif // __pal_curve_h__

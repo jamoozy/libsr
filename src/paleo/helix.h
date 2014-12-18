@@ -16,7 +16,7 @@ typedef struct {
 
 // The helix test result.
 typedef struct {
-  PAL_TEST_RESULT_UNION;
+  PAL_RESULT_UNION;
   pal_helix_t helix;
 } pal_helix_result_t;
 
@@ -35,6 +35,11 @@ pal_helix_t* helix_create();
 //    self: The helix to destroy.
 void pal_helix_destroy(pal_helix_t* self);
 
+// Does a deep copy of an helix.
+//    dst: The destination helix.
+//    src: The source helix.
+#define pal_helix_cpy(dst,src) memcpy(dst, src, sizeof(pal_helix_t));
+
 // Computes 'num' evenly spaced points.
 void pal_helix_compute_points(const pal_helix_t* self, point2d_t* p, int num);
 
@@ -51,5 +56,13 @@ void pal_helix_deinit();
 
 // Test whether this is a helix.
 const pal_helix_result_t* pal_helix_test(const pal_stroke_t* stroke);
+
+// Does a deep copy of a helix result.
+//    dst: The destination helix result.
+//    src: The source helix result.
+static inline void
+pal_helix_result_cpy(pal_helix_result_t* dst, const pal_helix_result_t* src) {
+  memcpy(dst, src, sizeof(pal_helix_result_t));
+}
 
 #endif // __pal_helix_h__

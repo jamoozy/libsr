@@ -5,26 +5,29 @@
 
 #include "paleo.h"
 
+// The spiral shape.
 typedef struct {
-  point2d_t center;
-  double r;
-  double theta_t;
-  double theta_f;
-  int cw;
+  point2d_t center;   // The center of the spiral.
+  double r;           // The maximum radius of the spiral.
+  double theta_t;     // The total angle traversed.
+  double theta_f;     // The final angle to stop drawing on.
+  int cw;             // Whether this is going clockwise.
 } pal_spiral_t;
 
+// The spiral result.
 typedef struct {
-  PAL_TEST_RESULT_UNION;
-  pal_spiral_t spiral;
+  PAL_RESULT_UNION;
+  pal_spiral_t spiral;    // The shape.
 } pal_spiral_result_t;
 
+// The spiral test context.
 typedef struct {
-  const pal_stroke_t* stroke;
-  struct {
-    point2d_t center;
-    double r;
+  const pal_stroke_t* stroke;   // The stroke to recognize.
+  struct {              // The ideal spiral.
+    point2d_t center;   // The center of the spiral.
+    double r;           // The radius of the spiral.
   } ideal;
-  pal_spiral_result_t result;
+  pal_spiral_result_t result;   // The result to return.
 } pal_spiral_context_t;
 
 
@@ -33,13 +36,25 @@ typedef struct {
 pal_spiral_t* pal_spiral_create();
 
 // Destroys the spiral by freeing its memory.
+//    self: The spiral to destroy.
 void pal_spiral_destroy(pal_spiral_t* self);
 
-// Computes 'n' evenly distributed points in the spiral and returns them in the
+// Does a deep copy of an spiral.
+//    dst: The destination spiral.
+//    src: The source spiral.
+#define pal_spiral_cpy(dst,src) memcpy(dst, src, sizeof(pal_spiral_t));
+
+// Draws 'n' evenly distributed points in the spiral and returns them in the
 // 'pts' array.
+//    self: The spiral to create points for.
+//    pts: The points.
+//    n: The number of points to create.
 void pal_spiral_points(const pal_spiral_t* self, point2d_t *pts, int n);
 
-// Computes a single point t% of the way through the spiral.
+// Computes a single point that is 't' through the spiral.
+//    self: The spiral to draw.
+//    p: The return point to compute.
+//    t: Must be in [0,1], denotes distance through spiral to compute.
 void pal_spiral_point_at(const pal_spiral_t* self, point2d_t* p, double t);
 
 
@@ -50,6 +65,16 @@ void pal_spiral_init();
 // De-initializes the curve test.
 void pal_spiral_deinit();
 
+// Does the spiral test on the Paleo stroke.
+//   stroke: The stroke to test.
 const pal_spiral_result_t* pal_spiral_test(const pal_stroke_t* stroke);
+
+// Does a deep copy of a curve result.
+//    dst: The destination curve result.
+//    src: The source curve result.
+static inline void pal_spiral_result_cpy(
+    pal_spiral_result_t* dst, const pal_spiral_result_t* src) {
+  memcpy(dst, src, sizeof(pal_spiral_result_t));
+}
 
 #endif // __pal_spiral_h__

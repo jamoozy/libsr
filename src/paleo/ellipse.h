@@ -24,8 +24,8 @@ typedef struct {
 
 // The results specific to an ellipse test.
 typedef struct {
-  PAL_TEST_RESULT_UNION;
-  pal_ellipse_t ellipse;
+  PAL_RESULT_UNION;
+  pal_ellipse_t ellipse;  // The shape.
 } pal_ellipse_result_t;
 
 // Context needed to perform the ellipse test.
@@ -33,17 +33,17 @@ typedef struct {
   const pal_stroke_t* stroke;
   double angle;         // Angle traversed about the center with the stroke.
   struct {              // The ideal ellipse.
-    struct {
-      long i;           // Index into stroke of one point.
-      long j;           // Index into stroke of another point.
-      double len;       // Length of major axis.
+    struct {            //  The ideal major axis.
+      long i;           //    Index into stroke of one point.
+      long j;           //    Index into stroke of another point.
+      double len;       //    Length of major axis.
     } major;
-    struct {
-      point2d_t a;      // One minor axis point.
-      point2d_t b;      // Another minor axis point.
-      double len;       // Length of minor axis.
+    struct {            // The ideal minor axis.
+      point2d_t a;      //  One minor axis point.
+      point2d_t b;      //    Another minor axis point.
+      double len;       //    Length of minor axis.
     } minor;
-    point2d_t center;   // Center of ideal ellipse.
+    point2d_t center;   //  Center of ideal ellipse.
   } ideal;
   pal_ellipse_result_t result;  // Result of the ellipse test.
 } pal_ellipse_context_t;
@@ -58,13 +58,13 @@ typedef struct {
 
 // The results specific to an ellipse test.
 typedef struct {
-  PAL_TEST_RESULT_UNION;
-  pal_circle_t circle;
+  PAL_RESULT_UNION;
+  pal_circle_t circle;  // The shape.
 } pal_circle_result_t;
 
 // Context needed to perform the ellipse test.
 typedef struct {
-  const pal_stroke_t* stroke;
+  const pal_stroke_t* stroke;   // The stroke to recognize.
   struct {                      // The ideal ellipse.
     point2d_t center;           // Center of ideal ellipse.
     double r;                   // Radius of ideal circle.
@@ -75,15 +75,29 @@ typedef struct {
 
 
 // Creates a new ellipse with the given focci and maj- and min-length
+//    f1: The first focal point.
+//    f2: The second focal point.
+//    maj: The length of the major axis.
+//    min: The length of the minor axis.
 pal_ellipse_t* pal_ellipse_create(
     const point2d_t* f1, const point2d_t* f2, double maj, double min);
 
 // Populate the already-allocated ellipse.
+//    f1: The first focal point.
+//    f2: The second focal point.
+//    maj: The length of the major axis.
+//    min: The length of the minor axis.
 void pal_ellipse_populate(pal_ellipse_t* self,
     const point2d_t* f1, const point2d_t* f2, double maj, double min);
 
+// Does a deep copy of an ellipse.
+//    dst: The destination ellipse.
+//    src: The source ellipse.
+#define pal_ellipse_cpy(dst,src) memcpy(dst, src, sizeof(pal_ellipse_t));
+
 // Destroys the ellipse by freeing its memory.
-void pal_ellipse_destroy(pal_ellipse_t* self);
+//    self: The ellipse to destroy.
+static inline void pal_ellipse_destroy(pal_ellipse_t* self) { free(self); }
 
 
 
@@ -103,8 +117,13 @@ pal_circle_t* pal_circle_create_full(long r, long x, long y);
 //   c: The center.
 pal_circle_t* pal_circle_create_with_point(long r, const point2d_t* c);
 
+// Does a deep copy of an circle.
+//    dst: The destination circle.
+//    src: The source circle.
+#define pal_circle_cpy(dst,src) memcpy(dst, src, sizeof(pal_circle_t));
+
 // Destroys the circle by freeing its memory.
-void pal_circle_destroy(pal_circle_t*);
+static inline void pal_circle_destroy(pal_circle_t* self) { free(self); }
 
 
 
@@ -124,8 +143,24 @@ void pal_circle_deinit();
 //   stroke: The stroke to test.
 const pal_ellipse_result_t* pal_ellipse_test(const pal_stroke_t* stroke);
 
+// Does a deep copy of an ellipse.
+//    dst: The destination ellipse.
+//    src: The source ellipse.
+static inline void pal_ellipse_result_cpy(
+    pal_ellipse_result_t* dst, const pal_ellipse_result_t* src) {
+  memcpy(dst, src, sizeof(pal_ellipse_t));
+}
+
 // Does the circle test on the paleo stroke.
 //   stroke: The stroke to test.
 const pal_circle_result_t* pal_circle_test(const pal_stroke_t* stroke);
+
+// Does a deep copy of a circle.
+//    dst: The destination circle.
+//    src: The source circle.
+static inline void pal_circle_result_cpy(
+    pal_circle_result_t* dst, const pal_circle_result_t* src) {
+  memcpy(dst, src, sizeof(pal_circle_t));
+}
 
 #endif // __pal_ellipse_h__

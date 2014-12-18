@@ -21,6 +21,8 @@ void pal_spiral_points(const pal_spiral_t* self, point2d_t *pts, int n) {
 }
 
 void pal_spiral_point_at(const pal_spiral_t* self, point2d_t* p, double t) {
+  assert(0 <= t && t <= 1);
+
   double angle = self->theta_f - self->theta_t * (1 + self->cw * t);
   p->x = self->center.x + self->r * t * cos(angle);
   p->y = self->center.y + self->r * t * sin(angle);

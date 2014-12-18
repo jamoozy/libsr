@@ -14,7 +14,7 @@ typedef struct {
 
 // The results specific to a line test.
 typedef struct {
-  PAL_TEST_RESULT_UNION;
+  PAL_RESULT_UNION;
   pal_line_t line;
 } pal_line_result_t;
 
@@ -28,7 +28,7 @@ typedef struct {
     double theta;  // Angle of the line (from p0).
   } ideal_line;
 
-  // Result of all line tests performed by the last call to line_set_test or
+  // Result of all line tests performed by the last call to pal_line_set_test or
   // poly_line_test.  For the simple line test there will be only one result
   // here -- the result of the single line test performed.  For the poly line,
   // there will be num_crnrs tests here.  The 0th will be the final poly line
@@ -58,6 +58,14 @@ pal_line_t* pal_line_create_points_with_points(
 pal_line_t* pal_line_create_points_with_longs(
     long ax, long ay, long bx, long by);
 
+// Does a deep copy of a line.
+//    dst: The destination line.
+//    src: The source line.
+static inline void pal_line_cpy(pal_line_t* dst, pal_line_t* src) {
+  dst->pts = malloc((dst->num = src->num) * sizeof(point2d_t));
+  memcpy(dst->pts, src->pts, src->num * sizeof(point2d_t));
+}
+
 // Frees the memory in a line.
 //   self: The line to free.
 static inline void pal_line_destroy(pal_line_t* self) {
@@ -69,6 +77,21 @@ static inline void pal_line_destroy(pal_line_t* self) {
 
 
 
+// Initialize the line test.
+void pal_line_init();
+
+// De-initializes the line test by freeing its memory.
+void pal_line_deinit();
+
+// Does a deep copy of a line result.
+//    dst: The destination line result.
+//    src: The source line result.
+static inline void
+pal_line_result_cpy(pal_line_result_t* dst, const pal_line_result_t* src) {
+  memcpy(dst, src, sizeof(pal_line_result_t));
+  pal_line_cpy(&dst->line, &src->line);
+}
+
 // Does the line test on the paleo stroke.
 //   stroke: The stroke to test.
 const pal_line_result_t* pal_line_test(const pal_stroke_t* stroke);
@@ -76,12 +99,6 @@ const pal_line_result_t* pal_line_test(const pal_stroke_t* stroke);
 // Does the poly line test on the paleo stroke.
 //   stroke: The stroke to test.
 const pal_line_result_t* pal_pline_test(const pal_stroke_t* stroke);
-
-// Initialize the line test.
-void pal_line_init();
-
-// De-initializes the line test by freeing its memory.
-void pal_line_deinit();
 
 
 #endif // __pal_line_h__

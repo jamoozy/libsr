@@ -32,15 +32,11 @@ void pal_arc_populate(pal_arc_t* self, const point2d_t* p1, const point2d_t* p2,
   self->angle = angle;
 }
 
-void inline pal_arc_destroy(pal_arc_t* self) { free(self); }
-
 
 
 ////////////////////////////////////////////////////////////////////////////////
 // ------------------------------- Up & Down -------------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
-
-
 
 // The arc context for testing.
 static pal_arc_context_t context;

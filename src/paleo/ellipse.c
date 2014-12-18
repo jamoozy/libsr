@@ -31,8 +31,6 @@ void pal_ellipse_populate(pal_ellipse_t* self,
   self->min = min;
 }
 
-void inline pal_ellipse_destroy(pal_ellipse_t* self) { free(self); }
-
 pal_circle_t* pal_circle_create() {
   pal_circle_t* self = calloc(1, sizeof(pal_circle_t));
   return self;
@@ -52,8 +50,6 @@ pal_circle_t* pal_circle_create_with_point(long r, const point2d_t* c) {
   memcpy(&self->center, c, sizeof(point2d_t));
   return self;
 }
-
-void inline pal_circle_destroy(pal_circle_t* self) { free(self); }
 
 
 
