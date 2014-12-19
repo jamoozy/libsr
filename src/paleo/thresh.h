@@ -23,7 +23,7 @@
 #define PAL_THRESH_T   0.25     // Spiral sub-center max difference.
 #define PAL_THRESH_U   0.2      // Spiral max ep_dist / px_len.
 #define PAL_THRESH_V   0.1
-#define PAL_THRESH_W   9.0
+#define PAL_THRESH_W   9.0      // Min DCR val for pline add at H#3.
 #define PAL_THRESH_X  10.0
 #define PAL_THRESH_Y   0.99    // Corner detection.
 #define PAL_THRESH_Z   0.06    // Corner merge percentage.

@@ -499,12 +499,83 @@ pal_type_e pal_recognize(const stroke_t* stroke) {
   //
   // Future versions of this library should improve upon this method.
 
-  // Do hierarchy.
+  // Do hierarchy; the following comment stanzas just quote the paper's
+  // hierarchy section.
   _hier_init(&paleo.h);
 
+  // 1. All lines.
   ENQ_H(LINE, r.line);
-  ENQ_H(PLINE, r.pline);
-//  ENQ_H(
+
+  // 2. Arcs whose feature area error is less than the feature area of its
+  //    polyline interpretation.
+  if (r.arc.fa < r.pline.res[0].fa) {
+    ENQ_H(ARC, r.arc);
+  }
+
+  // 3. Polylines with very high DCR values [W] and low number of sub-strokes
+  //    [X].  We use a less strict DCR threshold [J] if all sub-strokes passed
+  //    the line test.
+  int passed = 1;
+  if (paleo.stroke.dcr > PAL_THRESH_W &&
+      paleo.stroke.num_crnrs < PAL_THRESH_X) {
+    ENQ_H(PLINE, r.pline);
+    passed = 0;
+  }
+
+  for (int i = 1; i < r.pline.num && passed; i++) {
+    passed = passed && r.pline.res[i].possible;
+  }
+
+  if (passed) {
+    ENQ_H(PLINE, r.pline);
+  }
+
+  // 4. Non-overtraced circles whose feature area error is less than the feature
+  //    area of its polyline interpretation. We do make an exception however.
+  //    If the polyline test passed and the polyline rank is less than that of
+  //    the circle (as determined by the ranking algorithm) then polyline is
+  //    added in front of the circle interpretation. This exception does not
+  //    apply to small circles [N].
+
+  // 5. Non-overtraced ellipses whose feature area error is less than the
+  //    feature area of its polyline interpretation. As with circles, we add
+  //    polylines that meet the conditions mentioned in part 4.  Again, this
+  //    would not apply to small ellipses [L]. A circle fit will also be added
+  //    with the ellipse as an alternative interpretation.
+
+  // 6. Arcs not already added from step 2.
+
+  // 7. Spirals that may have also passed an overtraced circle or overtraced
+  //    ellipse test.
+
+  // 8. Circles (including overtraced) not added in step 3 (polyline condition
+  //    still applies).
+
+  // 9. Ellipses (including overtraced) not added in step 4 (polyline condition
+  //    still applies).
+
+  // 10. All helixes with scores less than the complex interpretation score. If
+  //    the complex score is lower then it is added, followed by the helix.
+
+  // 11. All curves.
+
+  // 12. All spirals not added in step 7.
+
+  // 13. All other polylines.
+
+  // 14. If the interpretation list is empty at this point, or the top
+  //    interpretation is a curve or polyline, then we execute a complex test.
+  //    If the complex test returns an interpretation that contains all lines or
+  //    polylines then we add a polyline interpretation. If not, then we compare
+  //    the ranking of the complex fit with the ranking of the top
+  //    interpretation (whether it is a curve or polyline). If the complex rank
+  //    is less than the current interpretation rank then the complex
+  //    interpretation is added at the front of the list. Otherwise, we add the
+  //    complex fit to the end of the interpretation list.
+
+  // 15. Polyline is always added as a default interpretation (regardless of
+  //    whether or not its test passed).
+
 
   return TYPE();
 }

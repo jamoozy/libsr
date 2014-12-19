@@ -12,10 +12,17 @@ typedef struct {
   point2d_t* pts;  // The points.  Must be at least 2.
 } pal_line_t;
 
-// The results specific to a line test.
+// The sub-results of the line result.  The 0th will be the result of the actual
+// line/pline; the ith will be the result of the ith sub-line (for plines, only).
 typedef struct {
   PAL_RESULT_UNION;
   pal_line_t line;
+} pal_line_sub_result_t;
+
+// The results specific to a line test.
+typedef struct {
+  pal_line_sub_result_t *res;
+  int num;
 } pal_line_result_t;
 
 // Context needed to perform the line test.
@@ -26,15 +33,15 @@ typedef struct {
     double y_int;  // Y-intercept
     point2d_t p0;  // First point in the ideal line.
     double theta;  // Angle of the line (from p0).
-  } ideal_line;
+  } ideal;
 
-  // Result of all line tests performed by the last call to pal_line_set_test or
-  // poly_line_test.  For the simple line test there will be only one result
-  // here -- the result of the single line test performed.  For the poly line,
-  // there will be num_crnrs tests here.  The 0th will be the final poly line
+  // Result of all line tests performed by the last call to pal_line_test or
+  // pal_pline_test.  For the simple line test there will be only one result
+  // here -- the result of the single line test performed.  For the poly-line,
+  // there will be num_crnrs tests here.  The 0th will be the final poly-line
   // test, and the nth will be the line segment test for the nth subsegment of
   // the line.
-  pal_line_result_t *result;
+  pal_line_result_t res;
 } pal_line_context_t;
 
 
@@ -88,8 +95,11 @@ void pal_line_deinit();
 //    src: The source line result.
 static inline void
 pal_line_result_cpy(pal_line_result_t* dst, const pal_line_result_t* src) {
-  memcpy(dst, src, sizeof(pal_line_result_t));
-  pal_line_cpy(&dst->line, &src->line);
+  dst->num = src->num;
+  for (int i = 0; i < src->num; i++) {
+    memcpy(&dst->res[i], &src->res[i], sizeof(pal_line_sub_result_t));
+    pal_line_cpy(&dst->res[i].line, &src->res[i].line);
+  }
 }
 
 // Does the line test on the paleo stroke.

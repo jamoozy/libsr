@@ -2,28 +2,19 @@
 #include <strings.h>
 
 #include "composite.h"
+#include "test_macros.h"
 
 
-void pal_composite_init() {
-}
+void pal_composite_init() { }
 
 void pal_composite_deinit() { }
-
-static void _reset(
-    pal_composite_context_t* context, const pal_stroke_t* stroke) {
-  bzero(context, sizeof(pal_composite_context_t));
-  context->stroke = stroke;
-  context->result.possible = 1;
-}
 
 
 
 pal_composite_result_t* pal_composite_test(const pal_stroke_t* stroke) {
-  assert(0);  // still have to figure out how to implement this ...
-
   pal_composite_context_t context;
   bzero(&context, sizeof(pal_composite_context_t));
-  _reset(&context, stroke);
+  RESET(stroke);
 
   // Find highest curvature.
   pal_point_t* max = &stroke->pts[0];
@@ -50,6 +41,8 @@ pal_composite_result_t* pal_composite_test(const pal_stroke_t* stroke) {
   // Test each individually.
   &context, pal_recognize(&subs[0]);
   &context, pal_recognize(&subs[1]);
+
+  assert(0);  // still have to figure out how to implement this ...
 
   // - TODO -
   // write me
