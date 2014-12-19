@@ -61,7 +61,7 @@ pal_line_t* pal_line_create_points_with_longs(
 // Does a deep copy of a line.
 //    dst: The destination line.
 //    src: The source line.
-static inline void pal_line_cpy(pal_line_t* dst, pal_line_t* src) {
+static inline void pal_line_cpy(pal_line_t* dst, const pal_line_t* src) {
   dst->pts = malloc((dst->num = src->num) * sizeof(point2d_t));
   memcpy(dst->pts, src->pts, src->num * sizeof(point2d_t));
 }

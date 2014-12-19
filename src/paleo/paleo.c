@@ -20,31 +20,31 @@
 
 
 // Finds the type that Paleo thinks the stroke is.
-#define TYPE() (paleo.h.r[0].type)
+#define TYPE() (paleo.h.elems[0].type)
 
 #define TYPE_ADDED(type) (paleo.h.mask & PAL_MASK(type))
 
 // Adds the result to the hierarchy at the specified location without doing any
 // checks.
-//    i: The index to add the result at.
-//    type: The type of the result.
-//    res: The result.
-#define Add_H_AT(i, type, res) do {             \
-  paleo.h.r[i].res = calloc(1, sizeof(res));    \
-  memcpy(&paleo.h.r[i].res, &res, sizeof(res)); \
-  paleo.h.mask &= PAL_MASK(type);               \
-  paleo.h.num++;                                \
+//    I: The index to add the result at.
+//    TYPE: The type of the result.
+//    RES: The result.
+#define ADD_H_AT(I, TYPE, RES) do {                 \
+  paleo.h.elems[I].res = calloc(1, sizeof(RES));    \
+  memcpy(&paleo.h.elems[I].res, &RES, sizeof(RES)); \
+  paleo.h.mask &= PAL_MASK(TYPE);                   \
+  paleo.h.num++;                                    \
 } while (0)
 
 // Checks that the type of the result hasn't already been added before adding it
 // to the top of the hierarchy.
-//    type: The type of the result.
-//    res: The result.
-#define PUSH_H(type, res) do {                        \
+//    TYPE: The type of the result.
+//    RES: The result.
+#define PUSH_H(type, RES) do {                        \
   if (!TYPE_ADDED(type)) {                            \
-    memmove(&paleo.h.r[1], &paleo.h.r[0],             \
+    memmove(&paleo.h.elems[1], &paleo.h.elems[0],     \
         (PAL_TYPE(NUM)-1) * sizeof(pal_hier_elem_t)); \
-    ADD_H_AT(0, type, res);                           \
+    ADD_H_AT(0, type, RES);                           \
   }                                                   \
 } while (0)
 
@@ -68,7 +68,7 @@ static pal_context_t paleo;
 void _hier_init(pal_hier_t* h) {
   bzero(h, sizeof(pal_hier_t));
   for (int i = 0; i < PAL_TYPE_NUM; i++) {
-    paleo.h.r[i].type = PAL_TYPE_UNRUN;
+    paleo.h.elems[i].type = PAL_TYPE_UNRUN;
   }
 }
 

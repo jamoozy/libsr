@@ -64,7 +64,7 @@ void pal_curve_compute_points(pal_curve_t* self, point2d_t* out, int num);
 // Does a deep copy of an curve.
 //    dst: The destination curve .
 //    src: The source curve.
-#define pal_curve_cpy(dst,src) memcpy(dst, src, sizeof(pal_curve _t));
+#define pal_curve_cpy(dst,src) memcpy(dst, src, sizeof(pal_curve_t));
 
 // Destroys the curve by freeing its memory.
 static inline void pal_curve_destroy(pal_curve_t* self) { free(self); }

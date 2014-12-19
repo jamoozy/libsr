@@ -40,11 +40,11 @@ typedef enum {
   PAL_TYPE_CURVE,
   PAL_TYPE_SPIRAL,
   PAL_TYPE_HELIX,
-  PAL_TYPE_COMPLEX,
+  PAL_TYPE_COMPOSITE,
   PAL_TYPE_NUM,
 } pal_type_e;
 
-#define PAL_TYPE(elem) (_PAL_TYPE_##elem)
+#define PAL_TYPE(elem) (PAL_TYPE_##elem)
 
 typedef enum {
   PAL_MASK_DOT      = 0x001,
@@ -59,7 +59,7 @@ typedef enum {
   PAL_MASK_COMPLEX  = 0x200
 } pal_mask_m;
 
-#define PAL_MASK(elem) (_PAL_MASK_##elem)
+#define PAL_MASK(elem) (PAL_MASK_##elem)
 
 // A paleo point; just like a normal point, but with paleo-specific info.
 typedef struct {
@@ -76,7 +76,7 @@ typedef struct {
   int num_pts;            // Number of points.
   pal_point_t* pts;       // Points.
   int num_crnrs;          // Number of corners.
-  pal_point_t** crnrs;    // Corners.
+  pal_point_t** crnrs;    // Pointers to the points in 'pts' that are corners.
   double px_length;       // Length of the stroke in pixels.
   double ndde;            // Normalized Distance between Direction Extremes.
   double dcr;             // Direction Change Ratio.
@@ -94,9 +94,9 @@ typedef struct {
 // The Paleo hierarchy.  This is an array of results ordered by how likely they
 // are to be the correct stroke recognition.
 typedef struct {
-  pal_hier_elem_t r[PAL_TYPE_NUM];   // List of results -- 0 is best result.
-  int mask;                           // Bit mask of added hierarchy elements.
-  int num;                            // How filled it is.
+  pal_hier_elem_t elems[PAL_TYPE_NUM];  // List of results -- 0 is best result.
+  int mask;                             // Bit mask of added hierarchy elements.
+  int num;                              // How filled it is.
 } pal_hier_t;
 
 // The main Paleo object.  Keeps track of context.
