@@ -25,7 +25,7 @@ struct {            \
   char   possible;  \
 }
 typedef PAL_RESULT_STRUCT pal_result_t;
-#define PAL_RESULT_UNION union { pal_result_t ptr; PAL_RESULT_STRUCT; };
+#define PAL_RESULT_UNION union { pal_result_t pr; PAL_RESULT_STRUCT; };
 
 // Types of recognitions returned by pal_process & pal_last_type.
 typedef enum {
@@ -46,17 +46,30 @@ typedef enum {
 
 #define PAL_TYPE(elem) (PAL_TYPE_##elem)
 
+#define PAL_RANK_DOT        ({assert(0);})
+#define PAL_RANK_LINE       1
+#define PAL_RANK_PLINE      ({assert(0);})
+#define PAL_RANK_CIRCLE     5
+#define PAL_RANK_ELLIPSE    5
+#define PAL_RANK_ARC        3
+#define PAL_RANK_CURVE      5
+#define PAL_RANK_SPIRAL     5
+#define PAL_RANK_HELIX      5
+#define PAL_RANK_COMPOSITE  ({assert(0);})
+
+#define PAL_RANK(elem) (PAL_RANK_##elem)
+
 typedef enum {
-  PAL_MASK_DOT      = 0x001,
-  PAL_MASK_LINE     = 0x002,
-  PAL_MASK_PLINE    = 0x004,
-  PAL_MASK_CIRCLE   = 0x008,
-  PAL_MASK_ELLIPSE  = 0x010,
-  PAL_MASK_ARC      = 0x020,
-  PAL_MASK_CURVE    = 0x040,
-  PAL_MASK_SPIRAL   = 0x080,
-  PAL_MASK_HELIX    = 0x100,
-  PAL_MASK_COMPLEX  = 0x200
+  PAL_MASK_DOT        = 0x001,
+  PAL_MASK_LINE       = 0x002,
+  PAL_MASK_PLINE      = 0x004,
+  PAL_MASK_CIRCLE     = 0x008,
+  PAL_MASK_ELLIPSE    = 0x010,
+  PAL_MASK_ARC        = 0x020,
+  PAL_MASK_CURVE      = 0x040,
+  PAL_MASK_SPIRAL     = 0x080,
+  PAL_MASK_HELIX      = 0x100,
+  PAL_MASK_COMPOSITE  = 0x200
 } pal_mask_m;
 
 #define PAL_MASK(elem) (PAL_MASK_##elem)
@@ -121,6 +134,11 @@ void pal_deinit();
 // here.
 //   stroke: The stroke to recognize.
 pal_type_e pal_recognize(const stroke_t* stroke);
+
+// Finds the rank of a specific shape.
+//    type: The type of the shape.
+//    shape: The shape.
+int pal_shape_rank(pal_type_e type, const void* shape);
 
 // Gets the last type returned by pal_recognize(const stroke_t*).
 pal_type_e pal_last_type();

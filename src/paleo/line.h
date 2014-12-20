@@ -73,6 +73,12 @@ static inline void pal_line_cpy(pal_line_t* dst, const pal_line_t* src) {
   memcpy(dst->pts, src->pts, src->num * sizeof(point2d_t));
 }
 
+// Returns the rank of the line.
+//    self: The line.
+static inline int pal_line_rank(const pal_line_t* self) {
+  return self->num-1;
+}
+
 // Frees the memory in a line.
 //   self: The line to free.
 static inline void pal_line_destroy(pal_line_t* self) {

@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include <strings.h>
+#include <values.h>
 #include <math.h>
 
 #include "common/util.h"
@@ -29,7 +30,11 @@
 //    I: The index to add the result at.
 //    TYPE: The type of the result.
 //    RES: The result.
+//
+// NOTE: a simple memcpy is sufficient here, because a deep copy of the original
+// result was already made down where PUSH_H and ENQ_H are called.
 #define ADD_H_AT(I, TYPE, RES) do {                 \
+  paleo.h.elems[I].type = PAL_TYPE(TYPE);           \
   paleo.h.elems[I].res = calloc(1, sizeof(RES));    \
   memcpy(&paleo.h.elems[I].res, &RES, sizeof(RES)); \
   paleo.h.mask &= PAL_MASK(TYPE);                   \
@@ -460,6 +465,11 @@ static inline void _break_stroke(int first_i, int last_i) {
 }
 
 
+// Finds the rank of the shape in a result.
+//    type: The type of the shape.
+//    res: The result.
+static inline int _rank_res(pal_type_e type, const void* res);
+
 pal_type_e pal_recognize(const stroke_t* stroke) {
   // Process simple stroke to create Paleo stroke.
   _process_stroke(stroke);
@@ -536,32 +546,68 @@ pal_type_e pal_recognize(const stroke_t* stroke) {
   //    the circle (as determined by the ranking algorithm) then polyline is
   //    added in front of the circle interpretation. This exception does not
   //    apply to small circles [N].
+  if ((!paleo.stroke.overtraced && r.circle.fa < r.pline.res[0].fa)) {
+    // Remember that r.pline.num = rank + 1.
+    if (r.circle.circle.r >= PAL_THRESH_N &&
+        r.pline.res[0].possible && r.pline.num <= PAL_RANK_CIRCLE) {
+      ENQ_H(PLINE, r.pline);
+    }
+    ENQ_H(CIRCLE, r.circle);
+  }
 
   // 5. Non-overtraced ellipses whose feature area error is less than the
   //    feature area of its polyline interpretation. As with circles, we add
   //    polylines that meet the conditions mentioned in part 4.  Again, this
   //    would not apply to small ellipses [L]. A circle fit will also be added
   //    with the ellipse as an alternative interpretation.
+  if ((!paleo.stroke.overtraced && r.ellipse.fa < r.pline.res[0].fa)) {
+    if (r.ellipse.ellipse.maj >= PAL_THRESH_L &&
+        r.pline.res[0].possible && r.pline.num <= PAL_RANK_ELLIPSE) {
+      ENQ_H(PLINE, r.pline);
+    }
+    ENQ_H(ELLIPSE, r.ellipse);
+    ENQ_H(CIRCLE, r.circle);
+  }
 
   // 6. Arcs not already added from step 2.
+  ENQ_H(ARC, r.arc);
 
   // 7. Spirals that may have also passed an overtraced circle or overtraced
   //    ellipse test.
+  if (paleo.stroke.overtraced) {
+    ENQ_H(SPIRAL, r.spiral);
+  }
 
   // 8. Circles (including overtraced) not added in step 3 (polyline condition
   //    still applies).
+  ENQ_H(CIRCLE, r.circle);
 
   // 9. Ellipses (including overtraced) not added in step 4 (polyline condition
   //    still applies).
+  ENQ_H(ELLIPSE, r.ellipse);
 
   // 10. All helixes with scores less than the complex interpretation score. If
   //    the complex score is lower then it is added, followed by the helix.
+  if (PAL_RANK_HELIX < pal_composite_rank(&r.composite.composite)) {
+    ENQ_H(HELIX, r.helix);
+  }
 
   // 11. All curves.
+  ENQ_H(CURVE, r.curve);
 
   // 12. All spirals not added in step 7.
+  ENQ_H(SPIRAL, r.spiral);
 
   // 13. All other polylines.
+  ENQ_H(PLINE, r.pline);
+
+  // NOTE: H#14 (below) confuses me a bit.  Above, (in H#10) I need to compare
+  // the rank of the composite shape -- which requires that I have already
+  // computed it -- however, below (in H#14), it says that only here should the
+  // composite test even be run....
+  //
+  // Well, I guess I'll "solve" this by running all the tests above, then follow
+  // the letter of the hierarchy.
 
   // 14. If the interpretation list is empty at this point, or the top
   //    interpretation is a curve or polyline, then we execute a complex test.
@@ -572,12 +618,72 @@ pal_type_e pal_recognize(const stroke_t* stroke) {
   //    is less than the current interpretation rank then the complex
   //    interpretation is added at the front of the list. Otherwise, we add the
   //    complex fit to the end of the interpretation list.
+  if (paleo.h.num == 0 ||
+      paleo.h.elems[0].type == PAL_TYPE_CURVE ||
+      paleo.h.elems[0].type == PAL_TYPE_PLINE) {
+    if (pal_composite_is_line(&r.composite.composite)) {
+      ENQ_H(PLINE, r.pline);
+    } else if (pal_composite_rank(&r.composite.composite) <
+       _rank_res(paleo.h.elems[0].type, paleo.h.elems[0].res)) {
+      PUSH_H(COMPOSITE, r.composite);
+    } else {
+      ENQ_H(COMPOSITE, r.composite);
+    }
+  }
 
   // 15. Polyline is always added as a default interpretation (regardless of
   //    whether or not its test passed).
+  ENQ_H(PLINE, r.pline);
 
-
+  // Hierarchy built!  Return the type.
   return TYPE();
+}
+
+static inline int _rank_res(pal_type_e type, const void* res) {
+  switch (type) {
+    case PAL_TYPE_LINE:
+      return pal_line_rank(&((const pal_line_result_t*)res)->res[0].line);
+      break;
+
+    case PAL_TYPE_ELLIPSE: return PAL_RANK_ELLIPSE; break;
+    case PAL_TYPE_CIRCLE:  return PAL_RANK_CIRCLE;  break;
+    case PAL_TYPE_ARC:     return PAL_RANK_ARC;     break;
+    case PAL_TYPE_CURVE:   return PAL_RANK_CURVE;   break;
+    case PAL_TYPE_SPIRAL:  return PAL_RANK_SPIRAL;  break;
+    case PAL_TYPE_HELIX:   return PAL_RANK_HELIX;   break;
+
+    case PAL_TYPE_COMPOSITE:
+      return pal_composite_rank(&((const pal_composite_result_t*)res)->composite);
+      break;
+
+    default:
+      fprintf(stderr, "Got bad type: %d", type);
+      break;
+  }
+}
+
+int pal_shape_rank(pal_type_e type, const void* shape) {
+  switch (type) {
+    case PAL_TYPE_LINE:
+      return pal_line_rank((const pal_line_t*)shape);
+      break;
+
+    case PAL_TYPE_ELLIPSE: return PAL_RANK_ELLIPSE; break;
+    case PAL_TYPE_CIRCLE:  return PAL_RANK_CIRCLE;  break;
+    case PAL_TYPE_ARC:     return PAL_RANK_ARC;     break;
+    case PAL_TYPE_CURVE:   return PAL_RANK_CURVE;   break;
+    case PAL_TYPE_SPIRAL:  return PAL_RANK_SPIRAL;  break;
+    case PAL_TYPE_HELIX:   return PAL_RANK_HELIX;   break;
+
+    case PAL_TYPE_COMPOSITE:
+      return pal_composite_rank((const pal_composite_t*)shape);
+      break;
+
+    default:
+      fprintf(stderr, "Got bad type: %d", type);
+      break;
+  }
+  return INT_MIN;
 }
 
 pal_type_e pal_last_type() { return TYPE(); }
