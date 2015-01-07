@@ -4,9 +4,11 @@
 #include "common/mock_point.h"
 #include "line.h"
 #include "circle.h"
+#include "arc.h"
 #include "curve.h"
-//#include "helix.h"
-//#include "spiral.h"
+#include "spiral.h"
+#include "helix.h"
+#include "complex.h"
 
 
 
