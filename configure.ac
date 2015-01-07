@@ -51,15 +51,14 @@ PKG_CHECK_MODULES([CHECK], [check >= 0.9], [have_check="yes"], [
 ])
 AM_CONDITIONAL(HAVE_CHECK, test "x$have_check" = "xyes")
 
-# Checks for header files
-AC_CHECK_HEADERS([
-  assert.h check.h cblas.h lapacke.h limits.h math.h openblas/cblas.h string.h
-  strings.h stdlib.h stdio.h values.h
-])
-AC_DEFINE(_GNU_SOURCE, 1, [Define for math.h M_PI (and others) usage.])
-
-# Checks for library functions.
+# Checks for standard library functions and headers.
+AC_CHECK_HEADERS(
+  assert.h check.h cblas.h lapacke.h limits.h math.h openblas/cblas.h \
+  string.h strings.h stdlib.h stdio.h values.h)
 AC_CHECK_FUNCS_ONCE([abs assert bzero memcpy memmove floor sqrt atan sin cos])
+
+# We're using GNU's stuff!
+AC_DEFINE(_GNU_SOURCE, 1, [Define for math.h M_PI (and others) usage.])
 
 # Output files.
 AC_CONFIG_HEADERS([config.h])
