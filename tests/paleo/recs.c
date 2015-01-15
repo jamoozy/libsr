@@ -2,7 +2,7 @@
 
 #include "common/mock_point.h"
 #include "line.h"
-#include "circle.h"
+#include "ellipse.h"
 #include "arc.h"
 #include "curve.h"
 #include "spiral.h"
@@ -11,11 +11,79 @@
 
 
 
+// Testing Strategy:
+//  1. Test "simple" result copying for ...
+//    a. Line (2 pts) (possible)
+//    b. Polyline (3,4,8 pts) (possible/not)
+//    c. Circle/Ellipse (possible)
+//    d. Arc (possible)
+//    e. Curve (possible)
+//    f. Spiral (not possible)
+//    g. Helix (not possible)
+//    h. A simple composite with a-g above.
+//    i. A complex composite with a&d
+//    j. A complex composite with f&g
+
+
+// General test for 2 results inheriting from pal_result_t.
+#define CK_ASSERT_PAL_RES_EQ(res,cpy) do { \
+  ck_assert_msg(res.lse == cpy.lse, \
+      "LSE's differ: %.2f != %.2f", res.lse, cpy.lse); \
+  ck_assert_msg(res.fa == cpy.fa, \
+      "FA's differ: %.2f != %.2f", res.fa, cpy.fa); \
+  ck_assert_msg(strcmp(res.fmsg, cpy.fmsg) == 0, \
+      "fmsg's differ: %s != %s", res.fmsg, cpy.fmsg); \
+  ck_assert_msg(res.fmsg != cpy.fmsg, "fmsg's have same address."); \
+  ck_assert_msg(res.possible == cpy.possible, \
+      "\"possible\" different: %d vs.  %d.", res.possible, cpy.possible); \
+} while (0)
+
+
+
 //////////////////////////////////////////////////////////////////////////////
-// ------------------------ Line Recognizer Tests ------------------------- //
+// ------------------------- Result Copying Tests ------------------------- //
 //////////////////////////////////////////////////////////////////////////////
 
-START_TEST(c_
+// Creates a pal_line_result_cpy check test.
+//   name: Name of the test.
+//   def: Definition of the result to copy and check.
+#define LINE_RESULT_CPY_TEST(name,def) START_TEST(name) { \
+} END_TEST
+
+// ---- 1a ------------
+
+LINE_RESULT_CPY_TEST(c_line_result_cpy_possible,
+    );
+
+START_TEST(c_line_result_cpy_possible) {
+  pal_line_result_t res = { { 40.09, -2.1, "success", 1, }, 1 };
+  pal_line_result_t cpy;
+
+  pal_line_result_cpy(cpy, res);
+
+  ck_assert_msg(res.num == cpy.num,
+      "num differs: %d vs. %d", res.num, cpy.num);
+
+  for (int i = 0; i < res.num; i++) {
+    CK_ASSERT_PAL_RES_EQ(res.res[i], cpy.res[i]);
+    ck_assert_msg(res.res[i].num == cpy.res[i].num,
+        "num differs: %d vs. %d", res.num, cpy.num);
+  }
+} END_TEST
+
+// ---- 1b ------------
+
+START_TEST(c_pline_result_cpy_3_pts_not) {
+  ck_assert_msg(0, "not impl")
+} END_TEST
+
+START_TEST(c_pline_result_cpy_4_pts_possible) {
+  ck_assert_msg(0, "not impl")
+} END_TEST
+
+START_TEST(c_pline_result_cpy_8_pts_not) {
+  ck_assert_msg(0, "not impl")
+} END_TEST
 
 
 
