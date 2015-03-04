@@ -30,6 +30,8 @@ START_TEST(c_vec_cross_prod_opp) {
 } END_TEST
 
 
+// ---- Vector Subtraction ------------
+
 static inline void _test_vec_sub(double xe, double ye,
     double x1, double y1, double x2, double y2) {
   point2d_t a = { x1, y1 }, b = { x2, y2 }, r;
@@ -51,9 +53,9 @@ START_TEST(c_vec_sub_opp) {
 } END_TEST
 
 
-////////////////////////////////////////////////////////////////////////////////
-// ------------------------------- Area Tests ------------------------------- //
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// ------------------------------ Area Tests ------------------------------ //
+//////////////////////////////////////////////////////////////////////////////
 
 static inline void _test_triangle_area(double e,
     double x1, double y1, double x2, double y2, double x3, double y3) {
@@ -88,6 +90,7 @@ START_TEST(c_triangle_area_eq) {
 } END_TEST
 
 
+// ---- Quad Area ------------
 
 static inline void _test_quad_area(double e,
     double x1, double y1, double x2, double y2,
@@ -123,38 +126,103 @@ START_TEST(c_quad_area_normal) {
 
 
 
-static inline void _test_segs_intersect(double e,
+//////////////////////////////////////////////////////////////////////////////
+// ---------------------------- Line / Segment ---------------------------- //
+//////////////////////////////////////////////////////////////////////////////
+
+// ---- geom_seg_seg_intersect ------------
+
+static inline void _test_seg_seg_intersect(char e,
     double x1, double y1, double x2, double y2,
     double x3, double y3, double x4, double y4) {
   point2d_t a = { x1, y1 }, b = { x2, y2 }, c = { x3, y3 }, d = { x4, y4 };
-  double r = geom_segs_intersect(&a, &b, &c, &d);
+  char r = geom_seg_seg_intersect(&a, &b, &c, &d);
   ck_assert_msg(r == e, "Expected %.2f, got %.2f", e, r);
 }
 
-START_TEST(c_segs_intersect_parallel) {
+START_TEST(c_seg_seg_intersect_parallel) {
   ck_assert_msg(0, "not impl");
 } END_TEST
 
-START_TEST(c_segs_intersect_overlapping) {
+START_TEST(c_seg_seg_intersect_overlapping) {
   ck_assert_msg(0, "not impl");
 } END_TEST
 
-START_TEST(c_segs_intersect_same) {
+START_TEST(c_seg_seg_intersect_same) {
   ck_assert_msg(0, "not impl");
 } END_TEST
 
-START_TEST(c_segs_intersect_cross) {
+START_TEST(c_seg_seg_intersect_cross) {
   ck_assert_msg(0, "not impl");
 } END_TEST
 
-START_TEST(c_segs_intersect_cross_front) {
+START_TEST(c_seg_seg_intersect_cross_front) {
   ck_assert_msg(0, "not impl");
 } END_TEST
 
 
-////////////////////////////////////////////////////////////////////////////////
-// ------------------------------ Entry Point ------------------------------- //
-////////////////////////////////////////////////////////////////////////////////
+// ---- geom_seg_line_intersect ------------
+
+static inline void _test_seg_line_intersect(char e,
+    double x1, double y1, double x2, double y2,
+    double x3, double y3, double x4, double y4) {
+  point2d_t a = { x1, y1 }, b = { x2, y2 }, c = { x3, y3 }, d = { x4, y4 };
+  char r = geom_seg_line_intersect(&a, &b, &c, &d);
+  ck_assert_msg(r == e, "Expected %.2f, got %.2f", e, r);
+}
+
+// TODO
+
+
+// ---- geom_seg_line_intersection ------------
+
+static inline void _test_seg_line_intersection(point2d_t* e,
+    double x1, double y1, double x2, double y2,
+    double x3, double y3, double x4, double y4) {
+  point2d_t isect = { -1, -1 };
+  point2d_t a = { x1, y1 }, b = { x2, y2 }, c = { x3, y3 }, d = { x4, y4 };
+  char r = geom_seg_line_intersection(&isect, &a, &b, &c, &d);
+  ck_assert_msg((!r) == (!e), "Expected %.2f, got %.2f", e, r);
+  if (e) {
+    ck_assert_msg(memcmp(&isect, e, sizeof(point2d_t)),
+          "Expected (%.2f,%.2f), got (%.2f,%.2f)",
+          e->x, e->y, isect.x, isect.y);
+  }
+}
+
+// TODO
+
+
+// ---- geom_line_line_intersection ------------
+
+static inline void _test_line_line_intersection(point2d_t* e,
+    double x1, double y1, double x2, double y2,
+    double x3, double y3, double x4, double y4) {
+  point2d_t isect = { -1, -1 };
+  point2d_t a = { x1, y1 }, b = { x2, y2 }, c = { x3, y3 }, d = { x4, y4 };
+  char r = geom_line_line_intersection(&isect, &a, &b, &c, &d);
+  ck_assert_msg((!r) == (!e), "Expected %.2f, got %.2f", e, r);
+  if (e) {
+    ck_assert_msg(memcmp(&isect, e, sizeof(point2d_t)),
+          "Expected (%.2f,%.2f), got (%.2f,%.2f)",
+          e->x, e->y, isect.x, isect.y);
+  }
+}
+
+// TODO
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// ------------------------------ Auxiliary ------------------------------- //
+//////////////////////////////////////////////////////////////////////////////
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// ----------------------------- Entry Point ------------------------------ //
+//////////////////////////////////////////////////////////////////////////////
 
 static Suite* geom_suite() {
   Suite* suite = suite_create("geom");
@@ -190,11 +258,11 @@ static Suite* geom_suite() {
   suite_add_tcase(suite, tc);
 
   tc = tcase_create("segs intersect");
-  tcase_add_test(tc, c_segs_intersect_parallel);
-  tcase_add_test(tc, c_segs_intersect_overlapping);
-  tcase_add_test(tc, c_segs_intersect_same);
-  tcase_add_test(tc, c_segs_intersect_cross);
-  tcase_add_test(tc, c_segs_intersect_cross_front);
+  tcase_add_test(tc, c_seg_seg_intersect_parallel);
+  tcase_add_test(tc, c_seg_seg_intersect_overlapping);
+  tcase_add_test(tc, c_seg_seg_intersect_same);
+  tcase_add_test(tc, c_seg_seg_intersect_cross);
+  tcase_add_test(tc, c_seg_seg_intersect_cross_front);
   suite_add_tcase(suite, tc);
 
   return suite;
