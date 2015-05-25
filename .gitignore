@@ -1,11 +1,29 @@
+# Dev stuff.
+*.a
 *.o
+Makefile
 Makefile.in
+.deps/
 
-/build
+# For tests/
+*.log
+*.trs
+/tests/common/check_geom
+/tests/common/check_stroke
+
+# For docs/
+*.dvi
+*.pdf
+
+# Root dir stuff.
 /.build-aux
-/autom4te.cache
 /aclocal.m4
-/config.h.in
-/configure
+/autom4te.cache
 /autoscan.log
+/build
+/config.h
+/config.h.in
+/config.log
+/config.status
+/configure
 /configure.scan
