@@ -1,11 +1,13 @@
+setup_script=$(top_srcdir)/bindings/setup.py
+
 all:
-	python setup.py build
+	python $(setup_script) build
 
 pymodule-sdist:
-	python setup.py sdist
+	python $(setup_script) sdist
 
 install-exec-local:
-	python setup.py install
+	python $(setup_script) install
 
 uninstall-local:
-	python setup.py uninstall
+	python $(setup_script) uninstall
