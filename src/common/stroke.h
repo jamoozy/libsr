@@ -48,4 +48,20 @@ inline void stroke_destroy(stroke_t* self) {
   free(self);
 }
 
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                  File I/O                                  //
+////////////////////////////////////////////////////////////////////////////////
+
+// Saves a stroke to disk.
+//   self: The stroke to save.
+//   fname: The file to save it to.
+// Returns: 1 on success, 0 o.w.
+int stroke_save(stroke_t* self, const char* fname);
+
+// Loads a stroke from disk.
+//   fname: The name of the file to load.
+stroke_t* stroke_from_file(const char* fname);
+
 #endif  // __stroke_h__

@@ -14,7 +14,8 @@ libsr = Extension('libsr',
                                    ('MINOR_VERSION', '1')],
                   include_dirs = ['/usr/local/include',
                                   os.path.join(src_dir, 'common')],
-                  extra_link_args = [os.path.join(build_dir, 'src', 'libsr.la')],
+                  extra_link_args = [os.path.join(build_dir,
+                      'src', 'common', 'libcommon.a')],
                   library_dirs = ['/usr/local/lib'],
                   sources = [os.path.join(dir_name, 'libsrmodule.c')])
 

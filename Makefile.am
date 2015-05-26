@@ -1,3 +1,5 @@
+ACLOCAL_AMFLAGS = -I m4
+
 SUBDIRS = src bindings .
 if HAVE_CHECK
 SUBDIRS += tests

@@ -1,5 +1,5 @@
 SUBDIRS = common paleo
 
-lib_LIBRARIES = libsr.a
-libsr_a_LIBADD = paleo/libpaleo.a common/libcommon.a
-libsr_a_SOURCES = main.c
+lib_LTLIBRARIES = libsr.la
+libsr_la_LIBADD = paleo/libpaleo.la common/libcommon.la
+libsr_la_SOURCES = main.c

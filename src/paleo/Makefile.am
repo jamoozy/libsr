@@ -1,7 +1,7 @@
 #AM_CPPFLAGS = -I$(top_srcdir)/src
 
-noinst_LIBRARIES = libpaleo.a
-libpaleo_a_SOURCES = \
+noinst_LTLIBRARIES = libpaleo.la
+libpaleo_la_SOURCES = \
 	thresh.h test_macros.h \
 	paleo.h paleo.c \
 	line.c line.h \

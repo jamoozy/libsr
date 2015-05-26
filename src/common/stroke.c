@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <assert.h>
 #include <string.h>
 
@@ -61,4 +62,54 @@ void stroke_add_timed(stroke_t* self, long x, long y, long t) {
   self->pts[self->num].t = t;
   self->pts[self->num].i = self->num;
   self->num++;
+}
+
+int stroke_save(stroke_t* self, const char* fname) {
+  FILE* fp = fopen(fname, "w");
+  if (!fp) {
+    fprintf(stderr, "Could not write to file: %s", fname);
+    return 0;
+  }
+
+  if (fprintf(fp, "%ld\n", self->num) < 0) {
+    fclose(fp);
+    return 0;
+  }
+  for (int i = 0; i < self->num; i++) {
+    if (fprintf(fp, "%ld,%ld,%ld",
+                self->pts[i].x, self->pts[i].y, self->pts[i].t) < 0) {
+      fclose(fp);
+      return 0;
+    }
+  }
+  fclose(fp);
+  return 1;
+}
+
+stroke_t* stroke_from_file(const char* fname) {
+  FILE* fp = fopen(fname, "r");
+  if (!fp) {
+    fprintf(stderr, "Could not read from file: %s", fname);
+    return NULL;
+  }
+
+  stroke_t* self = calloc(sizeof(stroke_t), 1);
+  if (fscanf(fp, "%ld\n", &self->num) == EOF) {
+    stroke_destroy(self);
+    fclose(fp);
+    return NULL;
+  }
+
+  self->pts = calloc(sizeof(point_t), self->num);
+  for (int i = 0; i < self->num; i++) {
+    if (fscanf(fp, "%ld,%ld,%ld",
+               &self->pts[i].x, &self->pts[i].y, &self->pts[i].t) == EOF) {
+      stroke_destroy(self);
+      fclose(fp);
+      return NULL;
+    }
+    self->pts[i].i = i;
+  }
+  fclose(fp);
+  return self;
 }

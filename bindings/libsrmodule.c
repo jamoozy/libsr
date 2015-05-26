@@ -54,20 +54,9 @@ Stroke_save(libsr_Stroke* self, PyObject* args, PyObject* kwargs) {
   return 0;
 }
 
-//static int
-//Stroke_from_file(libsr_Stroke* self, PyObject* args, PyObject* kwargs) {
-//  const char* fname = NULL;
-//  static char* kwlist[] = {"fname", NULL};
-//  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s", kwlist, &fname)) {
-//    return -1;
-//  }
-//  stroke_(self->stroke, fname);
-//  return 0;
-//}
-
 static PyMethodDef Stroke_methods[] = {
-  {"add", (PyCFunction)Stroke_add, METH_VARARGS,
-   ""},
+  {"from_file", (PyCFunction)Stroke_add, METH_VARARGS, ""},
+  {"add", (PyCFunction)Stroke_add, METH_VARARGS, ""},
   {"save", (PyCFunction)Stroke_save, METH_VARARGS,
    "Saves the stroke to disk."},
   {NULL, NULL, 0, NULL}
@@ -119,10 +108,15 @@ static PyTypeObject libsr_StrokeType = {
   Stroke_new,             // tp_new
 };
 
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                               Module Methods                               //
+////////////////////////////////////////////////////////////////////////////////
+
 static PyMethodDef libsr_methods[] = {
   {NULL, NULL, 0, NULL}  // Sentinel
 };
-
 
 
 #ifndef PyMODINIT_FUNC       // declarations for DLL import/export
