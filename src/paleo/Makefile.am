@@ -11,3 +11,4 @@ libpaleo_la_SOURCES = \
 	spiral.c spiral.h \
 	helix.h helix.c \
 	composite.c composite.h
+libpaleo_la_LDFLAGS = -fPIC

@@ -20,14 +20,15 @@ libsr = Extension('libsr',
                   define_macros=VERSION,
                   include_dirs=['/usr/local/include',
                                 os.path.join(src_dir, 'common')],
-                  extra_link_args=[os.path.join(build_dir, 'src', 'libsr.la')],
+                  extra_link_args=[os.path.join(build_dir,
+                                                'src', '.libs', 'libsr.so')],
                   library_dirs=['/usr/local/lib'],
                   sources=[os.path.join(dir_name, 'libsrmodule.c')])
 
 setup(name='libsr',
       version='0.1',
       description='A sketch recognition package',
-      long_description=LONG_DESCRIPTION
+      long_description=LONG_DESCRIPTION,
       author='Andrew "Jamoozy" C. Sabisch',
       author_email='jamoozy@gmail.com',
       url='https://github.com/jamoozy/libsr',
