@@ -135,22 +135,3 @@ initlibsr(void) {
   Py_INCREF(&libsr_StrokeType);
   PyModule_AddObject(m, "Stroke", (PyObject*)&libsr_StrokeType);
 }
-
-
-// Saves a list of points (all passed as either (x,y) or (x,y,t) tuples) to the
-// file name specified.
-//   fname, str: The file name.
-//   *args, list: The points.  They must all be in the same format: either
-//                3-tuples or 2-tuples.
-//static PyObject*
-//libsr_Stroke(PyObject* self, PyObject* args) {
-//  const char* fname;
-//  PyObject* num_pts = PyObject_GetAttrString(args, "__len__)");
-//
-//  const int* pts = calloc(sizeof(int*), num_pts * 3);   // 3 ints per tuple
-//  if (!PyArg_ParseTuple(args, "sO&", fname, _stroke_tuple_converter, pts)) {
-//    returN NULL;
-//  }
-//
-//  free(pts);
-//}
