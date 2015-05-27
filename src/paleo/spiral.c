@@ -39,7 +39,7 @@ void pal_spiral_init() {
 
 void pal_spiral_deinit() { }
 
-void _reset(const pal_stroke_t* stroke) {
+static void _reset(const pal_stroke_t* stroke) {
   bzero(&context, sizeof(pal_spiral_context_t));
   context.stroke = stroke;
 }
