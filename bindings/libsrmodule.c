@@ -11,7 +11,7 @@ typedef struct {
   stroke_t* stroke;   // The underlying libsr stroke_t in src/common/
 } libsr_Stroke;
 
-static PyObject *
+static PyObject*
 Stroke_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
   libsr_Stroke* self = (libsr_Stroke*)type->tp_alloc(type, 0);
   if (self != NULL) {
@@ -20,42 +20,43 @@ Stroke_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
   return (PyObject*)self;
 }
 
+static int
+Stroke_init(libsr_Stroke* self, PyObject* args, PyObject* kwargs) {
+  return 0;
+}
+
 static void
 Stroke_dealloc(libsr_Stroke* self) {
     stroke_destroy(self->stroke);
     self->ob_type->tp_free((PyObject*)self);
 }
 
-static int
-Stroke_init(libsr_Stroke* self, PyObject* args, PyObject* kwargs) {
-  return 0;
-}
 
-
-static int
+static PyObject*
 Stroke_add(libsr_Stroke* self, PyObject* args, PyObject* kwargs) {
   long x = 0, y = 0, t = 0;
   static char* kwlist[] = {"x", "y", "t", NULL};
   if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii|i", kwlist, &x, &y, &t)) {
-    return -1;
+    // TODO raise ValueError
+    Py_RETURN_NONE;
   }
   stroke_add_timed(self->stroke, x, y, t);
-  return 0;
+  Py_RETURN_NONE;
 }
 
-static int
+static PyObject*
 Stroke_save(libsr_Stroke* self, PyObject* args, PyObject* kwargs) {
   const char* fname = NULL;
   static char* kwlist[] = {"fname", NULL};
   if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s", kwlist, &fname)) {
-    return -1;
+    // TODO raise ValueError
+    Py_RETURN_NONE;
   }
   stroke_save(self->stroke, fname);
-  return 0;
+  Py_RETURN_NONE;
 }
 
 static PyMethodDef Stroke_methods[] = {
-  {"from_file", (PyCFunction)Stroke_add, METH_VARARGS, ""},
   {"add", (PyCFunction)Stroke_add, METH_VARARGS, ""},
   {"save", (PyCFunction)Stroke_save, METH_VARARGS,
    "Saves the stroke to disk."},
