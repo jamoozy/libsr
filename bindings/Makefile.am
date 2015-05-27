@@ -11,3 +11,7 @@ install-exec-local:
 
 uninstall-local:
 	python $(setup_script) uninstall
+
+clean-local:
+	python $(setup_script) clean
+	rm -rf build
