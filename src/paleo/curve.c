@@ -96,7 +96,7 @@ void pal_curve_init() { bzero(&context, sizeof(pal_curve_context_t)); }
 
 void pal_curve_deinit() { }
 
-void    _reset(const pal_stroke_t* stroke) {
+static void _reset(const pal_stroke_t* stroke) {
   bzero(&context, sizeof(pal_curve_result_t));
   context.stroke = stroke;
   context.result.possible = 1;
