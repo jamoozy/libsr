@@ -76,7 +76,7 @@ int stroke_save(stroke_t* self, const char* fname) {
     return 0;
   }
   for (int i = 0; i < self->num; i++) {
-    if (fprintf(fp, "%ld,%ld,%ld",
+    if (fprintf(fp, "%ld,%ld,%ld\n",
                 self->pts[i].x, self->pts[i].y, self->pts[i].t) < 0) {
       fclose(fp);
       return 0;
