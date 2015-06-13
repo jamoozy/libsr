@@ -3,7 +3,9 @@
 *.o
 Makefile
 Makefile.in
-.deps/
+/.deps/
+.libs
+/m4
 
 # For tests/
 *.log
