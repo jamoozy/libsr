@@ -1,7 +1,8 @@
 setup_script=$(top_srcdir)/bindings/setup.py
+test_script=$(top_srcdir)/bindings/test.py
 
 all:
-	python $(setup_script) build
+	CC=g++ python $(setup_script) build
 
 pymodule-sdist:
 	python $(setup_script) sdist
@@ -15,3 +16,6 @@ uninstall-local:
 clean-local:
 	python $(setup_script) clean
 	rm -rf build
+
+check-local:
+	python $(test_script)
