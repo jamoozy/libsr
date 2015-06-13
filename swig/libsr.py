@@ -4,6 +4,8 @@ iterator for it.'''
 import libsrbindings as b
 
 import datetime
+import pickle
+
 
 # Used to get utime -- seconds since the epoc.
 UTC_0 = datetime.datetime(1970, 1, 1)
@@ -46,6 +48,21 @@ class Stroke(object):
       fname, str: The file name to save to.
     '''
     b.stroke_save(self._stroke, fname)
+
+  def pickle(self, fname):
+    '''Pickles the Stroke.'''
+    with open(fname, 'w') as f:
+      pickle.dump(self, f)
+
+  @classmethod
+  def unpickle(self, fname):
+    '''Unpickles the Stroke in ``fname``.
+
+    Returns:
+      The ``Stroke`` object in ``fname``.
+    '''
+    with open(fname, 'r') as f:
+      return pickle.load(f)
 
   @classmethod
   def load(cls, fname):
