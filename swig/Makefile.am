@@ -1,8 +1,8 @@
-i_file = $(srcdir)/libsr.i
+i_file = $(srcdir)/libsrbindings.i
 c_src_dir = $(srcdir)/../src
 libcommon_a = $(builddir)/../src/common/.libs/libcommon.a
-wrap_file = $(srcdir)/libsr_wrap.c
-target = $(builddir)/_libsr.so
+wrap_file = $(srcdir)/libsrbindings_wrap.c
+target = $(builddir)/_libsrbindings.so
 
 all : $(target)
 
