@@ -43,7 +43,7 @@ void stroke_add_timed(stroke_t* self, long x, long y, long t);
 // Destroys the stroke and all its contained points by freeing their associated
 // memory.
 //   self: The stroke to destroy.
-inline void stroke_destroy(stroke_t* self) {
+static inline void stroke_destroy(stroke_t* self) {
   free(self->pts);
   free(self);
 }
