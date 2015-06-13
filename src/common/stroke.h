@@ -64,4 +64,16 @@ int stroke_save(stroke_t* self, const char* fname);
 //   fname: The name of the file to load.
 stroke_t* stroke_from_file(const char* fname);
 
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                          SWIG-specific functions                           //
+////////////////////////////////////////////////////////////////////////////////
+
+// Gets a pointer to an existing point in the stroke.  Do not free the memory
+// address passed!  It will result in memory corruption!
+//   self: The stroke.
+//   i: The index of the point to get.
+point_t* stroke_get(const stroke_t* self, int i);
+
 #endif  // __stroke_h__

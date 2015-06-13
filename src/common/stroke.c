@@ -113,3 +113,7 @@ stroke_t* stroke_from_file(const char* fname) {
   fclose(fp);
   return self;
 }
+
+point_t* stroke_get(const stroke_t* self, int i) {
+  return &self->pts[i];
+}
