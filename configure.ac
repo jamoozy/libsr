@@ -70,7 +70,7 @@ AC_CONFIG_FILES([
     src/Makefile
       src/paleo/Makefile
       src/common/Makefile
-    bindings/Makefile
+    swig/Makefile
     tests/Makefile
       tests/paleo/Makefile
       tests/common/Makefile

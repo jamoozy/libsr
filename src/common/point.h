@@ -10,16 +10,24 @@
 //   y: The Y-coordinate.
 #define POINT2D_BODY long x; long y;
 #define POINT2D_STRUCT struct { POINT2D_BODY }
+#ifndef SWIG
 #define POINT2D_UNION union { point2d_t p2d; POINT2D_STRUCT; };
+#endif
 typedef POINT2D_STRUCT point2d_t;
 
 // A 2D point with timestamp;
 //   x: The X-coordinate.
 //   y: The Y-coordinate.
 //   t: Unix time of creation (for drawn points)
+#ifdef SWIG
+#define POINT2DT_BODY POINT2D_BODY long t;
+#else
 #define POINT2DT_BODY POINT2D_UNION long t;
+#endif
 #define POINT2DT_STRUCT struct { POINT2DT_BODY }
+#ifndef SWIG
 #define POINT2DT_UNION union { point2dt_t p2dt; POINT2DT_STRUCT; };
+#endif
 typedef POINT2DT_STRUCT point2dt_t;
 
 // A point structure with coordinates in space, time, and index.
@@ -27,9 +35,15 @@ typedef POINT2DT_STRUCT point2dt_t;
 //   y: The Y-coordinate.
 //   t: Unix time of creation (for drawn points)
 //   i: Index (for strokes)
+#ifdef SWIG
+#define POINT_BODY POINT2DT_BODY long i;
+#else
 #define POINT_BODY POINT2DT_UNION long i;
+#endif
 #define POINT_STRUCT struct { POINT_BODY }
+#ifndef SWIG
 #define POINT_UNION union { point_t p; POINT_STRUCT; };
+#endif
 typedef POINT_STRUCT point_t;
 
 // Creates a point.
