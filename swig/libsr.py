@@ -22,6 +22,24 @@ class Stroke(object):
     '''
     self._stroke = _stroke or b.stroke_create(40)
 
+  def __len__(self):
+    '''Gets the number of points in this stroke.
+
+    Returns:
+      The number of points in the stroke.
+    '''
+    return self._stroke.num
+
+  def __getitem__(self, i):
+    '''Gets the ``i``th point from this stroke.
+
+    Args:
+      i, int: The index to the stroke to get.
+    Returns:
+      The ``i``th point wrapped as a `Point`.
+    '''
+    return Point(b.stroke_get(self._stroke, i))
+
   def add(self, x, y, t=None):
     '''Adds a point to this stroke.
 
@@ -112,6 +130,22 @@ class StrokeIter(object):
     return p.x, p.y, p.t
 
 
+class Point(object):
+  '''Wraps a point_t object (from C).'''
+  def __init__(self, _point=None):
+    '''Creates a new point_t object wrapped around ``_point`` or a new `point_t`
+    object.
+
+    Args:
+      _point, point_t: (default: new point_t) The `point_t` to wrap.
+    '''
+    self._point = _point or b.point_create()
+
+  def __getattr__(self, attr):
+    '''Passed attribute access to the underlying `point_t` object.'''
+    return getattr(self._point, attr)
+
+
 # Simple test to ensure everything seems to work.
 if __name__ == '__main__':
   stroke = Stroke()
@@ -120,3 +154,13 @@ if __name__ == '__main__':
   for p in stroke:
     print p
 
+  for i in xrange(len(stroke)):
+    print stroke[i]
+    print stroke[i]._point.x, stroke[i]._point.y, stroke[i]._point.t, stroke[i]._point.i
+    print stroke[i].x, stroke[i].y, stroke[i].t, stroke[i].i
+    for attr in ('X', 'Y', 'T', 'I', 'foo', 'bar'):
+      try:
+        print getattr(stroke[i], attr)
+        assert False, 'Did not raise error.'
+      except AttributeError:
+        pass
