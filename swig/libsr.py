@@ -5,6 +5,7 @@ import libsrbindings as b
 
 import datetime
 import pickle
+import random
 
 
 # Used to get utime -- seconds since the epoc.
@@ -46,6 +47,11 @@ class Stroke(object):
     Returns:
       The ``i``th point wrapped as a `Point`.
     '''
+    if isinstance(i, slice):
+      return (Point(b.stroke_get(self._stroke, j))
+              for j in xrange(i.start or 0,
+                              i.stop or self._stroke.num,
+                              i.step or 1))
     if i < 0:
       i += self._stroke.num
     if i < 0 or self._stroke.num <= i:
@@ -207,3 +213,13 @@ if __name__ == '__main__':
         assert False, 'Did not raise error.'
       except AttributeError:
         pass
+
+
+# Debugging help
+
+def _make_random_stroke(num_pts=20, max_int=100):
+  stroke = Stroke()
+  for x, y in ((random.randrange(max_int), random.randrange(max_int))
+               for i in xrange(num_pts)):
+    stroke.add(x, y)
+  return stroke
