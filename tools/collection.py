@@ -1,90 +1,111 @@
 #!/usr/bin/python
 
 import sys
+import random
 
+from pprint import pprint
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 import libsr
 
 
-class Canvas(QtGui.QGraphicsView):
-  '''Canvas to collect and display strokes.'''
-  def __init__(self):
-    super(Canvas, self).__init__()
-    self.scene = QtGui.QGraphicsScene()
+#class Canvas(QtGui.QGraphicsView):
+#  mouse_down = False
+#
+#  '''Canvas to collect and display strokes.'''
+#  def __init__(self):
+#    super(Canvas, self).__init__(QtGui.QGraphicsScene())
+##    self.sgis = []
+#    self.setWindowTitle('Canvas')
+#    self.show()
+#
+##  def paintEvent(self, *args, **kwargs):
+##    print 'args:', args
+##    print 'kwargs:', kwargs
+##    return
+##    # Draw the strokes.
+##    painter = QtGui.QPainter()
+##    for sgi in self.sgis:
+##      sgi.paint(painter, None, None)
+#
+#  def _append_pos(self, x, y):
+#    assert self.mouse_down, 'error: mouse not down'
+##    rect = self.sgis[-1].add(x, y)
+#    rect = self.scene().items()[0].add(x, y)
+#    self.invalidateScene(rect)
+#    print 'H:', self.isHidden(), 'V:', self.isVisible()
+#
+#  def mousePressEvent(self, e):
+##    self.sgis.append(StrokeGraphiscItem(e.x(), e.y()))
+##    self.scene().addItem(self.sgis[-1])
+#    self.scene().addItem(StrokeGraphiscItem(e.x(), e.y()))
+#    self.mouse_down = True
+#
+#  def mouseMoveEvent(self, e):
+#    self._append_pos(e.x(), e.y())
+#
+#  def mouseReleaseEvent(self, e):
+#    self._append_pos(e.x(), e.y())
+##    self.sgis[-1].path().closeSubpath()
+#    self.scene().items()[0].path().closeSubpath()
+#    self.mouse_down = False
+#
+#
+#class StrokeGraphiscItem(QtGui.QGraphicsPathItem):
+#  DRAW_BUF = 5   # Small buffer to get some ... well ... buffer around rects.
+#
+#  def __init__(self, x, y):
+#    super(StrokeGraphiscItem, self).__init__()
+#    self.path().moveTo(x, y)
+#    self.stroke = libsr.Stroke()
+#    self.stroke.add(x, y)
+#
+#  def add(self, x, y):
+#    self.path().lineTo(x, y)
+#    self.stroke.add(x, y)
+#    x, y, w, h = (min(self.stroke[-1].x, self.stroke[-2].x) - self.DRAW_BUF,
+#                  min(self.stroke[-1].y, self.stroke[-2].y) - self.DRAW_BUF,
+#                  max(1, abs(self.stroke[-1].x - self.stroke[-2].x)) +
+#                    2 * self.DRAW_BUF,
+#                  max(1, abs(self.stroke[-1].y - self.stroke[-2].y)) +
+#                    2 * self.DRAW_BUF)
+#    return QtCore.QRectF(x, y, w, h)
+#
+#  def __iter__(self):
+#    return iter(self.stroke)
+#
+#  def __len__(self):
+#    return len(self.stroke)
+#
+#  def paint(self, painter, option, widget):
+#    print 'paint', painter, option, widget
+#    painter.drawPath(self.path())
 
-    self.setGeometry(300, 300, 280, 170)
-    self.setWindowTitle('Points')
-    self.show()
 
-  def _mark_last_seg_dirty(self):
-    stroke = self.strokes[-1]
-    # Getting min/abs so that we get lowest x/y and positive w/h.
-    #    (TODO is this necessary?)
-    r = QtGui.QRegion(min(stroke[-1].x, stroke[-1].x),
-                      min(stroke[-1].y, stroke[-1].y),
-                      abs(stroke[-1].x - stroke[-2].x),
-                      abs(stroke[-1].y - stroke[-2].y))
+def main(*args):
+  app = QtGui.QApplication(list(args))
 
-  def mousePressEvent(self, e):
-    stroke = libsr.Stroke()
-    stroke.add(e.x(), e.y())
-    stroke_graphics_item = StrokeGraphicsItem(stroke)
-    self.scene.addItem(stroke_graphics_item)
+  scene = QtGui.QGraphicsScene()
+  scene.setBackgroundBrush(QtCore.Qt.white)
+  pp = QtGui.QPainterPath()
+  for n in xrange(5):
+    coords = zip((random.randrange(100) for i in xrange(20)),
+                 (random.randrange(100) for i in xrange(20)))
+    pp.moveTo(*coords[0])
+    for x, y in coords[:1]:
+      pp.lineTo(x, y)
 
-  def paint(self, qp, opt, w):
-    self.draw_strokes(qp)
+  pen = QtGui.QPen(QtCore.Qt.SolidLine)
+  pen.setColor(QtCore.Qt.red)
+  scene.addPath(pp, pen)
 
-    # Draw the strokes.
-    for stroke in self.strokes:
-      path = QtGui.QPainterPath()
-      pts = list(stroke)
-      path.moveTo(*pts[0][:2])
-      for pt in pts[:1]:
-        path.lineTo(*pt[:2])
-      qp.drawPath(path)
+  view = QtGui.QGraphicsView(scene)
+  view.show()
 
-
-class StrokeGraphicsItem(QtGui.QGraphicsItem):
-  def __init__(self, stroke):
-    super(StrokeGraphicsItem, self).__init__()
-    self.mouse_down = True
-    self.stroke = stroke
-
-  def boundingRect(self):
-    rect = [0, 0, 0, 0]
-    for pt in self.stroke:
-      rect[0] = min(rect[0], pt[0])
-      rect[1] = min(rect[1], pt[1])
-      rect[2] = max(rect[2], pt[0])
-      rect[3] = max(rect[3], pt[1])
-    rect[2] -= rect[0]
-    rect[3] -= rect[1]
-    return QtCore.QRectF(*rect)
-
-  def _append_pos(self, x, y):
-    assert self.mouse_down, 'error: mouse not down'
-    self.stroke.add(x, y)
-
-  def mousePressEvent(self, e):
-    pass
-
-  def mouseMoveEvent(self, e):
-    self._append_pos(e.x(), e.y())
-    self._mark_last_seg_dirty()
-
-  def mouseReleaseEvent(self, e):
-    self._append_pos(e.x(), e.y())
-    self._mark_last_seg_dirty()
-    self.mouse_down = False
-
-
-def main():
-  app = QtGui.QApplication(sys.argv)
-  c = Canvas()
   sys.exit(app.exec_())
 
 
 if __name__ == '__main__':
-  main()
+  main(*sys.argv)
+
