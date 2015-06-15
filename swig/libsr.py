@@ -6,6 +6,7 @@ import libsrbindings as b
 import datetime
 import pickle
 import random
+import sys
 
 
 # Used to get utime -- seconds since the epoc.
@@ -26,6 +27,7 @@ class Stroke(object):
                          will destroy it in its :meth:`__del__` method.
     '''
     self._stroke = _stroke or b.stroke_create(40)
+    self.bbox = (sys.maxint, sys.maxint, -sys.maxint, -sys.maxint)
 
   def __del__(self):
     '''Destroys the underlying stroke_t object.'''
@@ -67,6 +69,12 @@ class Stroke(object):
       t, int: (default: now) The time the point was made (in micro-s).
     '''
     t = t or int((datetime.datetime.utcnow() - UTC_0).total_seconds() * 1e6)
+    self.bbox = (
+      min(self.bbox[0], x),
+      min(self.bbox[1], y),
+      max(self.bbox[2], x),
+      max(self.bbox[3], y),
+    )
     b.stroke_add_timed(self._stroke, x, y, t)
 
   def __iter__(self):
