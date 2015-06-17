@@ -22,12 +22,13 @@ class Canvas(QtGui.QGraphicsView):
 
   def _append_pos(self, x, y):
     assert self.mouse_down, 'error: mouse not down'
-    rect = self.scene().items()[0].add(self.mapToScene(QtGui.QPointF(x, y)))
+    rect = self.scene().items()[0].add(
+      self.mapToScene(QtCore.QPoint(x, y)))
     self.update(rect)
 
   def mousePressEvent(self, e):
     self.scene().addItem(StrokeGraphiscItem(
-      self.mapToScene(QtGui.QPointF(e.x(), e.y())))
+      self.mapToScene(QtCore.QPoint(e.x(), e.y()))))
     self.mouse_down = True
 
   def mouseMoveEvent(self, e):
@@ -44,27 +45,24 @@ class StrokeGraphiscItem(QtGui.QGraphicsItem):
   def __init__(self, scene_point):
     super(StrokeGraphiscItem, self).__init__()
     self.stroke = libsr.Stroke()
-    self.stroke.add(scene_point)
+    self._add_scene_point(scene_point)
+
+  def _add_scene_point(self, scene_point):
+    pt = self.mapFromScene(scene_point)
+    self.stroke.add(int(pt.x()), int(pt.y()))
 
   def add(self, scene_point):
-    pt = self.mapFromScene(scene_point)
-    self.stroke.add(pt.x(), pt.y())
+    self._add_scene_point(scene_point)
     x, y, w, h = (min(self.stroke[-1].x, self.stroke[-2].x) - self.DRAW_BUF,
                   min(self.stroke[-1].y, self.stroke[-2].y) - self.DRAW_BUF,
                   max(1, abs(self.stroke[-1].x - self.stroke[-2].x)) +
-                    2 * self.DRAW_BUF,
+                    self.DRAW_BUF + self.DRAW_BUF,
                   max(1, abs(self.stroke[-1].y - self.stroke[-2].y)) +
-                    2 * self.DRAW_BUF)
+                    self.DRAW_BUF + self.DRAW_BUF)
     return QtCore.QRect(x, y, w, h)
 
   def boundingRect(self):
     return QtCore.QRectF(*self.stroke.bbox)
-
-  def __iter__(self):
-    return iter(self.stroke)
-
-  def __len__(self):
-    return len(self.stroke)
 
   def paint(self, painter, option, widget):
     print 'paint'
