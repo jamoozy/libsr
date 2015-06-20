@@ -20,9 +20,6 @@ install-exec-local :
 	mkdir -p $(lib_dst)
 	cp $(builddir)/bindings.py $(py_so) $(lib_dst)
 	cp $(srcdir)/libsr.py $(lib_dst)/__init__.py
-	pushd $(lib_dst)
-	python -c 'import .'
-	popd
 
 clean-local :
 	rm -f $(py_so) $(wrap_file)
