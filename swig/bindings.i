@@ -1,4 +1,4 @@
-%module libsrbindings
+%module bindings
 %{
 void *__gxx_personality_v0;
 #include "common/point.h"
