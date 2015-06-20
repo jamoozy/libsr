@@ -1,7 +1,7 @@
 '''Syntactic sugar for all of libpaleo.  Wraps a Stroke and implements an
 iterator for it.'''
 
-import .bindings as b
+import bindings as b
 
 import datetime
 import pickle
