@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-import sys
-import random
-
 from pprint import pprint
+import random
+import sys
+
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 
@@ -27,6 +27,7 @@ class Canvas(QtGui.QGraphicsView):
 
   def __init__(self):
     super(Canvas, self).__init__(QtGui.QGraphicsScene())
+    self.scene().setSceneRect(0, 0, 800, 600)
     self.setBackgroundBrush(QtCore.Qt.white)
     self.setWindowTitle('Canvas')
     self.show()
@@ -48,6 +49,7 @@ class Canvas(QtGui.QGraphicsView):
 
 
 class StrokeGraphiscItem(QtGui.QGraphicsItem):
+  '''Draws an internal libsr.Stroke object.'''
   DRAW_BUF = 5   # Small buffer to get some ... well ... buffer around rects.
 
   def __init__(self, x, y):
@@ -60,7 +62,8 @@ class StrokeGraphiscItem(QtGui.QGraphicsItem):
     self.prepareGeometryChange()
 
   def add(self, x, y):
-    self._add_scene_point(x, y)
+    pt = self.mapToScene(x, y)
+    self._add_scene_point(int(pt.x()), int(pt.y()))
 
   def boundingRect(self):
     return QtCore.QRectF(*self.stroke.bbox)
@@ -68,15 +71,13 @@ class StrokeGraphiscItem(QtGui.QGraphicsItem):
   def paint(self, painter, option, widget):
     pen = QtGui.QPen(QtCore.Qt.SolidLine)
     pen.setColor(QtCore.Qt.black)
-    pen.setWidth(5)
+    pen.setWidth(1)
     painter.setPen(pen)
     pp = QtGui.QPainterPath()
     pp.moveTo(self.stroke[0].x, self.stroke[0].y)
     for pt in self.stroke[1:]:
       pp.lineTo(pt.x, pt.y)
     painter.drawPath(pp)
-    pen.setColor(QtCore.Qt.black)
-    painter.setPen(pen)
 
 
 def main(*args):
