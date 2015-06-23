@@ -74,6 +74,9 @@ class StrokeGraphiscItem(QtWidgets.QGraphicsItem):
     super(StrokeGraphiscItem, self).__init__()
     self.stroke = libsr.Stroke()
     self._add_scene_point(x, y)
+    self.pen = QtGui.QPen(QtCore.Qt.SolidLine)
+    self.pen.setColor(QtCore.Qt.black)
+    self.pen.setWidth(1)
 
   def _add_scene_point(self, x, y):
     '''Adds a scene point to the underlying libsr.Stroke object.
@@ -106,10 +109,8 @@ class StrokeGraphiscItem(QtWidgets.QGraphicsItem):
 
   def paint(self, painter, option, widget):
     '''See QGraphicsItem.paint().'''
-    pen = QtGui.QPen(QtCore.Qt.SolidLine)
-    pen.setColor(QtCore.Qt.black)
-    pen.setWidth(1)
-    painter.setPen(pen)
+    painter.setPen(self.pen)
+    painter.setRenderHint(QtGui.QPainter.Antialiasing)
     pp = QtGui.QPainterPath()
     pp.moveTo(self.stroke[0].x, self.stroke[0].y)
     for pt in self.stroke[1:]:
