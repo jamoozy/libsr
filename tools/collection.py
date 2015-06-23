@@ -34,6 +34,11 @@ class Canvas(QtWidgets.QGraphicsView):
     self.setWindowTitle('Canvas')
     self.show()
 
+    # Generate pen for all the strokes.
+    self.pen = QtGui.QPen(QtCore.Qt.SolidLine)
+    self.pen.setColor(QtCore.Qt.black)
+    self.pen.setWidth(1)
+
   def resizeEvent(self, e):
     '''See :meth:`QGraphicsView.mouseResizeEvent`.'''
     self.scene().setSceneRect(0, 0, e.size().width(), e.size().height())
@@ -64,19 +69,18 @@ class StrokeGraphiscItem(QtWidgets.QGraphicsItem):
   '''Draws an underlying libsr.Stroke object.'''
   DRAW_BUF = 5   # Small buffer to get some ... well ... buffer around rects.
 
-  def __init__(self, x, y):
+  def __init__(self, pen, x, y):
     '''Creates a new graphics item (and underlying stroke) starting at (x, y).
 
     Args:
+      pen, QtGui.QPen: The pen to use to draw.
       x, float: X-position of mouse event.
       y, float: Y-position of mouse event.
     '''
     super(StrokeGraphiscItem, self).__init__()
     self.stroke = libsr.Stroke()
     self._add_scene_point(x, y)
-    self.pen = QtGui.QPen(QtCore.Qt.SolidLine)
-    self.pen.setColor(QtCore.Qt.black)
-    self.pen.setWidth(1)
+    self.pen = pen
 
   def _add_scene_point(self, x, y):
     '''Adds a scene point to the underlying libsr.Stroke object.
