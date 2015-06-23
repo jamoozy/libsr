@@ -4,8 +4,9 @@ from pprint import pprint
 import random
 import sys
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 try:
   import libsr
@@ -15,17 +16,19 @@ except ImportError:
   try:
     import libsr
     print 'Warning, had to add "%s" to path for libsr.' % add_path
-  except ImportError:
-    print 'Could not import libsr!  Did you run make install?'
+  except ImportError as e:
+    print 'Could not import libsr!'
+    print 'Error message:', e.message
+    print 'Did you run make install?'
     sys.exit(-1)
 
 
-class Canvas(QtGui.QGraphicsView):
+class Canvas(QtWidgets.QGraphicsView):
   '''Canvas to collect and display strokes.'''
 
   def __init__(self):
     '''Initializes the canvas.'''
-    super(Canvas, self).__init__(QtGui.QGraphicsScene())
+    super(Canvas, self).__init__(QtWidgets.QGraphicsScene())
     self.scene().setSceneRect(0, 0, 800, 600)
     self.setBackgroundBrush(QtCore.Qt.white)
     self.setWindowTitle('Canvas')
@@ -57,7 +60,7 @@ class Canvas(QtGui.QGraphicsView):
     self._append_pos(e.x(), e.y())
 
 
-class StrokeGraphiscItem(QtGui.QGraphicsItem):
+class StrokeGraphiscItem(QtWidgets.QGraphicsItem):
   '''Draws an underlying libsr.Stroke object.'''
   DRAW_BUF = 5   # Small buffer to get some ... well ... buffer around rects.
 
@@ -116,7 +119,7 @@ class StrokeGraphiscItem(QtGui.QGraphicsItem):
 
 def main(*args):
   '''Proverbial "main()" method!'''
-  app = QtGui.QApplication(list(args))
+  app = QtWidgets.QApplication(list(args))
   c = Canvas()
   sys.exit(app.exec_())
 
