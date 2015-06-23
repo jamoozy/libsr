@@ -28,11 +28,16 @@ class Canvas(QtWidgets.QGraphicsView):
 
   def __init__(self):
     '''Initializes the canvas.'''
-    super(Canvas, self).__init__(QtWidgets.QGraphicsScene())
+    super(Canvas, self).__init__(StrokeScene())
     self.scene().setSceneRect(0, 0, 800, 600)
-    self.setBackgroundBrush(QtCore.Qt.white)
+    #self.setBackgroundBrush(QtCore.Qt.white)
     self.setWindowTitle('Canvas')
     self.show()
+
+    # Generate pen for background drawing.
+    self.bg_pen = QtGui.QPen(QtCore.Qt.SolidLine)
+    self.bg_pen.setColor(QtCore.Qt.black)
+    self.bg_pen.setWidth(2)
 
     # Generate pen for all the strokes.
     self.pen = QtGui.QPen(QtCore.Qt.SolidLine)
@@ -54,7 +59,7 @@ class Canvas(QtWidgets.QGraphicsView):
 
   def mousePressEvent(self, e):
     '''See :meth:`QGraphicsView.mousePressEvent`.'''
-    self.scene().addItem(StrokeGraphiscItem(e.x(), e.y()))
+    self.scene().addItem(StrokeGraphiscItem(self.pen, e.x(), e.y()))
 
   def mouseMoveEvent(self, e):
     '''See :meth:`QGraphicsView.mouseMoveEvent`.'''
@@ -63,6 +68,17 @@ class Canvas(QtWidgets.QGraphicsView):
   def mouseReleaseEvent(self, e):
     '''See :meth:`QGraphicsView.mouseReleaseEvent`.'''
     self._append_pos(e.x(), e.y())
+
+  def drawBackground(self, painter, rect):
+    '''Draws a border.'''
+    painter.setPen(self.bg_pen)
+    painter.drawRect(0, 0, self.scene().width() - 1, self.scene().height() - 1)
+
+
+class StrokeScene(QtWidgets.QGraphicsScene):
+  '''A graphics scene that holds a bunch of strokes.'''
+  def __init__(self):
+    super(QtWidgets.QGraphicsScene, self).__init__()
 
 
 class StrokeGraphiscItem(QtWidgets.QGraphicsItem):
