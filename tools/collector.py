@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
-from pprint import pprint
-import random
+import os
 import sys
 
 from PyQt5 import QtCore
@@ -9,6 +8,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5 import uic
 
+# Do a bit extra for importing libsr, just in case the user installed it.
 try:
   import libsr
 except ImportError:
@@ -29,28 +29,103 @@ class Collector(QtWidgets.QMainWindow):
   def __init__(self, ui_file):
     super(QtWidgets.QMainWindow, self).__init__()
     uic.loadUi(ui_file, self)
-    self.setCentralWidget(Canvas())
+
+    # Dialogs.
+    self.save_dialog = QtWidgets.QFileDialog(self, 'Save to Directory')
+    self.save_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
+    self.save_dialog.setViewMode(QtWidgets.QFileDialog.List)
+    self.save_dialog.fileSelected.connect(self.save_dir_selected)
+
+    self.load_dialog = QtWidgets.QFileDialog(self, 'Load from Directory')
+    self.load_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptOpen)
+    self.load_dialog.setViewMode(QtWidgets.QFileDialog.List)
+    self.load_dialog.fileSelected.connect(self.load_dir_selected)
+
+    # Connect action clicks.
+    self.actionSave.triggered.connect(self.save_dialog.show)
+    self.actionLoad.triggered.connect(self.load_dialog.show)
+    self.actionNew.triggered.connect(self.check_reset_scene)
+    self.actionQuit.triggered.connect(self.show_quit_dialog)
+
+    # Generate pen for all the strokes.
+    self.stroke_pen = QtGui.QPen(QtCore.Qt.SolidLine)
+    self.stroke_pen.setColor(QtCore.Qt.black)
+    self.stroke_pen.setWidth(1)
+
+    self.canvases = [Canvas(self.stroke_pen)]
+    self.setCentralWidget(self.canvases[0])
     self.setWindowTitle('Collector')
     self.show()
+
+  def dirty(self):
+    for canvas in self.canvases:
+      if canvas.dirty():
+        return True
+    return False
+
+  def _clear_strokes(self):
+    self.canvases = []
+
+  def get_strokes(self):
+    return [s for c in self.canvases for s in c.get_strokes()]
+
+  def set_strokes(self, strokes):
+    self._clear_strokes()
+    self.canvases = [Canvas(self.stroke_pen)]
+    self.canvases[0].set_strokes(strokes)
+
+  def save_dir_selected(self, dname):
+    strokes = self.get_strokes()
+    for i, stroke in enumerate(strokes):
+      fname = os.path.join(dname, "stroke%03d.sr")
+      stroke.save(fname)
+
+  def load_dir_selected(self, dname):
+    strokes = []
+    while os.path.isfile(os.path.join(dname, "stroke%03d.sr")):
+      fname = os.path.isfile(os.path.join(dname, "stroke%03d.sr"))
+      strokes.append(libsr.Stroke.load(fname))
+    self.set_strokes(strokes)
+
+  def check_reset_scene(self, dname):
+    if self.dirty():
+      # save / discard / cancel dialog
+      self.save_dialog.show()
+    self._clear_strokes()
+    self.canvases = [Canvas(self.stroke_pen)]
+    self.canvases[0].set_strokes(strokes)
+
+  def show_quit_dialog(self):
+    # Quit?
+    sys.exit(0)
 
 
 class Canvas(QtWidgets.QGraphicsView):
   '''Canvas to collect and display strokes.'''
 
-  def __init__(self):
+  def __init__(self, stroke_pen):
     '''Initializes the canvas.'''
     super(Canvas, self).__init__(StrokeScene())
     self.scene().setSceneRect(0, 0, 800, 600)
+
+    self.is_dirty = False
+    self.stroke_pen = stroke_pen
 
     # Generate pen for background drawing.
     self.bg_pen = QtGui.QPen(QtCore.Qt.SolidLine)
     self.bg_pen.setColor(QtCore.Qt.black)
     self.bg_pen.setWidth(2)
 
-    # Generate pen for all the strokes.
-    self.pen = QtGui.QPen(QtCore.Qt.SolidLine)
-    self.pen.setColor(QtCore.Qt.black)
-    self.pen.setWidth(1)
+  def dirty(self, d=None):
+    if d is None:
+      return self.is_dirty
+    self.is_dirty = bool(d)
+
+  def set_strokes(self, strokes):
+    self.is_dirty = False
+    for stroke in strokes:
+      self.scene().addItem(StrokeGraphiscItem(self.strokes, 0, 0))
+      self.scene().items()[0].set_stroke(stroke)
 
   def resizeEvent(self, e):
     '''See :meth:`QGraphicsView.mouseResizeEvent`.'''
@@ -63,11 +138,12 @@ class Canvas(QtWidgets.QGraphicsView):
       x, float: X-position of mouse event.
       y, float: Y-position of mouse event.
     '''
+    self.is_dirty = True
     rect = self.scene().items()[0].add(x, y)
 
   def mousePressEvent(self, e):
     '''See :meth:`QGraphicsView.mousePressEvent`.'''
-    self.scene().addItem(StrokeGraphiscItem(self.pen, e.x(), e.y()))
+    self.scene().addItem(StrokeGraphiscItem(self.stroke_pen, e.x(), e.y()))
 
   def mouseMoveEvent(self, e):
     '''See :meth:`QGraphicsView.mouseMoveEvent`.'''
@@ -116,6 +192,9 @@ class StrokeGraphiscItem(QtWidgets.QGraphicsItem):
     self.stroke.add(int(x), int(y))
     self.prepareGeometryChange()
 
+  def set_stroke(self, stroke):
+    self.stroke = stroke
+
   def add(self, x, y):
     '''Adds a new point to the underlying strokes.  Also registers that this has
     added a new point, and thus needs to be redrawn.
@@ -147,9 +226,8 @@ class StrokeGraphiscItem(QtWidgets.QGraphicsItem):
 
 
 if __name__ == '__main__':
-  import os
   app = QtWidgets.QApplication(sys.argv)
   dir_name = os.path.join(
-      os.path.dirname(os.path.realpath(__file__)), 'collection.ui')
+      os.path.dirname(os.path.realpath(__file__)), 'collector.ui')
   c = Collector(dir_name)
   sys.exit(app.exec_())
