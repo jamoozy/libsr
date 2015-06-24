@@ -24,9 +24,13 @@ except ImportError:
     sys.exit(-1)
 
 
-class Collector(QtGui.QWidget):
+class Collector(QtWidgets.QMainWindow):
   def __init__(self, ui_file):
+    super(QtWidgets.QMainWindow, self).__init__()
     uic.loadUi(ui_file, self)
+    self.setCentralWidget(Canvas())
+    self.setWindowTitle('Canvas')
+    self.show()
 
 
 class Canvas(QtWidgets.QGraphicsView):
@@ -37,8 +41,6 @@ class Canvas(QtWidgets.QGraphicsView):
     super(Canvas, self).__init__(StrokeScene())
     self.scene().setSceneRect(0, 0, 800, 600)
     #self.setBackgroundBrush(QtCore.Qt.white)
-    self.setWindowTitle('Canvas')
-    self.show()
 
     # Generate pen for background drawing.
     self.bg_pen = QtGui.QPen(QtCore.Qt.SolidLine)
@@ -144,12 +146,10 @@ class StrokeGraphiscItem(QtWidgets.QGraphicsItem):
     painter.drawPath(pp)
 
 
-def main(*args):
-  '''Proverbial "main()" method!'''
-  app = QtWidgets.QApplication(list(args))
-  c = Canvas()
-  sys.exit(app.exec_())
-
-
 if __name__ == '__main__':
-  main(*sys.argv)
+  import os
+  app = QtWidgets.QApplication(sys.argv)
+  dir_name = os.path.join(
+      os.path.dirname(os.path.realpath(__file__)), 'collection.ui')
+  c = Collector(dir_name)
+  sys.exit(app.exec_())
