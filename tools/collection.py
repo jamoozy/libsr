@@ -25,11 +25,12 @@ except ImportError:
 
 
 class Collector(QtWidgets.QMainWindow):
+  '''The top level widget.  All hail the top level widget!'''
   def __init__(self, ui_file):
     super(QtWidgets.QMainWindow, self).__init__()
     uic.loadUi(ui_file, self)
     self.setCentralWidget(Canvas())
-    self.setWindowTitle('Canvas')
+    self.setWindowTitle('Collector')
     self.show()
 
 
@@ -40,7 +41,6 @@ class Canvas(QtWidgets.QGraphicsView):
     '''Initializes the canvas.'''
     super(Canvas, self).__init__(StrokeScene())
     self.scene().setSceneRect(0, 0, 800, 600)
-    #self.setBackgroundBrush(QtCore.Qt.white)
 
     # Generate pen for background drawing.
     self.bg_pen = QtGui.QPen(QtCore.Qt.SolidLine)
