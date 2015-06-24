@@ -7,6 +7,7 @@ import sys
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
+from PyQt5 import uic
 
 try:
   import libsr
@@ -21,6 +22,11 @@ except ImportError:
     print 'Error message:', e.message
     print 'Did you run make install?'
     sys.exit(-1)
+
+
+class Collector(QtGui.QWidget):
+  def __init__(self, ui_file):
+    uic.loadUi(ui_file, self)
 
 
 class Canvas(QtWidgets.QGraphicsView):
