@@ -99,16 +99,6 @@ class Stroke(object):
       pickle.dump(self, f)
 
   @classmethod
-  def unpickle(self, fname):
-    '''Unpickles the Stroke in ``fname``.
-
-    Returns:
-      The ``Stroke`` object in ``fname``.
-    '''
-    with open(fname, 'r') as f:
-      return pickle.load(f)
-
-  @classmethod
   def load(cls, fname):
     '''Loads a stroke stroke in a libsr-specific way and returns it.
 
@@ -119,6 +109,16 @@ class Stroke(object):
       The stroke.
     '''
     return Stroke(b.stroke_from_file(fname))
+
+  @classmethod
+  def unpickle(self, fname):
+    '''Unpickles the Stroke in ``fname``.
+
+    Returns:
+      The ``Stroke`` object in ``fname``.
+    '''
+    with open(fname, 'r') as f:
+      return pickle.load(f)
 
 
 class StrokeIter(object):
