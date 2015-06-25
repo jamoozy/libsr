@@ -41,11 +41,21 @@ class Collector(QtWidgets.QMainWindow):
     self.load_dialog.setViewMode(QtWidgets.QFileDialog.List)
     self.load_dialog.fileSelected.connect(self.load_dir_selected)
 
+    self.quit_dialog = QtWidgets.QMessageBox(self)
+    self.quit_dialog.setText("Save before exiting?")
+    self.quit_save = self.quit_dialog.addButton(
+        "Save", QtWidgets.QMessageBox.AcceptRole)
+    self.quit_destroy = self.quit_dialog.addButton(
+        "Don't Save", QtWidgets.QMessageBox.DestructiveRole)
+    self.quit_cancel = self.quit_dialog.addButton(
+        "Cancel", QtWidgets.QMessageBox.RejectRole)
+    self.quit_dialog.buttonClicked.connect(self._handle_quit_dialog_click)
+
     # Connect action clicks.
     self.actionSave.triggered.connect(self.save_dialog.show)
     self.actionLoad.triggered.connect(self.load_dialog.show)
     self.actionNew.triggered.connect(self.check_reset_scene)
-    self.actionQuit.triggered.connect(self.show_quit_dialog)
+    self.actionQuit.triggered.connect(self.quit_dialog.show)
 
     # Generate pen for all the strokes.
     self.stroke_pen = QtGui.QPen(QtCore.Qt.SolidLine)
@@ -58,29 +68,58 @@ class Collector(QtWidgets.QMainWindow):
     self.show()
 
   def dirty(self):
+    '''Determines whether any of the canvases in this Collector are dirty.
+    Dirty canvases are those with unsaved changes.
+
+    Returns, bool:
+      Whether any canvas is dirty.
+    '''
     for canvas in self.canvases:
       if canvas.dirty():
         return True
     return False
 
   def _clear_strokes(self):
+    '''Clears all strokes in all canvases without doing any checks.'''
     self.canvases = []
 
   def get_strokes(self):
+    '''Gets all the strokes in all the canvases in this collector.
+
+    Returns, list:
+      The list of strokes.
+    '''
     return [s for c in self.canvases for s in c.get_strokes()]
 
   def set_strokes(self, strokes):
+    '''Clears all the canvases and sets the strokes as the contents of a newly
+    created only canvas.
+
+    Params:
+      strokes, list: The list of strokes to set as the contents of a new, sole
+      canvas.
+    '''
     self._clear_strokes()
     self.canvases = [Canvas(self.stroke_pen)]
     self.canvases[0].set_strokes(strokes)
 
   def save_dir_selected(self, dname):
+    '''Saves all the strokes into separate files in the passed directory.
+
+    Params;
+      dname, str: The name of the directory to save to.
+    '''
     strokes = self.get_strokes()
     for i, stroke in enumerate(strokes):
       fname = os.path.join(dname, "stroke%03d.sr")
       stroke.save(fname)
 
   def load_dir_selected(self, dname):
+    '''Loads the strokes in the directory into
+
+    Params:
+      dname, str: The name of the directory to load from.
+    '''
     strokes = []
     while os.path.isfile(os.path.join(dname, "stroke%03d.sr")):
       fname = os.path.isfile(os.path.join(dname, "stroke%03d.sr"))
@@ -88,6 +127,12 @@ class Collector(QtWidgets.QMainWindow):
     self.set_strokes(strokes)
 
   def check_reset_scene(self, dname):
+    '''Resets the collector with strokes from the directory, but does a check
+    that this isn't dirty, first.
+
+    Params:
+      dname, str: The name of the directory to read stroke files from.
+    '''
     if self.dirty():
       # save / discard / cancel dialog
       self.save_dialog.show()
@@ -95,9 +140,15 @@ class Collector(QtWidgets.QMainWindow):
     self.canvases = [Canvas(self.stroke_pen)]
     self.canvases[0].set_strokes(strokes)
 
-  def show_quit_dialog(self):
-    # Quit?
-    sys.exit(0)
+  def _handle_quit_dialog_click(self, button):
+    if button == self.quit_save:
+      print 'save'
+    elif button == self.quit_destroy:
+      print 'destroy'
+    elif button == self.quit_cancel:
+      print 'cancel'
+    else:
+      raise Exception('Unrecognized button:' + button.text())
 
 
 class Canvas(QtWidgets.QGraphicsView):
