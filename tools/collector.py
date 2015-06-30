@@ -23,6 +23,8 @@ except ImportError:
     print 'Did you run make install?'
     sys.exit(-1)
 
+from qt_util import SaveDestroyCancelBox
+
 
 class Collector(QtWidgets.QMainWindow):
   '''The top level widget.  All hail the top level widget!'''
@@ -30,34 +32,59 @@ class Collector(QtWidgets.QMainWindow):
     super(QtWidgets.QMainWindow, self).__init__()
     uic.loadUi(ui_file, self)
 
-    # Dialogs.
-    self.save_dialog = QtWidgets.QFileDialog(self, 'Save to Directory')
-    self.save_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
-    self.save_dialog.setViewMode(QtWidgets.QFileDialog.List)
-    self.save_dialog.fileSelected.connect(self.save_dir_selected)
+    ##########################
+    # Message & File Dialogs #
+    ##########################
 
-    self.load_dialog = QtWidgets.QFileDialog(self, 'Load from Directory')
-    self.load_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptOpen)
-    self.load_dialog.setViewMode(QtWidgets.QFileDialog.List)
-    self.load_dialog.fileSelected.connect(self.load_dir_selected)
+    self.save_file_dialog = QtWidgets.QFileDialog(self, 'Save to Directory')
+    self.save_file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
+    self.save_file_dialog.setViewMode(QtWidgets.QFileDialog.List)
+    self.save_file_dialog.fileSelected.connect(self.save_dir_selected)
 
-    self.quit_dialog = QtWidgets.QMessageBox(self)
-    self.quit_dialog.setText("Save before exiting?")
-    self.quit_save = self.quit_dialog.addButton(
-        "Save", QtWidgets.QMessageBox.AcceptRole)
-    self.quit_destroy = self.quit_dialog.addButton(
-        "Don't Save", QtWidgets.QMessageBox.DestructiveRole)
-    self.quit_cancel = self.quit_dialog.addButton(
-        "Cancel", QtWidgets.QMessageBox.RejectRole)
-    self.quit_dialog.buttonClicked.connect(self._handle_quit_dialog_click)
+    self.load_file_dialog = QtWidgets.QFileDialog(self, 'Load from Directory')
+    self.load_file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptOpen)
+    self.load_file_dialog.setViewMode(QtWidgets.QFileDialog.List)
+    self.load_file_dialog.fileSelected.connect(self.load_dir_selected)
 
-    # Connect action clicks.
-    self.actionSave.triggered.connect(self.save_dialog.show)
-    self.actionLoad.triggered.connect(self.load_dialog.show)
-    self.actionNew.triggered.connect(self.check_reset_scene)
-    self.actionQuit.triggered.connect(self.quit_dialog.show)
+    self.new_dialog = SaveDestroyCancelBox(
+        self, "Save before creating new?", self._handle_new_dialog_click)
 
-    # Generate pen for all the strokes.
+    self.quit_dialog = SaveDestroyCancelBox(
+        self, "Save before exiting?", self._handle_quit_dialog_click)
+
+    #############
+    # File Menu #
+    #############
+
+    def save():
+      if self.dirty():
+        self.save_dialog.show()
+    self.actionSave.triggered.connect(save)
+
+    def load():
+      if self.dirty():
+        self.load_dialog.show()
+      else:
+        self.load_file_dialog.show()
+    self.actionLoad.triggered.connect(load)
+
+    def new():
+      if self.dirty():
+        self.new_dialog.show()
+      else:
+        self._clear_strokes()
+    self.actionNew.triggered.connect(new)
+
+    def quit():
+      if self.dirty():
+        self.quit_dialog.show()
+      sys.exit(0)
+    self.actionQuit.triggered.connect(quit)
+
+    ########
+    # Pens #
+    ########
+
     self.stroke_pen = QtGui.QPen(QtCore.Qt.SolidLine)
     self.stroke_pen.setColor(QtCore.Qt.black)
     self.stroke_pen.setWidth(1)
@@ -81,6 +108,8 @@ class Collector(QtWidgets.QMainWindow):
 
   def _clear_strokes(self):
     '''Clears all strokes in all canvases without doing any checks.'''
+    for c in self.canvases:
+      self.remove(c)
     self.canvases = []
 
   def get_strokes(self):
@@ -140,14 +169,42 @@ class Collector(QtWidgets.QMainWindow):
     self.canvases = [Canvas(self.stroke_pen)]
     self.canvases[0].set_strokes(strokes)
 
-  def _handle_quit_dialog_click(self, button):
-    if button == self.quit_save:
-      print 'save'
-    elif button == self.quit_destroy:
-      print 'destroy'
-    elif button == self.quit_cancel:
-      print 'cancel'
-    else:
+  def _handle_new_dialog_click(self, dialog, button):
+    '''Handles the results of the new dialog.
+
+    Params:
+      button, QButton: The button clicked.
+
+    Raises:
+      Exception: if there's an unrecognized button.
+    '''
+    if button == dialog.b_save:
+      def reset():
+        self.save_dialog.fileSelected.disconnect(reset)
+        self._clear_strokes()
+      self.save_dialog.fileSelected.connect(reset)
+      self.save_dialog.show()
+    elif button == dialog.b_destroy:
+      self._clear_strokes()
+    elif button != dialog.b_cancel:
+      raise Exception('Unrecognized button:' + button.text())
+
+  def _handle_quit_dialog_click(self, dialog, button):
+    '''Handles the results of the quit dialog.
+
+    Params:
+      dialog, SaveDestroyCancelBox: The dialog.
+      button, QButton: The button clicked.
+
+    Raises:
+      Exception: if there's an unrecognized button.
+    '''
+    if button == dialog.b_save:
+      self.save_dialog.fileSelected.connect(lambda: sys.exit(0))
+      self.save_dialog.show()
+    elif button == dialog.b_destroy:
+      sys.exit(0)
+    elif button != dialog.b_cancel:
       raise Exception('Unrecognized button:' + button.text())
 
 
@@ -168,11 +225,25 @@ class Canvas(QtWidgets.QGraphicsView):
     self.bg_pen.setWidth(2)
 
   def dirty(self, d=None):
+    '''Sets or returns the current `dirty` state.
+
+    Params:
+      d, bool: If present, the state to set `self.dirty` to.  If `None`, returns
+               the currently set dirty state.
+
+    Returns:
+      The dirty state iff `d == None`, else `None`.
+    '''
     if d is None:
       return self.is_dirty
     self.is_dirty = bool(d)
 
   def set_strokes(self, strokes):
+    '''Sets the strokes in this canvas to `strokes`.
+
+    Params:
+      strokes, list(libsr.Stroke): The strokes to set this to.
+    '''
     self.is_dirty = False
     for stroke in strokes:
       self.scene().addItem(StrokeGraphiscItem(self.strokes, 0, 0))
