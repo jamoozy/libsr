@@ -23,7 +23,7 @@ except ImportError:
     print 'Did you run make install?'
     sys.exit(-1)
 
-from qt_util import SaveDestroyCancelBox
+from qt_util import SaveDestroyCancelBox, popup
 
 
 class Collector(QtWidgets.QMainWindow):
@@ -38,11 +38,13 @@ class Collector(QtWidgets.QMainWindow):
 
     self.save_file_dialog = QtWidgets.QFileDialog(self, 'Save to Directory')
     self.save_file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
+    self.save_file_dialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
     self.save_file_dialog.setViewMode(QtWidgets.QFileDialog.List)
     self.save_file_dialog.fileSelected.connect(self.save_dir_selected)
 
     self.load_file_dialog = QtWidgets.QFileDialog(self, 'Load from Directory')
     self.load_file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptOpen)
+    self.load_file_dialog.setFileMode(QtWidgets.QFileDialog.Directory)
     self.load_file_dialog.setViewMode(QtWidgets.QFileDialog.List)
     self.load_file_dialog.fileSelected.connect(self.load_dir_selected)
 
@@ -58,12 +60,12 @@ class Collector(QtWidgets.QMainWindow):
 
     def save():
       if self.dirty():
-        self.save_dialog.show()
+        self.save_file_dialog.show()
     self.actionSave.triggered.connect(save)
 
     def load():
       if self.dirty():
-        self.load_dialog.show()
+        self.save_file_dialog.show()
       else:
         self.load_file_dialog.show()
     self.actionLoad.triggered.connect(load)
@@ -78,7 +80,8 @@ class Collector(QtWidgets.QMainWindow):
     def quit():
       if self.dirty():
         self.quit_dialog.show()
-      sys.exit(0)
+      else:
+        sys.exit(0)
     self.actionQuit.triggered.connect(quit)
 
     ########
@@ -89,10 +92,15 @@ class Collector(QtWidgets.QMainWindow):
     self.stroke_pen.setColor(QtCore.Qt.black)
     self.stroke_pen.setWidth(1)
 
-    self.canvases = [Canvas(self.stroke_pen)]
+    self.canvases = []
+    self._add_canvas()
     self.setCentralWidget(self.canvases[0])
     self.setWindowTitle('Collector')
     self.show()
+
+  def _add_canvas(self):
+    '''Adds a canvas to this tool.'''
+    self.canvases.append(Canvas(self.stroke_pen))
 
   def dirty(self):
     '''Determines whether any of the canvases in this Collector are dirty.
@@ -109,8 +117,7 @@ class Collector(QtWidgets.QMainWindow):
   def _clear_strokes(self):
     '''Clears all strokes in all canvases without doing any checks.'''
     for c in self.canvases:
-      self.remove(c)
-    self.canvases = []
+      c.clear()
 
   def get_strokes(self):
     '''Gets all the strokes in all the canvases in this collector.
@@ -129,8 +136,22 @@ class Collector(QtWidgets.QMainWindow):
       canvas.
     '''
     self._clear_strokes()
-    self.canvases = [Canvas(self.stroke_pen)]
+    self._add_canvas()
     self.canvases[0].set_strokes(strokes)
+
+  @classmethod
+  def _make_fname(cls, dname, i, j):
+    '''What's the 
+
+    Params:
+      dname, str: Directory name.
+      i, int: Index of canvas.
+      j, int: Index of stroke within canvas.
+
+    Returns, str:
+      The constructed name of the directory.
+    '''
+    return os.path.join(dname, "stroke-%02d-%03d.sr" % (i, j))
 
   def save_dir_selected(self, dname):
     '''Saves all the strokes into separate files in the passed directory.
@@ -138,10 +159,20 @@ class Collector(QtWidgets.QMainWindow):
     Params;
       dname, str: The name of the directory to save to.
     '''
-    strokes = self.get_strokes()
-    for i, stroke in enumerate(strokes):
-      fname = os.path.join(dname, "stroke%03d.sr")
-      stroke.save(fname)
+    if not os.path.exists(dname):
+      print 'making dirs:', dname
+      os.makedirs(dname)
+    elif os.path.isfile(dname):
+      popup("File exists!  Choose another location.")
+      self.save_file_dialog.show()
+      return
+
+    for i, canvas in enumerate(self.canvases):
+      for j, stroke in enumerate(canvas.get_strokes()):
+        fname = self._make_fname(dname, i, j)
+        print 'saving to:', fname
+        stroke.save(fname)
+      canvas.is_dirty = False
 
   def load_dir_selected(self, dname):
     '''Loads the strokes in the directory into
@@ -149,11 +180,33 @@ class Collector(QtWidgets.QMainWindow):
     Params:
       dname, str: The name of the directory to load from.
     '''
-    strokes = []
-    while os.path.isfile(os.path.join(dname, "stroke%03d.sr")):
-      fname = os.path.isfile(os.path.join(dname, "stroke%03d.sr"))
-      strokes.append(libsr.Stroke.load(fname))
-    self.set_strokes(strokes)
+    if not os.path.exists(dname):
+      popup(self, "No such directory!")
+      return
+
+    if not os.path.isdir(dname):
+      popup(self, "Please select a directory, not a file!")
+      return
+
+    dname, dirs, files = os.walk(dname).next()
+    if len(files) <= 0:
+      popup(self, "Directory is empty!")
+      return
+
+    fdata = [(os.path.join(dname, fname), int(e[1]), int(e[2][:3]))
+             for e in [fname.split('-') for fname in files]
+             if len(e) == 3]
+
+    if len(fdata) <= 0:
+      popup(self, "Directory has no strokes!")
+      return
+
+    self._clear_strokes()
+    for fname, i, j in fdata:
+      # Ensure we have the canvas with this index.
+      while len(self.canvases) <= i:
+        self._add_canvas()
+      self.canvases[i].add(libsr.Stroke.load(fname))
 
   def check_reset_scene(self, dname):
     '''Resets the collector with strokes from the directory, but does a check
@@ -164,9 +217,9 @@ class Collector(QtWidgets.QMainWindow):
     '''
     if self.dirty():
       # save / discard / cancel dialog
-      self.save_dialog.show()
+      self.save_file_dialog.show()
     self._clear_strokes()
-    self.canvases = [Canvas(self.stroke_pen)]
+    self._add_canvas()
     self.canvases[0].set_strokes(strokes)
 
   def _handle_new_dialog_click(self, dialog, button):
@@ -180,10 +233,10 @@ class Collector(QtWidgets.QMainWindow):
     '''
     if button == dialog.b_save:
       def reset():
-        self.save_dialog.fileSelected.disconnect(reset)
+        self.save_file_dialog.fileSelected.disconnect(reset)
         self._clear_strokes()
-      self.save_dialog.fileSelected.connect(reset)
-      self.save_dialog.show()
+      self.save_file_dialog.fileSelected.connect(reset)
+      self.save_file_dialog.show()
     elif button == dialog.b_destroy:
       self._clear_strokes()
     elif button != dialog.b_cancel:
@@ -200,8 +253,8 @@ class Collector(QtWidgets.QMainWindow):
       Exception: if there's an unrecognized button.
     '''
     if button == dialog.b_save:
-      self.save_dialog.fileSelected.connect(lambda: sys.exit(0))
-      self.save_dialog.show()
+      self.save_file_dialog.fileSelected.connect(lambda: sys.exit(0))
+      self.save_file_dialog.show()
     elif button == dialog.b_destroy:
       sys.exit(0)
     elif button != dialog.b_cancel:
@@ -211,10 +264,10 @@ class Collector(QtWidgets.QMainWindow):
 class Canvas(QtWidgets.QGraphicsView):
   '''Canvas to collect and display strokes.'''
 
-  def __init__(self, stroke_pen):
+  def __init__(self, stroke_pen, rect=(0, 0, 800, 600)):
     '''Initializes the canvas.'''
     super(Canvas, self).__init__(StrokeScene())
-    self.scene().setSceneRect(0, 0, 800, 600)
+    self.scene().setSceneRect(*rect)
 
     self.is_dirty = False
     self.stroke_pen = stroke_pen
@@ -224,19 +277,36 @@ class Canvas(QtWidgets.QGraphicsView):
     self.bg_pen.setColor(QtCore.Qt.black)
     self.bg_pen.setWidth(2)
 
-  def dirty(self, d=None):
-    '''Sets or returns the current `dirty` state.
+  def add(self, stroke):
+    '''Adds a stroke to this canvas.
 
     Params:
-      d, bool: If present, the state to set `self.dirty` to.  If `None`, returns
-               the currently set dirty state.
+      stroke, libsr.Stroke: The stroke to add.
+    '''
+    self.scene().addItem(StrokeGraphiscItem(self.stroke_pen, 0, 0))
+    self.scene().items()[0].set_stroke(stroke)
+
+  def clear(self):
+    '''Clears all the strokes in this canvas.'''
+    for sgi in self.scene().items()[:]:
+      self.scene().removeItem(sgi)
+
+  def dirty(self):
+    '''Sets or returns the current `dirty` state.
 
     Returns:
-      The dirty state iff `d == None`, else `None`.
+      The dirty state.
     '''
-    if d is None:
-      return self.is_dirty
-    self.is_dirty = bool(d)
+    return self.is_dirty
+
+  def get_strokes(self):
+    '''Gets all the strokes in this canvas.
+
+    Returns, list:
+      The list of strokes.
+    '''
+    return [sgi.stroke for sgi in self.scene().items()
+                       if isinstance(sgi, StrokeGraphiscItem)]
 
   def set_strokes(self, strokes):
     '''Sets the strokes in this canvas to `strokes`.
@@ -246,8 +316,7 @@ class Canvas(QtWidgets.QGraphicsView):
     '''
     self.is_dirty = False
     for stroke in strokes:
-      self.scene().addItem(StrokeGraphiscItem(self.strokes, 0, 0))
-      self.scene().items()[0].set_stroke(stroke)
+      self.add(stroke)
 
   def resizeEvent(self, e):
     '''See :meth:`QGraphicsView.mouseResizeEvent`.'''
@@ -316,6 +385,7 @@ class StrokeGraphiscItem(QtWidgets.QGraphicsItem):
 
   def set_stroke(self, stroke):
     self.stroke = stroke
+    self.prepareGeometryChange()
 
   def add(self, x, y):
     '''Adds a new point to the underlying strokes.  Also registers that this has
