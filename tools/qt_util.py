@@ -15,3 +15,19 @@ class SaveDestroyCancelBox(QtWidgets.QMessageBox):
 
   def _cb(self, button):
     self.cb(self, button)
+
+def popup(parent, message):
+  '''Pops up a small dialog with a message.
+
+  Params:
+    parent, QWidget: The parent of the popup.
+    message, str: The message to display.
+
+  Returns, QButton:
+    The "Okay" button of the popup.
+  '''
+  popup = QtWidgets.QMessageBox(parent)
+  popup.setText(message)
+  button = popup.addButton("Okay", QtWidgets.QMessageBox.AcceptRole)
+  popup.show()
+  return button
