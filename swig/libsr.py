@@ -13,6 +13,8 @@ import sys
 UTC_0 = datetime.datetime(1970, 1, 1)
 
 class Stroke(object):
+  '''A libsr Stroke object.'''
+
   # Store this here so we can call it when Python starts shutting down.
   stroke_destroy = b.stroke_destroy
 
@@ -91,7 +93,7 @@ class Stroke(object):
     Args:
       fname, str: The file name to save to.
     '''
-    b.stroke_save(self._stroke, fname)
+    b.stroke_save(self._stroke, str(fname))
 
   def pickle(self, fname):
     '''Pickles the Stroke.'''
@@ -108,7 +110,7 @@ class Stroke(object):
     Returns:
       The stroke.
     '''
-    return Stroke(b.stroke_from_file(fname))
+    return Stroke(b.stroke_from_file(str(fname)))
 
   @classmethod
   def unpickle(self, fname):
