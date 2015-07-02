@@ -7,6 +7,9 @@ Makefile.in
 .libs
 /m4
 
+# SWIG stuff.
+/swig/bindings.py
+
 # For tests/
 *.log
 *.trs
