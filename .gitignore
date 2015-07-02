@@ -14,6 +14,9 @@ Makefile.in
 /tests/common/check_stroke
 
 # For docs/
+/docs/doxygen_sqlite3.db
+/docs/html
+/docs/latex
 *.dvi
 *.pdf
 
