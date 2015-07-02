@@ -1,5 +1,12 @@
 #!/usr/bin/python
 
+## @package tools
+
+## @file
+# The UI for the collector.  Ties into libsr Python2.7 package.
+#
+# The purpose of this tool is to collect strokes for testing.
+
 import os
 import sys
 
@@ -25,9 +32,12 @@ except ImportError:
 
 from qt_util import SaveDestroyCancelBox, popup
 
-
+## The top level widget.  All hail the top level widget!
 class Collector(QtWidgets.QMainWindow):
-  '''The top level widget.  All hail the top level widget!'''
+  ## Creates the collector based on the UI file.
+  #
+  # @param self The object to initialize.
+  # @param ui_file (str) The UI file to load.
   def __init__(self, ui_file):
     super(QtWidgets.QMainWindow, self).__init__()
     uic.loadUi(ui_file, self)
@@ -50,7 +60,6 @@ class Collector(QtWidgets.QMainWindow):
 
     self.new_dialog = SaveDestroyCancelBox(
         self, "Save before creating new?", self._handle_new_dialog_click)
-
     self.quit_dialog = SaveDestroyCancelBox(
         self, "Save before exiting?", self._handle_quit_dialog_click)
 
@@ -98,67 +107,36 @@ class Collector(QtWidgets.QMainWindow):
     self.setWindowTitle('Collector')
     self.show()
 
-  def _add_canvas(self):
-    '''Adds a canvas to this tool.'''
-    self.canvases.append(Canvas(self.stroke_pen))
-
+  ## Determines whether any of the canvases in this Collector are dirty.
+  # Dirty canvases are those with unsaved changes.
+  #
+  # @returns (bool) Whether any canvas is dirty.
   def dirty(self):
-    '''Determines whether any of the canvases in this Collector are dirty.
-    Dirty canvases are those with unsaved changes.
-
-    Returns, bool:
-      Whether any canvas is dirty.
-    '''
     for canvas in self.canvases:
       if canvas.dirty():
         return True
     return False
 
-  def _clear_strokes(self):
-    '''Clears all strokes in all canvases without doing any checks.'''
-    for c in self.canvases:
-      c.clear()
-
+  ## Gets all the strokes in all the canvases in this collector.
+  #
+  # @returns (list) The list of strokes.
   def get_strokes(self):
-    '''Gets all the strokes in all the canvases in this collector.
-
-    Returns, list:
-      The list of strokes.
-    '''
     return [s for c in self.canvases for s in c.get_strokes()]
 
+  ## Clears all the canvases and sets the strokes as the contents of a newly
+  # created only canvas.
+  #
+  # @param strokes (list): The list of strokes to set as the contents of a new,
+  #                        sole canvas.
   def set_strokes(self, strokes):
-    '''Clears all the canvases and sets the strokes as the contents of a newly
-    created only canvas.
-
-    Params:
-      strokes, list: The list of strokes to set as the contents of a new, sole
-      canvas.
-    '''
     self._clear_strokes()
     self._add_canvas()
     self.canvases[0].set_strokes(strokes)
 
-  @classmethod
-  def _make_fname(cls, dname, i, j):
-    '''What's the 
-
-    Params:
-      dname, str: Directory name.
-      i, int: Index of canvas.
-      j, int: Index of stroke within canvas.
-
-    Returns, str:
-      The constructed name of the directory.
-    '''
-    return os.path.join(dname, "stroke-%02d-%03d.sr" % (i, j))
-
+  ## Saves all the strokes into separate files in the passed directory.
+  #
+  # @param dname (str) The name of the directory to save to.
   def save_dir_selected(self, dname):
-    '''Saves all the strokes into separate files in the passed directory.
-
-    Params;
-      dname, str: The name of the directory to save to.
-    '''
     if not os.path.exists(dname):
       print 'making dirs:', dname
       os.makedirs(dname)
@@ -174,12 +152,11 @@ class Collector(QtWidgets.QMainWindow):
         stroke.save(fname)
       canvas.is_dirty = False
 
+  ## Clears the canvas and loads the strokes in the passed directory into the
+  # appropriate canvases.
+  #
+  # @param dname (str) The name of the directory to load from.
   def load_dir_selected(self, dname):
-    '''Loads the strokes in the directory into
-
-    Params:
-      dname, str: The name of the directory to load from.
-    '''
     if not os.path.exists(dname):
       popup(self, "No such directory!")
       return
@@ -194,11 +171,11 @@ class Collector(QtWidgets.QMainWindow):
       return
 
     fdata = [(os.path.join(dname, fname), int(e[1]), int(e[2][:3]))
-             for e in [fname.split('-') for fname in files]
+             for e in (fname.split('-') for fname in files)
              if len(e) == 3]
 
     if len(fdata) <= 0:
-      popup(self, "Directory has no strokes!")
+      popup(self, "Directory is malformatted; no strokes found!")
       return
 
     self._clear_strokes()
@@ -208,13 +185,11 @@ class Collector(QtWidgets.QMainWindow):
         self._add_canvas()
       self.canvases[i].add(libsr.Stroke.load(fname))
 
+  ## Resets the collector with strokes from the directory, but does a check that
+  # this isn't dirty, first.
+  #
+  # @param dname (str) The name of the directory to read stroke files from.
   def check_reset_scene(self, dname):
-    '''Resets the collector with strokes from the directory, but does a check
-    that this isn't dirty, first.
-
-    Params:
-      dname, str: The name of the directory to read stroke files from.
-    '''
     if self.dirty():
       # save / discard / cancel dialog
       self.save_file_dialog.show()
@@ -222,15 +197,24 @@ class Collector(QtWidgets.QMainWindow):
     self._add_canvas()
     self.canvases[0].set_strokes(strokes)
 
+
+  # ---- Internal Methods ----
+
+  ## Adds a canvas to this tool.
+  def _add_canvas(self):
+    self.canvases.append(Canvas(self.stroke_pen))
+
+  ## Clears all strokes in all canvases without doing any checks.
+  def _clear_strokes(self):
+    for c in self.canvases:
+      c.clear()
+
+  ## Handles the results of the new dialog.
+  #
+  # @param button (QButton) The button clicked.
+  #
+  # @raises Exception If there's an unrecognized button.
   def _handle_new_dialog_click(self, dialog, button):
-    '''Handles the results of the new dialog.
-
-    Params:
-      button, QButton: The button clicked.
-
-    Raises:
-      Exception: if there's an unrecognized button.
-    '''
     if button == dialog.b_save:
       def reset():
         self.save_file_dialog.fileSelected.disconnect(reset)
@@ -242,16 +226,13 @@ class Collector(QtWidgets.QMainWindow):
     elif button != dialog.b_cancel:
       raise Exception('Unrecognized button:' + button.text())
 
+  ## Handles the results of the quit dialog.
+  #
+  # @param dialog (SaveDestroyCancelBox) The dialog.
+  # @param button (QButton) The button clicked.
+  #
+  # @raises Exception If there's an unrecognized button.
   def _handle_quit_dialog_click(self, dialog, button):
-    '''Handles the results of the quit dialog.
-
-    Params:
-      dialog, SaveDestroyCancelBox: The dialog.
-      button, QButton: The button clicked.
-
-    Raises:
-      Exception: if there's an unrecognized button.
-    '''
     if button == dialog.b_save:
       self.save_file_dialog.fileSelected.connect(lambda: sys.exit(0))
       self.save_file_dialog.show()
@@ -261,11 +242,27 @@ class Collector(QtWidgets.QMainWindow):
       raise Exception('Unrecognized button:' + button.text())
 
 
-class Canvas(QtWidgets.QGraphicsView):
-  '''Canvas to collect and display strokes.'''
+  # ---- Class Methods ----
 
+  ## Generates the file name of the `j`th stroke in the `i`th canvas.
+  #
+  # @param dname (str) Directory name.
+  # @param i (int) Index of canvas.
+  # @param j (int) Index of stroke within canvas.
+  #
+  # @returns (str) The constructed name of the directory.
+  @classmethod
+  def _make_fname(cls, dname, i, j):
+    return os.path.join(dname, "stroke-%02d-%03d.sr" % (i, j))
+
+
+## Canvas to collect and display strokes.
+class Canvas(QtWidgets.QGraphicsView):
+  ## Initializes the canvas.
+  #
+  # @param stroke_pen (QPen) The pen to use for strokes.
+  # @param rect (tuple) Preferred (x, y, w, h) of this canvas.
   def __init__(self, stroke_pen, rect=(0, 0, 800, 600)):
-    '''Initializes the canvas.'''
     super(Canvas, self).__init__(StrokeScene())
     self.scene().setSceneRect(*rect)
 
@@ -277,137 +274,131 @@ class Canvas(QtWidgets.QGraphicsView):
     self.bg_pen.setColor(QtCore.Qt.black)
     self.bg_pen.setWidth(2)
 
+  ## Adds a stroke to this canvas.
+  #
+  # @param stroke (libsr.Stroke) The stroke to add.
   def add(self, stroke):
-    '''Adds a stroke to this canvas.
-
-    Params:
-      stroke, libsr.Stroke: The stroke to add.
-    '''
     self.scene().addItem(StrokeGraphiscItem(self.stroke_pen, 0, 0))
     self.scene().items()[0].set_stroke(stroke)
 
+  ## Clears all the strokes in this canvas.
   def clear(self):
-    '''Clears all the strokes in this canvas.'''
     for sgi in self.scene().items()[:]:
+      print 'removing:', sgi
       self.scene().removeItem(sgi)
 
+  ## Sets or returns the current `dirty` state.
+  #
+  # @return The dirty state.
   def dirty(self):
-    '''Sets or returns the current `dirty` state.
-
-    Returns:
-      The dirty state.
-    '''
     return self.is_dirty
 
+  ## Gets all the strokes in this canvas.
+  #
+  # @return (list) The list of strokes.
   def get_strokes(self):
-    '''Gets all the strokes in this canvas.
-
-    Returns, list:
-      The list of strokes.
-    '''
     return [sgi.stroke for sgi in self.scene().items()
                        if isinstance(sgi, StrokeGraphiscItem)]
 
+  ## Sets the strokes in this canvas to `strokes`.
+  #
+  # @param strokes (list(libsr.Stroke)) The strokes to set this to.
   def set_strokes(self, strokes):
-    '''Sets the strokes in this canvas to `strokes`.
-
-    Params:
-      strokes, list(libsr.Stroke): The strokes to set this to.
-    '''
     self.is_dirty = False
     for stroke in strokes:
       self.add(stroke)
 
-  def resizeEvent(self, e):
-    '''See :meth:`QGraphicsView.mouseResizeEvent`.'''
-    self.scene().setSceneRect(0, 0, e.size().width(), e.size().height())
 
+  # ---- Internal Methods ----
+
+  ## Append the position to the most-recently drawn stroke.
+  #
+  # @param x (float) X-position of mouse event.
+  # @param y (float) Y-position of mouse event.
   def _append_pos(self, x, y):
-    '''Append the position to the most-recently drawn stroke.
-
-    Args:
-      x, float: X-position of mouse event.
-      y, float: Y-position of mouse event.
-    '''
     self.is_dirty = True
     rect = self.scene().items()[0].add(x, y)
 
+
+  # ---- Qt Event Handlers ----
+
+  ## See :meth:`QGraphicsView.mouseResizeEvent`.
+  def resizeEvent(self, e):
+    self.scene().setSceneRect(0, 0, e.size().width(), e.size().height())
+
+  ## See :meth:`QGraphicsView.mousePressEvent`.
   def mousePressEvent(self, e):
-    '''See :meth:`QGraphicsView.mousePressEvent`.'''
     self.scene().addItem(StrokeGraphiscItem(self.stroke_pen, e.x(), e.y()))
 
+  ## See :meth:`QGraphicsView.mouseMoveEvent`.
   def mouseMoveEvent(self, e):
-    '''See :meth:`QGraphicsView.mouseMoveEvent`.'''
     self._append_pos(e.x(), e.y())
 
+  ## See :meth:`QGraphicsView.mouseReleaseEvent`.
   def mouseReleaseEvent(self, e):
-    '''See :meth:`QGraphicsView.mouseReleaseEvent`.'''
     self._append_pos(e.x(), e.y())
 
+  ## Draws a border.
+  # @see :meth:`QWidget.drawBackground`
   def drawBackground(self, painter, rect):
-    '''Draws a border.'''
     painter.setPen(self.bg_pen)
     painter.drawRect(0, 0, self.scene().width() - 1, self.scene().height() - 1)
 
 
+## A graphics scene that holds a bunch of strokes.
 class StrokeScene(QtWidgets.QGraphicsScene):
-  '''A graphics scene that holds a bunch of strokes.'''
   def __init__(self):
     super(QtWidgets.QGraphicsScene, self).__init__()
 
 
+## Draws an underlying libsr.Stroke object.
 class StrokeGraphiscItem(QtWidgets.QGraphicsItem):
-  '''Draws an underlying libsr.Stroke object.'''
   DRAW_BUF = 5   # Small buffer to get some ... well ... buffer around rects.
 
+  ## Creates a new graphics item (and underlying stroke) starting at (x, y).
+  #
+  # @param pen (QtGui.QPen) The pen to use to draw.
+  # @param x (float) X-position of mouse event.
+  # @param y (float) Y-position of mouse event.
   def __init__(self, pen, x, y):
-    '''Creates a new graphics item (and underlying stroke) starting at (x, y).
-
-    Args:
-      pen, QtGui.QPen: The pen to use to draw.
-      x, float: X-position of mouse event.
-      y, float: Y-position of mouse event.
-    '''
     super(StrokeGraphiscItem, self).__init__()
     self.stroke = libsr.Stroke()
     self._add_scene_point(x, y)
     self.pen = pen
 
+  ## Adds a scene point to the underlying libsr.Stroke object.
+  #
+  # @param x (float) X-coordinate of mouse event.
+  # @param y (float) Y-coordinate of mouse event.
   def _add_scene_point(self, x, y):
-    '''Adds a scene point to the underlying libsr.Stroke object.
-
-    Args:
-      x, float: X-coordinate of mouse event.
-      y, float: Y-coordinate of mouse event.
-    '''
     self.stroke.add(int(x), int(y))
     self.prepareGeometryChange()
 
+  ## Adds a the stroke surrounded by a new StrokeGraphiscItem.
+  #
+  # @param stroke (libsr.Stroke) The stroke to add.
   def set_stroke(self, stroke):
     self.stroke = stroke
     self.prepareGeometryChange()
 
+  ## Adds a new point to the underlying strokes.
+  # Also registers that this has added a new point, and thus needs to be
+  # redrawn.
+  #
+  # @param x (float) X-coordinate of mouse event.
+  # @param y (float) Y-coordinate of mouse event.
   def add(self, x, y):
-    '''Adds a new point to the underlying strokes.  Also registers that this has
-    added a new point, and thus needs to be redrawn.
-
-    Args:
-      x, float: X-coordinate of mouse event.
-      y, float: Y-coordinate of mouse event.
-    '''
     pt = self.mapToScene(x, y)
     self._add_scene_point(int(pt.x()), int(pt.y()))
 
+  ## The rectangle bounding all the points in the underlying stroke.
+  #
+  # @return The rectangle containing the underlying stroke.
   def boundingRect(self):
-    '''The rectangle bounding all the points in the underlying stroke.
-
-    Returns:
-      The rectangle containing the underlying stroke.
-    '''
     return QtCore.QRectF(*self.stroke.bbox)
 
+  ## See :meth:`QGraphicsItem.paint()`.
   def paint(self, painter, option, widget):
-    '''See QGraphicsItem.paint().'''
     painter.setPen(self.pen)
     painter.setRenderHint(QtGui.QPainter.Antialiasing)
     pp = QtGui.QPainterPath()
@@ -418,6 +409,11 @@ class StrokeGraphiscItem(QtWidgets.QGraphicsItem):
 
 
 if __name__ == '__main__':
+  # Ideally, we could put this in, e.g., a `run()` method.  Unfortunately,
+  # there's some kind of bug that causes Qt to segfault (In Python??? I know,
+  # right?) on exit.  So, these lines are left here; now there's no segfault.
+  #
+  # ... and the peasants rejoice.
   app = QtWidgets.QApplication(sys.argv)
   dir_name = os.path.join(
       os.path.dirname(os.path.realpath(__file__)), 'collector.ui')
