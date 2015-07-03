@@ -1,0 +1,4 @@
+autoreconf
+libtool
+libopenblas-dev
+liblapacke-dev
