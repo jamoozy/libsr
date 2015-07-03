@@ -15,7 +15,7 @@ AC_PROG_CC_C99
 LT_INIT
 AC_PROG_LIBTOOL
 AC_CONFIG_MACRO_DIR([m4])
-ACLOCAL_AMFLAGS += -I m4
+ACLOCAL_AMFLAGS+=-I m4
 
 AC_C_CONST
 AC_C_INLINE
@@ -24,17 +24,17 @@ AC_C_TYPEOF
 # Check for LaTeX stuff.
 AC_PATH_PROG(PDFLATEX, [pdflatex])
 AS_IF([test "x$PDFLATEX" = x], [have_pdflatex="no"], [have_pdflatex="yes"])
-AM_CONDITIONAL(HAVE_PDFLATEX, test "x$PDFLATEX" = "xyes")
+AM_CONDITIONAL([HAVE_PDFLATEX], test "x$PDFLATEX" = "xyes")
 
 AC_PATH_PROG(LATEX, [latex])
 AC_PATH_PROG(DVIPDF, [dvipdf])
 AS_IF([test "x$LATEX" = x -o "x$DVIPDF" = x],
   [have_latex="no"], [have_latex="yes"])
-AM_CONDITIONAL(HAVE_LATEX, test "x$LATEX" = "xyes" -a "xDVIPDF" = "xyes")
+AM_CONDITIONAL([HAVE_LATEX], test "x$LATEX" = "xyes" -a "xDVIPDF" = "xyes")
 
 AS_IF([test "x$have_pdflatex" = "xyes" -o "x$have_latex" = "xyes"],
   [have_any_latex="yes"], [have_any_latex="no"])
-AM_CONDITIONAL(HAVE_ANY_LATEX,
+AM_CONDITIONAL([HAVE_ANY_LATEX],
   test "x$HAVE_LATEX_DVIPDF" = "xyes" -o "x$HAVE_PDFLATEX" = "xyes")
 
 AC_TYPE_SIZE_T
@@ -52,16 +52,24 @@ AC_SEARCH_LIBS([LAPACKE_dgetri], [lapacke], [], [
 PKG_CHECK_MODULES([CHECK], [check >= 0.9], [have_check="yes"], [
   AC_MSG_WARN([Check not installed, so tests not run.])
 ])
-AM_CONDITIONAL(HAVE_CHECK, test "x$have_check" = "xyes")
+AM_CONDITIONAL([HAVE_CHECK], test "x$have_check" = "xyes")
 
 # Checks for standard library functions and headers.
 AC_CHECK_HEADERS(
-  assert.h check.h cblas.h lapacke.h limits.h math.h openblas/cblas.h \
+  assert.h check.h cblas.h lapacke.h limits.h math.h openblas/cblas.h Python.h \
   string.h strings.h stdlib.h stdio.h values.h)
 AC_CHECK_FUNCS_ONCE([abs assert bzero memcpy memmove floor sqrt atan sin cos])
 
 # We're using GNU's stuff!
 AC_DEFINE(_GNU_SOURCE, 1, [Define for math.h M_PI (and others) usage.])
+
+# Check for swig binary.
+SWIG_BINARY=`which swig`
+AM_CONDITIONAL([HAVE_SWIG], test -n "$SWIG_BINARY")
+AS_IF(test "x$HAVE_SWIG" != "x",
+      echo [Swig not installed.  No language bindings will be installed.])
+
+AM_CONDITIONAL([HAVE_PYTHON_DEV], test "x$HAVE_PYTHON_H" != "x")
 
 # Output files.
 AC_CONFIG_HEADERS([config.h])

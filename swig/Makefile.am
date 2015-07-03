@@ -1,5 +1,10 @@
 name = bindings
 
+SUBTASKS=
+if HAVE_PYTHON_DEV
+SUBTASKS+=python
+endif
+
 i_file = $(srcdir)/$(name).i
 c_src_dir = $(srcdir)/../src
 libsr_a = $(builddir)/../src/.libs/libsr.a
@@ -12,7 +17,10 @@ c_headers = $(c_src_dir)/paleo/paleo.h \
             $(c_src_dir)/common/point.h
 lib_dst = $(libdir)/python2.7/libsr
 
-all : $(py_so)
+
+all : $(SUBTASKS)
+
+python : $(py_so)
 
 $(wrap_file) $(generated_py) : $(i_file) $(c_headers)
 	swig -outdir $(builddir) -python -I$(c_src_dir) $(i_file)
