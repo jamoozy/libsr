@@ -1,4 +1,5 @@
 autoreconf
+check
 libtool
 libopenblas-dev
 liblapacke-dev

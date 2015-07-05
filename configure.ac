@@ -63,13 +63,30 @@ AC_CHECK_FUNCS_ONCE([abs assert bzero memcpy memmove floor sqrt atan sin cos])
 # We're using GNU's stuff!
 AC_DEFINE(_GNU_SOURCE, 1, [Define for math.h M_PI (and others) usage.])
 
-# Check for swig binary.
-SWIG_BINARY=`which swig`
-AM_CONDITIONAL([HAVE_SWIG], test -n "$SWIG_BINARY")
-AS_IF(test "x$HAVE_SWIG" != "x",
-      echo [Swig not installed.  No language bindings will be installed.])
+# Check for bindings dependencies.
+AC_PATH_PROG(SWIG, [swig])
+AM_CONDITIONAL([HAVE_SWIG], test -n "$SWIG")
+AS_IF([test -n "$SWIG"], [
+  AC_MSG_NOTICE("swig found.  Bindings will be built.")
 
-AM_CONDITIONAL([HAVE_PYTHON_DEV], test "x$HAVE_PYTHON_H" != "x")
+  # Python-specific stuff.
+  AC_PATH_PROG(PYTHON, [python])
+  AX_PYTHON_DEVEL([>= '2.7'])
+  AM_CONDITIONAL([HAVE_PYTHON_DEV], test -n "$PYTHON_CPPFLAGS")
+  AS_IF([test -n "$PYTHON_CPPFLAGS"],
+    AS_IF([test -n "$SWIG"],
+      AC_MSG_NOTICE("Python.h found, bindings will be built."),
+      AC_MSG_NOTICE(
+        "Python.h found, but swig was not.  Bindings will not be built.")),
+    AC_MSG_NOTICE("Python.h not found.  Python bindings will not be built."))
+], [
+  AC_MSG_NOTICE("Swig not found.  No language bindings will be installed.")
+
+  # Define the things that would have been defined.
+  AM_CONDITIONAL([HAVE_PYTHON_DEV], test "x" != "x")
+])
+
+
 
 # Output files.
 AC_CONFIG_HEADERS([config.h])

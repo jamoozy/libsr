@@ -1,8 +1,10 @@
 name = bindings
 
 SUBTASKS=
+if HAVE_SWIG
 if HAVE_PYTHON_DEV
 SUBTASKS+=python
+endif
 endif
 
 i_file = $(srcdir)/$(name).i
