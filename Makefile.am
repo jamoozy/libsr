@@ -10,6 +10,3 @@ endif
 if HAVE_SWIG
 SUBDIRS += swig
 endif
-
-pymodule-sdist:
-	$(MAKE) -C bindings pymodule-sdist
