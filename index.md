@@ -1,3 +1,7 @@
+---
+layout: index
+---
+
 # LibSR: a Sketch Recognition library.
 
 Docs: http://www.jamoozy.com/libsr-docs/index.html
