@@ -211,6 +211,7 @@ class Collector(QtWidgets.QMainWindow):
 
   ## Handles the results of the new dialog.
   #
+  # @param dialog (QWidget) The widget that contains the button.
   # @param button (QButton) The button clicked.
   #
   # @raises Exception If there's an unrecognized button.
@@ -281,13 +282,15 @@ class Canvas(QtWidgets.QGraphicsView):
     self.scene().addItem(StrokeGraphiscItem(self.stroke_pen, 0, 0))
     self.scene().items()[0].set_stroke(stroke)
 
-  ## Clears all the strokes in this canvas.
+  ## Clears all the strokes in this canvas, very destructively.
   def clear(self):
     for sgi in self.scene().items()[:]:
       print 'removing:', sgi
       self.scene().removeItem(sgi)
 
-  ## Sets or returns the current `dirty` state.
+  ## Returns the current _dirty_ state.
+  # The canvas is considered _dirty_ when it contains unsaved changes.  Changes
+  # include both additions and deletions.
   #
   # @return The dirty state.
   def dirty(self):
@@ -322,19 +325,19 @@ class Canvas(QtWidgets.QGraphicsView):
 
   # ---- Qt Event Handlers ----
 
-  ## See :meth:`QGraphicsView.mouseResizeEvent`.
+  ## See `QGraphicsView.mouseResizeEvent`.
   def resizeEvent(self, e):
     self.scene().setSceneRect(0, 0, e.size().width(), e.size().height())
 
-  ## See :meth:`QGraphicsView.mousePressEvent`.
+  ## See `QGraphicsView.mousePressEvent`.
   def mousePressEvent(self, e):
     self.scene().addItem(StrokeGraphiscItem(self.stroke_pen, e.x(), e.y()))
 
-  ## See :meth:`QGraphicsView.mouseMoveEvent`.
+  ## See `QGraphicsView.mouseMoveEvent`.
   def mouseMoveEvent(self, e):
     self._append_pos(e.x(), e.y())
 
-  ## See :meth:`QGraphicsView.mouseReleaseEvent`.
+  ## See `QGraphicsView.mouseReleaseEvent`.
   def mouseReleaseEvent(self, e):
     self._append_pos(e.x(), e.y())
 
