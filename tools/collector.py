@@ -342,7 +342,7 @@ class Canvas(QtWidgets.QGraphicsView):
     self._append_pos(e.x(), e.y())
 
   ## Draws a border.
-  # @see :meth:`QWidget.drawBackground`
+  # @see QWidget.drawBackground
   def drawBackground(self, painter, rect):
     painter.setPen(self.bg_pen)
     painter.drawRect(0, 0, self.scene().width() - 1, self.scene().height() - 1)
@@ -400,7 +400,7 @@ class StrokeGraphiscItem(QtWidgets.QGraphicsItem):
   def boundingRect(self):
     return QtCore.QRectF(*self.stroke.bbox)
 
-  ## See :meth:`QGraphicsItem.paint()`.
+  ## See QGraphicsItem.paint()
   def paint(self, painter, option, widget):
     painter.setPen(self.pen)
     painter.setRenderHint(QtGui.QPainter.Antialiasing)
