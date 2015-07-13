@@ -12,45 +12,39 @@ import sys
 # Used to get utime -- seconds since the epoc.
 UTC_0 = datetime.datetime(1970, 1, 1)
 
+## A `libsr.Stroke` object wraps a C `stroke_t` (defined in
+# [@ref src/common/stroke.h]) into a Python-like class.
 class Stroke(object):
-  '''A libsr Stroke object.'''
 
-  # Store this here so we can call it when Python starts shutting down.
+  ## Store this here so we can call it when Python starts shutting down.
   stroke_destroy = b.stroke_destroy
 
-  '''A wrapped stroke_t (from C) object.'''
+  ## Creates a new Stroke.  Will either wrap `_stroke` or a newly-created
+  # `stroke_t` object.
+  #
+  # @param _stroke [@ref stroke_t] (optional) The stroke to wrap.  Defaults to a
+  #                new stroke.  Takes ownership of the [@ref stroke_t] object,
+  #                so it will destroy it in its [@ref __del__()` method.
   def __init__(self, _stroke=None):
-    '''Creates a new Stroke.  Will either wrap ``_stroke`` or a newly-created
-    stroke_t object.
-
-    Args:
-      _stroke, stroke_t: (optional) The stroke to wrap.  Defaults to a new
-                         stroke.  Takes ownership of the stroke_t object, so it
-                         will destroy it in its :meth:`__del__` method.
-    '''
     self._stroke = _stroke or b.stroke_create(40)
     self.bbox = (sys.maxint, sys.maxint, -sys.maxint, -sys.maxint)
 
+  ## Destroys (frees) the underlying `stroke_t` object.
   def __del__(self):
-    '''Destroys the underlying stroke_t object.'''
     self.stroke_destroy(self._stroke)
 
+  ## Gets the number of points in this stroke.
+  #
+  # @return [@ref int] The number of points in the stroke.
   def __len__(self):
-    '''Gets the number of points in this stroke.
-
-    Returns:
-      The number of points in the stroke.
-    '''
     return self._stroke.num
 
+  ## Gets the `i`th point from this stroke.
+  #
+  # @param i [@ref int] The index to the stroke to get.
+  #
+  # @return [@ref libsr.Point] The `i`th point wrapped as a [libsr.Point].
   def __getitem__(self, i):
-    '''Gets the ``i``th point from this stroke.
-
-    Args:
-      i, int: The index to the stroke to get.
-    Returns:
-      The ``i``th point wrapped as a `Point`.
-    '''
     if isinstance(i, slice):
       return (Point(b.stroke_get(self._stroke, j))
               for j in xrange(i.start or 0,
@@ -62,14 +56,12 @@ class Stroke(object):
       raise IndexError('%d \\nin [0,%d)' % (i, self._stroke.num))
     return Point(b.stroke_get(self._stroke, i))
 
+  ## Adds a point to this stroke.
+  #
+  # @param x [@ref int] X coordinate.
+  # @param y [@ref int] Y coordinate.
+  # @param t [@ref int] (default: now) The time the point was made (in micro-s).
   def add(self, x, y, t=None):
-    '''Adds a point to this stroke.
-
-    Args:
-      x, int: X coordinate.
-      y, int: Y coordinate.
-      t, int: (default: now) The time the point was made (in micro-s).
-    '''
     t = t or int((datetime.datetime.utcnow() - UTC_0).total_seconds() * 1e6)
     self.bbox = (
       min(self.bbox[0], x),
@@ -79,78 +71,65 @@ class Stroke(object):
     )
     b.stroke_add_timed(self._stroke, x, y, t)
 
+  ## Creates a [@ref libsr.StrokeIter] over this [@ref libsr.Stroke]'s
+  # [@ref libsr.Point]s.
+  #
+  # @return The iterator.
   def __iter__(self):
-    '''Creates a ``StrokeIter`` over this ``Stroke``.
-
-    Returns:
-      The iterator.
-    '''
     return StrokeIter(self)
 
+  ## Saves the underlying stroke to file in a libsr-specific way.
+  #
+  # @param fname [@ref str] The file name to save to.
   def save(self, fname):
-    '''Saves the underlying stroke to file in a libsr-specific way.
-
-    Args:
-      fname, str: The file name to save to.
-    '''
     b.stroke_save(self._stroke, str(fname))
 
+  ## Pickles this [@ref libsr.Stroke].
+  #
+  # @param fname [@ref str] The file name to pickle to.
   def pickle(self, fname):
-    '''Pickles the Stroke.'''
     with open(fname, 'w') as f:
       pickle.dump(self, f)
 
+  ## Loads a stroke stroke in a `libsr`-specific way and returns it.
+  #
+  # @param fname [@ref str] The file name to save to.
+  #
+  # @return [@ref libsr.Stroke] The stroke.
   @classmethod
   def load(cls, fname):
-    '''Loads a stroke stroke in a libsr-specific way and returns it.
-
-    Args:
-      fname, str: The file name to save to.
-
-    Returns:
-      The stroke.
-    '''
     return Stroke(b.stroke_from_file(str(fname)))
 
+  ## Unpickles the Stroke in `fname`.
+  #
+  # @return [@ref libsr.Stroke] The [@ref libsr.Stroke] object in `fname`.
   @classmethod
   def unpickle(self, fname):
-    '''Unpickles the Stroke in ``fname``.
-
-    Returns:
-      The ``Stroke`` object in ``fname``.
-    '''
     with open(fname, 'r') as f:
       return pickle.load(f)
 
 
+## An iterator over a Stroke object.
 class StrokeIter(object):
-  '''An iterator over a Stroke object.'''
+  ## Creates a new iterator over a stroke.
+  #
+  # @param stroke [@ref libsr.Stroke] The stroke to iterate over.
   def __init__(self, stroke):
-    '''Creates a new iterator over a stroke.
-
-    Args:
-      stroke, Stroke: The stroke to iterate over.
-    '''
     self._stroke = stroke._stroke
     self.i = 0
 
+  ## Returns itself.
+  #
+  # @return [@ref libsr.StrokeIter] `self`
   def __iter__(self):
-    '''Returns itself.
-
-    Returns:
-      ``self``
-    '''
     return self
 
+  ## Gets the next point in the underlying stroke as an ``(x, y, t)`` tuple.
+  #
+  # @return [@ref tuple] The next point as an `(x, y, t)` tuple.
+  #
+  # @throws [@ref StopIteration] when there are no more points.
   def next(self):
-    '''Gets the next point in the underlying stroke as an ``(x, y, t)`` tuple.
-
-    Returns:
-      The next point as an ``(x, y, t)`` tuple.
-
-    Raises:
-      :exc:`StopIteration` when there are no more points.
-    '''
     if self.i >= self._stroke.num:
       raise StopIteration()
     p = b.stroke_get(self._stroke, self.i)
@@ -158,18 +137,19 @@ class StrokeIter(object):
     return Point(p)
 
 
+## Wraps a `point_t` structure (defined in [@ref src/common/point_t.h]) into a
+# Pythonic class.
 class Point(object):
   # Store this here so we can call it when Python starts shutting down.
   point_destroy = b.point_destroy
 
-  '''Wraps a point_t object (from C).'''
-  def __init__(self, _point=None):
-    '''Creates a new point_t object wrapped around ``_point`` or a new `point_t`
-    object.
+  ## Creates a new point_t object wrapped around ``_point`` or a new `point_t`
+  # object.
 
-    Args:
-      _point, point_t: (default: new point_t) The `point_t` to wrap.
-    '''
+  # @param _point [@ref point_t] (default: new [@ref point_t]) The
+  #               [@ref point_t] to wrap.  If this is `None`, manages its own
+  #               memory.
+  def __init__(self, _point=None):
     if _point:
       self.created_point = False
       self._point = _point
@@ -177,31 +157,31 @@ class Point(object):
       self.created_point = True
       self._point = b.point_create()
 
+  ## Destroys the underlying [@ref point_t] object.
   def __del__(self):
-    '''Destroys the underlying point_t object.'''
     if self.created_point:
       self.point_destroy(self._point)
 
+  ## Generates and returns a [@ref str] of form `i: (x, y) @t`.
   def __repr__(self):
     return '#%d: (%d,%d) @%d' % (self.i, self.x, self.y, self.t)
 
+  ## Generates and returns a [@ref str] of form `Point(x, y, t, i)`.
   def __str__(self):
     return 'Point(%d, %d, %d, %d)' % (self.x, self.y, self.t, self.i)
 
+  ## Returns the `(x, y)` tuple of this point.
+  #
+  # @return [@ref tuple] The `(x, y)` coordinates of this point.
   def pos(self):
-    '''Returns the ``(x, y)`` tuple of this point.
-
-    Returns:
-      The ``(x, y)`` coordinates of this point.
-    '''
     return self._point.x, self._point.y
 
+  ## Passed attribute access to the underlying [@ref point_t] object.
   def __getattr__(self, attr):
-    '''Passed attribute access to the underlying `point_t` object.'''
     return getattr(self._point, attr)
 
 
-# Simple test to ensure everything seems to work.
+# Simple test to ensure the API seems to work.
 if __name__ == '__main__':
   stroke = Stroke()
   for i in xrange(10, 110, 10):
@@ -225,8 +205,7 @@ if __name__ == '__main__':
         pass
 
 
-# Debugging help
-
+## Debugging help; generates a random stroke.
 def _make_random_stroke(num_pts=20, max_int=100):
   stroke = Stroke()
   for x, y in ((random.randrange(max_int), random.randrange(max_int))
