@@ -252,7 +252,7 @@ static void _process_stroke(const stroke_t* strk) {
 
   // Compute length between min and max, then normalize.
   double sub_length = 0;
-  if (max_i < min_i) { swap(int, max_i, min_i); }
+  if (max_i < min_i) { SWAP(max_i, min_i); }
   for (int i = min_i + 1; i < max_i; i++) {
     sub_length += point2d_distance(&ps->pts[i-1].p2d, &ps->pts[i].p2d);
   }
