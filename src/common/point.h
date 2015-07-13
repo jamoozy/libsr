@@ -5,9 +5,11 @@
 #include <stdlib.h>
 #include <math.h>
 
-// A simple 2D point.
-//   x: The X-coordinate.
-//   y: The Y-coordinate.
+/*! A simple 2D point.
+ *
+ * @param x The X-coordinate.
+ * @param y The Y-coordinate.
+ */
 #define POINT2D_BODY long x; long y;
 #define POINT2D_STRUCT struct { POINT2D_BODY }
 #ifndef SWIG
@@ -15,10 +17,12 @@
 #endif
 typedef POINT2D_STRUCT point2d_t;
 
-// A 2D point with timestamp;
-//   x: The X-coordinate.
-//   y: The Y-coordinate.
-//   t: Unix time of creation (for drawn points)
+/*! A 2D point with timestamp;
+ *
+ * @param x The X-coordinate.
+ * @param y The Y-coordinate.
+ * @param t Unix time of creation (for drawn points)
+ */
 #ifdef SWIG
 #define POINT2DT_BODY POINT2D_BODY long t;
 #else
@@ -30,11 +34,12 @@ typedef POINT2D_STRUCT point2d_t;
 #endif
 typedef POINT2DT_STRUCT point2dt_t;
 
-// A point structure with coordinates in space, time, and index.
-//   x: The X-coordinate.
-//   y: The Y-coordinate.
-//   t: Unix time of creation (for drawn points)
-//   i: Index (for strokes)
+/*! A point structure with coordinates in space, time, and index.
+ * @param x The X-coordinate.
+ * @param y The Y-coordinate.
+ * @param t Unix time of creation (for drawn points)
+ * @param i Index (for strokes)
+ */
 #ifdef SWIG
 #define POINT_BODY POINT2DT_BODY long i;
 #else
@@ -46,28 +51,50 @@ typedef POINT2DT_STRUCT point2dt_t;
 #endif
 typedef POINT_STRUCT point_t;
 
-// Creates a point.
+/*! Creates a point.  The caller must call [@ref point_destroy(point_t*)] to
+ * free the memory allocated by this function.
+ *
+ * @return a new `point_t`
+ */
 point_t* point_create();
 
-// Creates a point at a specific place.
-//   x: The X coordinate.
-//   y: The Y coordinate.
+/*! Creates a point at a specific place.  The caller must call
+ * [@ref point_destroy(point_t*)] to free the memory allocated by this function.
+ *
+ * @param x The X coordinate.
+ * @param y The Y coordinate.
+ *
+ * @return [@ref point_t]
+ */
 point_t* point_create_coords(long x, long y);
 
-// Creates a timed point.
-//   x: The X coordinate.
-//   y: The Y coordinate.
-//   t: The unix time it was created.
+/*! Creates a timed point.  The caller must call [@ref point_destroy(point_t*)]
+ * to free the memory allocated by this function.
+ *
+ * @param x The X coordinate.
+ * @param y The Y coordinate.
+ * @param t The unix time it was created.
+ *
+ * @return [@ref point_t]
+ */
 point_t* point_create_timed(long x, long y, long t);
 
-// Creates a fully-populated point.
-//   x: The X coordinate.
-//   y: The Y coordinate.
-//   t: The unix time it was created.
-//   i: The index in the stroke.
+/*! Creates a fully-populated point.  The caller must call
+ * [@ref point_destroy(point_t*)] to free the memory allocated by this function.
+ *
+ * @param x The X coordinate.
+ * @param y The Y coordinate.
+ * @param t The unix time it was created.
+ * @param i The index in the stroke.
+ *
+ * @return [@ref point_t]
+ */
 point_t* point_create_full(long x, long y, long t, long i);
 
-// Destroys (frees the memory of) a point.
+/*! Destroys (frees the memory of) a point.
+ *
+ * @param self The point to destroy.
+ */
 void point_destroy(point_t* self);
 
 
@@ -76,31 +103,59 @@ void point_destroy(point_t* self);
 // ------------------------------ Point Utils ------------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Computes the distance from a to b.
+/*!
+ * Computes the distance from `a` to `b`.
+ *
+ * @param a A [@ref point_t].
+ * @param b Another [@ref point_t].
+ *
+ * @return The distance between the points.
+ */
 static inline double point2d_distance(const point2d_t* a, const point2d_t* b) {
   const long diff_x = a->x - b->x;
   const long diff_y = a->y - b->y;
   return sqrt(diff_x * diff_x + diff_y * diff_y);
 }
 
-// Computes the angle from a to b.
+/*! Computes the angle between two lines, both with an endpoint at the origin
+ * (`(0, 0`) and the other at `a` and `b` respectively.
+ *
+ * @param a The endpoint of one line.
+ * @param a The endpoint of the other line.
+ *
+ * @return The angle between the lines.
+ */
 static inline double point2d_angle_to(const point2d_t* a, const point2d_t* b) {
   return atan2(b->y - a->y, b->x - a->x);
 }
 
-// Accumulates the value of b into a.
+/*! Accumulates the value of b into a.
+ *
+ * @param a The destination point.
+ * @param b The source point.
+ */
 static inline void point2d_accum(point2d_t* a, const point2d_t* b) {
   a->x += b->x;
   a->y += b->y;
 }
 
-// Divides a point2d_t by a scalar.
+/*! Divides a [@ref point2d_t] by a scalar.
+ *
+ * @param a A point.
+ * @param s A scalar to divide by.
+ */
 static inline void point2d_div(point2d_t* a, double s) {
   a->x /= s;
   a->y /= s;
 }
 
-// Finds the point between a and b.
+/*! Finds the point exactly between `a` and `b`.
+ *
+ * @param a A [@ref point2d_t]
+ * @param b Another [@ref point2d_t]
+ *
+ * @return The point directly between `a` and `b`.
+ */
 static inline void point2d_center(point2d_t* out,
     const point2d_t* a, const point2d_t* b) {
   assert(a->x != b->x || a->y != b->y);
@@ -108,8 +163,14 @@ static inline void point2d_center(point2d_t* out,
   out->y = (a->y + b->y) / 2;
 }
 
-// Computes 2 points on the perpendicular bisector through the midpoint of the
-// line segment defined by a and b.
+/*! Computes 2 points on the perpendicular bisector through the midpoint of the
+ * line segment defined by `a` and `b`.
+ *
+ * @param o1 One output point.
+ * @param l2 Another output point.
+ * @param a An input point.
+ * @param b Another input point.
+ */
 void point2d_bis(point2d_t* o1, point2d_t* o2,
     const point2d_t* a, const point2d_t* b);
 
