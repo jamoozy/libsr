@@ -124,7 +124,7 @@ class StrokeIter(object):
   def __iter__(self):
     return self
 
-  ## Gets the next point in the underlying stroke as an ``(x, y, t)`` tuple.
+  ## Gets the next point in the underlying stroke as an `(x, y, t)` tuple.
   #
   # @return [@ref tuple] The next point as an `(x, y, t)` tuple.
   #
@@ -143,7 +143,7 @@ class Point(object):
   # Store this here so we can call it when Python starts shutting down.
   point_destroy = b.point_destroy
 
-  ## Creates a new point_t object wrapped around ``_point`` or a new `point_t`
+  ## Creates a new point_t object wrapped around `_point` or a new `point_t`
   # object.
 
   # @param _point [@ref point_t] (default: new [@ref point_t]) The
