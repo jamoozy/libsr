@@ -39,7 +39,8 @@ class Stroke(object):
   def __len__(self):
     return self._stroke.num
 
-  ## Gets the `i`th point from this stroke.
+  ## Gets the `i`th point from this stroke.  If `i` is a slice, gets the slice
+  # as a generator.
   #
   # @param i [@ref int] The index to the stroke to get.
   #
