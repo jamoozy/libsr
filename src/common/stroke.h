@@ -1,3 +1,9 @@
+/*! @file stroke.h
+ * Creates an object-like `stroke_t` structure.
+ *
+ * For file I/O, see `stroke_save()` and `stroke_from_file()`.
+ */
+
 #ifndef __stroke_h__
 #define __stroke_h__
 
@@ -8,9 +14,9 @@
  * user's pen moved during (and including) mouse up and mouse down events.
  */
 typedef struct {
-  long num;      ///< Number of points in the points array.
-  long size;     ///< Used size of points.
-  point_t* pts;  ///< The points.
+  long num;      //!< Number of points in the points array.
+  long size;     //!< Used size of points.
+  point_t* pts;  //!< The points.
 } stroke_t;
 
 /*! Creates a stroke with no points and the given size.
