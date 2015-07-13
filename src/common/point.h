@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-/*! A simple 2D point.
+/*! @struct point2d_t
+ * A simple 2D point.
  *
  * @param x The X-coordinate.
  * @param y The Y-coordinate.
@@ -17,7 +18,8 @@
 #endif
 typedef POINT2D_STRUCT point2d_t;
 
-/*! A 2D point with timestamp;
+/*! @struct point2dt_t
+ * A 2D point with timestamp;
  *
  * @param x The X-coordinate.
  * @param y The Y-coordinate.
@@ -34,7 +36,9 @@ typedef POINT2D_STRUCT point2d_t;
 #endif
 typedef POINT2DT_STRUCT point2dt_t;
 
-/*! A point structure with coordinates in space, time, and index.
+/*! @struct point_t
+ * A point structure with coordinates in space, time, and index.
+ *
  * @param x The X-coordinate.
  * @param y The Y-coordinate.
  * @param t Unix time of creation (for drawn points)
