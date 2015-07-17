@@ -1,3 +1,7 @@
+/*! @file point.c
+ * Implementation of interface defined in point.h.
+ */
+
 #include "point.h"
 
 point_t* point_create() {

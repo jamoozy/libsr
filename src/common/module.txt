@@ -1,0 +1,4 @@
+/*! @namespace common
+ * Collection of utilities and structures common to all sketch recognition
+ * libraries.
+ */

@@ -1,3 +1,7 @@
+/*! @file geom.c
+ * Implementation of interface defined in geom.h.
+ */
+
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
@@ -11,21 +15,21 @@
 // ----------------------- Line/Segment Intersection ------------------------ //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Has to do with the intersection technique described in:
-//    http://stackoverflow.com/questions/563198/
-//                 how-do-you-detect-where-two-line-segments-intersect
+/*! Has to do with the intersection technique described in:
+ * [http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect]
+ */
 typedef struct {
-  double t;
-  double u;
-  char intersects;  // Does this even intersect?
+  double t;         //!< Vector used for intersection computation.
+  double u;         //!< Vector used for intersection computation.
+  char intersects;  //!< Does this even intersect?
 } intersection_t;
 
-void _intersect(intersection_t*,
-    const point2d_t*, const point2d_t*, const point2d_t*, const point2d_t*);
-
-
-// Computes the intersection struct for the two lines defined by a1 --> a2 and
-// b1 --> b2.  t corresponds to the a's and u to the b's.
+/*! Performs the intersection technique described in:
+ * [http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect]
+ *
+ * Computes the intersection struct for the two lines defined by a1 --> a2 and
+ * b1 --> b2.  t corresponds to the a's and u to the b's.
+ */
 void _intersect(intersection_t* inter,
     const point2d_t* a1, const point2d_t* a2,
     const point2d_t* b1, const point2d_t* b2) {

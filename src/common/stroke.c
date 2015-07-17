@@ -1,3 +1,7 @@
+/*! @file stroke.c
+ * Implementation of interface defined in stroke.h.
+ */
+
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
