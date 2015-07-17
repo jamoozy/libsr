@@ -18,4 +18,5 @@ endif
 ################################################################################
 
 html-local :
-	doxygen $(srcdir)/Doxyfile
+	DIRS=`for d in \`cat 
+	(cat $(srcdir)/Doxyfile ; echo "INPUT = ") | doxygen -
