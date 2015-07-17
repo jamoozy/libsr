@@ -30,19 +30,20 @@ uninstall-local : $(UNINSTALL_SUBTASKS)
 clean-local : $(CLEAN_SUBTASKS)
 
 
+
 ################################################################################
 #                                    Python                                    #
 ################################################################################
 
 py_wrap = $(srcdir)/$(name)_wrap.c
-py_so = $(builddir)/_$(name).so
 py_gen = $(builddir)/$(name).py
+py_so = $(builddir)/_$(name).so
 py_dst = $(libdir)/python2.7/libsr
 
 python : $(py_so)
 
 $(py_wrap) $(py_gen) : $(i_file) $(c_headers)
-	swig -outdir $(builddir) -python -I$(c_src_dir) $(i_file)
+	swig -outdir $(srcdir) -python -I$(c_src_dir) $(i_file)
 
 $(py_so) : $(py_wrap) $(libsr_a)
 	$(CC) -shared -fPIC -I$(c_src_dir) -I/usr/include/python2.7 $(CFLAGS) $(LDFLAGS) $^ -o $@

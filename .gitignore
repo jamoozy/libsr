@@ -9,6 +9,7 @@ Makefile.in
 
 # SWIG stuff.
 /swig/bindings.py
+/swig/bindings_wrap.c
 
 # For tests/
 *.log
