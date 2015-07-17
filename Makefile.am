@@ -18,5 +18,4 @@ endif
 ################################################################################
 
 html-local :
-	DIRS=`for d in \`cat 
-	(cat $(srcdir)/Doxyfile ; echo "INPUT = ") | doxygen -
+	$(srcdir)/docs/build.rb -v --indir="$(srcdir)" --outdir="$(builddir)"
