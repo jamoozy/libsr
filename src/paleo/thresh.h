@@ -1,9 +1,10 @@
-/*! \addtogroup pal
+/*!
+ * \addtogroup pal
  * \{
  *
  * \file thresh.h
  * Defines the thresholds needed for PaleoSketch recognition.  For more info,
- * see the paper: \cite<PaleoSketch>.
+ * see the paper: \cite PaleoSketch.
  */
 
 #ifndef __paleo_thresh_h__

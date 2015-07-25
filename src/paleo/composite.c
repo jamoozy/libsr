@@ -151,3 +151,5 @@ pal_composite_result_t* pal_composite_test(const pal_stroke_t* stroke) {
 static void _split(stroke_t stroke[2], int x) {
 }
 
+
+/*! \} */

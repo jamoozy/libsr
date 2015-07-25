@@ -1,8 +1,13 @@
-/*! \file macros.h
- * Contains several convenience macros used across PaleoSketch's recognizers.
- *
+/*!
  * \addtogroup pal
  * \{
+ *
+ * \file test_macros.h
+ * Contains several convenience macros used across PaleoSketch's recognizers.
+ * These macros are to be used for convenience in Paleo test files.  They
+ * assume you have a global "context" struct that contains a "result" struct
+ * which inherits from Paleo results by including the PALEO_RESULT_UNION macro
+ * at its top.
  */
 
 #ifndef __pal_test_macros_h__
@@ -12,14 +17,8 @@
 #include <string.h>
 #include <assert.h>
 
-////////////////////////////////////////////////////////////////////////////////
-//    These macros are to be used for convenience in Paleo test files.  They  //
-//       assume you have a global "context" struct that contains a "result"   //
-//            struct which inherits from Paleo results by including the       //
-//                      PALEO_RESULT_UNION macro at its top.                  //
-////////////////////////////////////////////////////////////////////////////////
-
-/*! Resets the context for testing.  Assumes that the variable \c "context"
+/*!
+ * Resets the context for testing.  Assumes that the variable \c "context"
  * exists, is the current scope, and has both \c stroke and \c
  * stroke.result.possible fields.
  *
@@ -30,7 +29,8 @@
   context.result.possible = 1; \
 } while (0)
 
-/*! Convenience macro to set up the context's result as having failed.
+/*!
+ * Convenience macro to set up the context's result as having failed.
  *
  * \param msg The format string-formatted reason for failure.
  * \param ... The args to the format string.
@@ -46,7 +46,8 @@
   context.result.possible = 0; \
 } while (0)
 
-/*! Effectively "asserts" \c cond.  If \c cond is false, calls \c
+/*!
+ * Effectively "asserts" \c cond.  If \c cond is false, calls \c
  * CHECK_RTN_RESULT with \c msg and the variable arguments.
  *
  * \param cond The condition to check.
@@ -60,7 +61,8 @@
   } \
 } while (0)
 
-/*! Convenience macro to set the failure reason and return from the current
+/*!
+ * Convenience macro to set the failure reason and return from the current
  * function.
  *
  * \param msg The fmt string-formatted failure reason.

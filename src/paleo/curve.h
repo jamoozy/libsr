@@ -1,4 +1,4 @@
-/*! \addtogroup pal
+/*! \addtogroup pal PaleoSketch
  * \{
  *
  * \file curve.h
@@ -140,3 +140,5 @@ pal_curve_result_cpy(pal_curve_result_t* dst, const pal_curve_result_t* src) {
 }
 
 #endif // __pal_curve_h__
+
+/*! \} */

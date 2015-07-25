@@ -1,8 +1,9 @@
-/*! \file spiral.h
- * Defines the interface to the portion of PaleoSketch that recognizes spirals.
- *
- * \addtogroup
+/*!
+ * \addtogroup pal
  * \{
+ *
+ * \file spiral.h
+ * Defines the interface to the portion of PaleoSketch that recognizes spirals.
  */
 
 #ifndef __pal_spiral_h__

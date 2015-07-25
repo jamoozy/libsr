@@ -1,8 +1,9 @@
-/*! \file helix.h
- * Defines the interface for the PaleoSketch helix recognizer.
- *
+/*!
  * \addtogroup pal
  * \{
+ *
+ * \file helix.h
+ * Defines the interface for the PaleoSketch helix recognizer.
  */
 
 #ifndef __pal_helix_h__
@@ -38,27 +39,31 @@ typedef struct {
 //! Creates a new helix.
 pal_helix_t* helix_create();
 
-/* Destroys the helix by freeing its memory.
+/*!
+ * Destroys the helix by freeing its memory.
  *
  * \param self The helix to destroy.
  */
 void pal_helix_destroy(pal_helix_t* self);
 
-/* Does a deep copy of an helix.
+/*!
+ * Does a deep copy of an helix.
  *
  * \param dst The destination helix.
  * \param src The source helix.
  */
 #define pal_helix_cpy(dst,src) memcpy(dst, src, sizeof(pal_helix_t));
 
-/*! Computes \c num evenly spaced points.
+/*!
+ * Computes `num` evenly spaced points.
  *
  * \param self The helix.
- * \param p The point
+ * \param p The point.
+ * \param num The number of points to create.
  */
 void pal_helix_compute_points(const pal_helix_t* self, point2d_t* p, int num);
 
-/*! Computes a single point at the parametric value \c t.
+/*! Computes a single point at the parametric value `t`.
  *
  * \param self The helix.
  * \param p The return point.
@@ -74,7 +79,8 @@ void pal_helix_init();
 /*! De-initializes the curve test. */
 void pal_helix_deinit();
 
-/*! Test whether this is a helix.
+/*!
+ * Test whether this is a helix.
  *
  * \param stroke The stroke to test.
  *
@@ -82,7 +88,8 @@ void pal_helix_deinit();
  */
 const pal_helix_result_t* pal_helix_test(const pal_stroke_t* stroke);
 
-/* Does a deep copy of a helix result.
+/*!
+ * Does a deep copy of a helix result.
  *
  * \param dst The destination helix result.
  * \param src The source helix result.

@@ -1,6 +1,6 @@
 /*! \file paleo.h
  * The interface file defining the interface to PaleoSketch.  See
- * \cite<PaleoSketch>.
+ * \cite PaleoSketch.
  *
  * \addtogroup pal
  * \{
