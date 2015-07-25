@@ -1,0 +1,6 @@
+/*! \defgroup pal
+ * \namespace pal
+ *
+ * Collection of "classes", functions, structures, macros, etc. that implement
+ * the paper by Brandon Paulson entitled PaleoSketch \cite PaleoSketch.
+ */

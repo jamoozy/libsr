@@ -1,3 +1,9 @@
+/*! \file helix.c
+ *
+ * \addtogroup pal
+ * \{
+ */
+
 #include <config.h>
 #include <values.h>
 #include <math.h>
@@ -32,7 +38,7 @@ void pal_helix_compute_point(const pal_helix_t* self, point2d_t* p, double t) {
 // ------------------------------ Helix Shape ------------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
 
-// The context used for shape recognition.
+//! The context used for shape recognition.
 static pal_helix_context_t context;
 
 void pal_helix_init() {
@@ -41,6 +47,10 @@ void pal_helix_init() {
 
 void pal_helix_deinit() { }
 
+/*! Resets the internal helix context in prep for a new test.
+ *
+ * \param stroke The stroke to test.
+ */
 static inline void _reset(const pal_stroke_t* stroke) {
   bzero(&context, sizeof(pal_helix_context_t));
   RESET(stroke);
@@ -111,3 +121,5 @@ const pal_helix_result_t* pal_helix_test(const pal_stroke_t* stroke) {
 
   return &context.result;
 }
+
+/*! \} */

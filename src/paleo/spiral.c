@@ -1,3 +1,11 @@
+/*! \file spiral.c
+ * Implementation of interface defined in spiral.h.  Together, these files
+ * implement the PaleoSketch spiral recognizer, shape, and result.
+ *
+ * \addtogroup pal
+ * \{
+ */
+
 #include <config.h>
 #include <values.h>
 #include <math.h>
@@ -31,6 +39,7 @@ void pal_spiral_point_at(const pal_spiral_t* self, point2d_t* p, double t) {
 
 
 
+/*! The context used for recognition. */
 static pal_spiral_context_t context;
 
 void pal_spiral_init() {
@@ -39,6 +48,10 @@ void pal_spiral_init() {
 
 void pal_spiral_deinit() { }
 
+/*! Resets the spiral context to prep for a new recognition.
+ *
+ * \param stroke The stroke to recognize.
+ */
 static void _reset(const pal_stroke_t* stroke) {
   bzero(&context, sizeof(pal_spiral_context_t));
   context.stroke = stroke;
@@ -171,3 +184,5 @@ pal_spiral_test(const pal_stroke_t* stroke) {
   sp->theta_t = abs(sp->theta_t);
   return &context.result;
 }
+
+/*! \} */

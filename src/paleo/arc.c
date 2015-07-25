@@ -1,3 +1,11 @@
+/*! \file arc.c
+ * Implementation of interface defined in arc.h.  Together, these files
+ * implement the PaleoSketch arc recognizer, shape, and result.
+ *
+ * \addtogroup pal
+ * \{
+ */
+
 #include <config.h>
 #include <string.h>
 #include <strings.h>
@@ -38,13 +46,17 @@ void pal_arc_populate(pal_arc_t* self, const point2d_t* p1, const point2d_t* p2,
 // ------------------------------- Up & Down -------------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
 
-// The arc context for testing.
+/* The arc context for testing. */
 static pal_arc_context_t context;
 
 void pal_arc_init() { bzero(&context, sizeof(pal_arc_context_t)); }
 
 void pal_arc_deinit() { }
 
+/* Resets the global arc context.
+ *
+ * \param stroke The stroke to recognize, and thus to reset.
+ */
 static inline void _reset(const pal_stroke_t* stroke) {
   RESET(stroke);
   //bzero(&context, sizeof(pal_arc_test_context_t));
@@ -58,6 +70,12 @@ static inline void _reset(const pal_stroke_t* stroke) {
 // ------------------------------ The Arc Test ------------------------------ //
 ////////////////////////////////////////////////////////////////////////////////
 
+/* Implements the actual arc test on the stroke.
+ *
+ * \param stroke The stroke to recognize.
+ *
+ * \returns The recognized result.
+ */
 const pal_arc_result_t* pal_arc_test(const pal_stroke_t* stroke) {
   CHECK_RTN_RESULT(!stroke->closed, "Stroke closed.");
   CHECK_RTN_RESULT(!stroke->overtraced, "Stroke overtraced.");
@@ -140,3 +158,5 @@ const pal_arc_result_t* pal_arc_test(const pal_stroke_t* stroke) {
       &stroke->pts[0].p2d, &stroke->pts[1].p2d, &context.ideal.center, angle);
   return &context.result;
 }
+
+/*! \} */

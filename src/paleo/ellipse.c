@@ -1,3 +1,10 @@
+/*! \file ellipse.c
+ * Implements the interface defined in ellipse.h
+ *
+ * \addtogroup pal
+ * \{
+ */
+
 #include <config.h>
 #include <string.h>
 #include <strings.h>
@@ -57,13 +64,17 @@ pal_circle_t* pal_circle_create_with_point(long r, const point2d_t* c) {
 // ------------------------------- Up & Down -------------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
 
-// The ellipse context for testing.
+//! The ellipse context for testing.
 static pal_ellipse_context_t e_context;
 
 void pal_ellipse_init() { bzero(&e_context, sizeof(pal_ellipse_context_t)); }
 
 void pal_ellipse_deinit() { }
 
+/*! Resets the context in prep for the next ellipse text.
+ *
+ * \param stroke The stroke to test.
+ */
 static inline void _reset_el(const pal_stroke_t* stroke) {
   // 0-out e_context.
   bzero(&e_context, sizeof(pal_ellipse_result_t));
@@ -74,13 +85,17 @@ static inline void _reset_el(const pal_stroke_t* stroke) {
 }
 
 
-// The circle context for testing.
+//! The circle context for testing.
 static pal_circle_context_t c_context;
 
 void pal_circle_init() { bzero(&c_context, sizeof(pal_circle_context_t)); }
 
 void pal_circle_deinit() { }
 
+/*! Resets the context for a circle test.
+ *
+ * \param stroke The stroke to test.
+ */
 static inline void _reset_cir(const pal_stroke_t* stroke) {
   // 0-out e_context.
   bzero(&c_context, sizeof(pal_ellipse_result_t));
@@ -96,7 +111,7 @@ static inline void _reset_cir(const pal_stroke_t* stroke) {
 // --------------------------- The Ellipsis Test ---------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Make macros work for e_context.
+// Makes macros work for e_context.
 #define context e_context
 
 const pal_ellipse_result_t* pal_ellipse_test(const pal_stroke_t* stroke) {
@@ -226,6 +241,7 @@ const pal_ellipse_result_t* pal_ellipse_test(const pal_stroke_t* stroke) {
   return &e_context.result;
 }
 
+// Done with this for now.  Switch over to c_context (below).
 #undef context
 
 
@@ -234,7 +250,7 @@ const pal_ellipse_result_t* pal_ellipse_test(const pal_stroke_t* stroke) {
 // ---------------------------- The Circle Test ----------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Make macros work for c_context.
+// Makes macros work for c_context.
 #define context c_context
 
 const pal_circle_result_t* pal_circle_test(const pal_stroke_t* stroke) {
@@ -278,4 +294,7 @@ const pal_circle_result_t* pal_circle_test(const pal_stroke_t* stroke) {
   return &c_context.result;
 }
 
+// And finito!
 #undef context
+
+/*! \} */

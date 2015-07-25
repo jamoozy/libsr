@@ -1,4 +1,9 @@
 /*! \file paleo.h
+ * The interface file defining the interface to PaleoSketch.  See
+ * \cite<PaleoSketch>.
+ *
+ * \addtogroup pal
+ * \{
  */
 
 #ifndef  __paleo_h__
@@ -183,3 +188,5 @@ pal_type_e pal_last_type();
 const pal_stroke_t* pal_last_stroke();
 
 #endif  //__paleo_h__
+
+/*! \} */

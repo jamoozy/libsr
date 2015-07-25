@@ -1,3 +1,11 @@
+/*! \file paleo.c
+ * Implements the interface defined in paleo.h.  Utilizes all the
+ * implementations in line.h, circle.h, etc.
+ *
+ * \addtogroup pal
+ * @{
+ */
+
 #include <config.h>
 
 #include <assert.h>
@@ -20,19 +28,26 @@
 
 
 
-// Finds the type that Paleo thinks the stroke is.
+/*! Finds the type that Paleo thinks the stroke is. */
 #define TYPE() (paleo.h.elems[0].type)
 
+/*! Determines whether the type \c type has been added
+ *
+ * \param type The type to check for.
+ */
 #define TYPE_ADDED(type) (paleo.h.mask & PAL_MASK(type))
 
-// Adds the result to the hierarchy at the specified location without doing any
-// checks.
-//    I: The index to add the result at.
-//    TYPE: The type of the result.
-//    RES: The result.
-//
-// NOTE: a simple memcpy is sufficient here, because a deep copy of the original
-// result was already made down where PUSH_H and ENQ_H are called.
+/*! Adds the result to the hierarchy at the specified location without doing any
+ * checks.
+ *
+ * \param I The index to add the result at.
+ * \param TYPE The type of the result.
+ * \param RES The result.
+ *
+ * \note This is not a full deep copy
+ * A simple \c memcpy is sufficient here, because a deep copy of the original
+ * result was already made down where \c PUSH_H and \c ENQ_H are called.
+ */
 #define ADD_H_AT(I, TYPE, RES) do {                 \
   paleo.h.elems[I].type = PAL_TYPE(TYPE);           \
   paleo.h.elems[I].res = calloc(1, sizeof(RES));    \
@@ -41,10 +56,12 @@
   paleo.h.num++;                                    \
 } while (0)
 
-// Checks that the type of the result hasn't already been added before adding it
-// to the top of the hierarchy.
-//    TYPE: The type of the result.
-//    RES: The result.
+/*! Checks that the type of the result hasn't already been added before adding
+ * it to the top of the hierarchy.
+ *
+ * \param TYPE The type of the result.
+ * \param RES The result.
+ */
 #define PUSH_H(type, RES) do {                        \
   if (!TYPE_ADDED(type)) {                            \
     memmove(&paleo.h.elems[1], &paleo.h.elems[0],     \
@@ -53,10 +70,12 @@
   }                                                   \
 } while (0)
 
-// Checks that the type of the result hasn't already been added before adding it
-// to the end of the hierarchy.
-//    type: The type of the result.
-//    res: The result.
+/*! Checks that the type of the result hasn't already been added before adding
+ * it to the end of the hierarchy.
+ *
+ * \param type The type of the result.
+ * \param res The result.
+ */
 #define ENQ_H(type, res) do {         \
   if (!TYPE_ADDED(type)) {            \
     ADD_H_AT(paleo.h.num, type, res); \
@@ -68,9 +87,14 @@
 // ---------------------------- Paleo Up/Down ----------------------------- //
 //////////////////////////////////////////////////////////////////////////////
 
+/*! The paleo context. */
 static pal_context_t paleo;
 
-void _hier_init(pal_hier_t* h) {
+/*! Initializes the paleo heirarchy.
+ *
+ * \param h The hierarchy to init.
+ */
+static void _hier_init(pal_hier_t* h) {
   bzero(h, sizeof(pal_hier_t));
   for (int i = 0; i < PAL_TYPE_NUM; i++) {
     paleo.h.elems[i].type = PAL_TYPE_UNRUN;
@@ -111,53 +135,85 @@ void pal_deinit() {
 //////////////////////////////////////////////////////////////////////////////
 
 
-// Computes speed in px/s between the two points.
+/*! Computes speed in px/s between the two timed points.
+ *
+ * \param a A point.
+ * \param b Another point.
+ *
+ * \return The speed between the two points in pixels per second.
+ */
 static inline double _speed(const point2dt_t* a, const point2dt_t* b) {
   // Should not have a div/0 error because we made sure times didn't match.
   return point2d_distance((point2d_t*)a, (point2d_t*)b) / abs(b->t - a->t);
 }
 
-// Based on paper by Bo Yu & Shijie Cai in 2003 entitled:
-//   "A Domain-Independent System for Sketch Recognition"
-// See page 142 (PDF page 2) for the definition of direction.
-//
-// This finds the curvature defined by the two given points according to Yu et
-// al.'s method.  This function will return the "direction" (defined in the
-// paper) of the point at a given its next point b.
+/*! Based on paper by Bo Yu & Shijie Cai in 2003 entitled:
+ *   "A Domain-Independent System for Sketch Recognition"
+ * See \cite YuSketch page 142 (PDF page 2) for the definition of direction.
+ *
+ * This finds the curvature defined by the two given points according to Yu et
+ * al.'s method.  This function will return the "direction" of the point at a
+ * given its next point b.
+ *
+ * \param a A point.
+ * \param b Another point.
+ *
+ * \return The direction.
+ */
 static inline double _yu_direction(const point2d_t* a, const point2d_t* b);
 
-// Based on paper by Bo Yu & Shijie Cai in 2003 entitled:
-//   "A Domain-Independent System for Sketch Recognition"
-// See page 142 (PDF page 2) for the definition of direction.
-//
-// This finds the curvature given a section of a stroke defined by the window
-// size parameter "k" (see the paper for a full definition).  This function
-// assumes that there are 2k+1 points in 'sub_strk'.
+/*! Based on paper by Bo Yu & Shijie Cai in 2003 entitled:
+ *   "A Domain-Independent System for Sketch Recognition"
+ * See \cite YuSketch page 142 (PDF page 2) for the definition of direction.
+ *
+ * \note A note on implementation.
+ * This finds the curvature given a section of a stroke defined by the window
+ * size parameter \c k (see the paper for a full definition).  This function
+ * assumes that there are \f$2k+1\f$ points in \c sub_strk.  If this assumption
+ * is not met, this will cause memory corruption and/or a segfault.  I.e.,
+ * behavior is not defined.
+ *
+ * \param k Window size.
+ * \param sub_strk Pointer to the point at the center of the window.
+ *
+ * \return The curvature.
+ */
 static inline double _yu_curvature(int k, const pal_point_t* sub_strk);
 
-// Determines the simple dy/dx for b given a was the last point in the
-// stroke.
-//   a: The first point.
-//   b: The second point.
+/*! Determines the simple \f$\frac{dy}{dx}\f$ for \c b given a was the last
+ * point in the stroke.
+ *
+ * \param a The first point.
+ * \param b The second point.
+ *
+ * \return The simple \f$\frac{dx}{dy}\f$.
+ */
 static inline double _dy_dx_direction(const point2d_t* a, const point2d_t* b);
 
-// Based on PaleoSketch paper -- 2nd to last and final paragraphs.
-//
-// Finds corners in the paleo stroke by iteratively merging close corners and finding the most curved region to reassign the corner to.
+/*! Based on PaleoSketch \cite PaleoSketch -- 2nd to last and final paragraphs.
+ *
+ * Finds corners in the paleo stroke by iteratively merging close corners and
+ * finding the most curved region to reassign the corner to.
+ */
 static inline void _paulson_corners();
 
-#define K 3  // The default K used in the below computation.
+#define K 3  //!< The default K used to compute stroke point window.
 
-// Computes DCR of paleo.stroke.
+/*! Computes DCR of \c paleo.stroke. */
 static inline void _compute_dcr();
 
-// Breaks the stroke's tails off.
-//   first_i: The index of the first point (incl.).
-//   last_i: The index of the last point (incl.).
+/*! Breaks the stroke's tails off.
+ *
+ * \param first_i The index of the first point (incl.).
+ * \param last_i The index of the last point (incl.).
+ */
 static inline void _break_stroke(int first_i, int last_i);
 
-// Does pre-processing on a stroke to create a paleo stroke: a stroke with more
-// information, used by the individual recognizers.
+/*! Does pre-processing on a stroke to create a paleo stroke: a stroke with more
+ * information, used by the individual recognizers.
+ *
+ * \param strk The stroke to process/recognize.
+ */
 static void _process_stroke(const stroke_t* strk) {
   pal_stroke_t* ps = &paleo.stroke;
   ps->pts = calloc(strk->num, sizeof(pal_point_t));
@@ -324,19 +380,26 @@ static inline double _dy_dx_direction(const point2d_t* a, const point2d_t* b) {
   return (b->y - a->y) / (b->x - a->x);
 }
 
-// Merges corners sufficiently close together.  Returns whether something was
-// changed in the crnrs array.
+/* Merges corners sufficiently close together.  Returns whether something was
+ * changed in the \c crnrs array.
+ *
+ * \return A \c bool value; 0 means nothing merged, 1 means something was.
+ */
 static inline short _paulson_merge_corners();
 
-// Find highest curvature in each corner's neighbor hood and set that as the
-// corner.  Returns whether something was changed in the crnrs array.
+/* Find highest curvature in each corner's neighbor hood and set that as the
+ * corner.  Whether something was changed in the \c crnrs array.
+ *
+ * \return A \c bool value; 0 means nothing changed, 1 means something was.
+ */
 static inline short _paulson_replace_corners();
 
 static inline void _paulson_corners() {
   assert(paleo.stroke.num_crnrs == 0);
   assert(paleo.stroke.crnrs == NULL);
 
-#define _pal_add_to_corners(i) \
+  // Convenience macro to make lines shorter.
+  #define _pal_add_to_corners(i) \
   (paleo.stroke.crnrs[paleo.stroke.num_crnrs++] = &paleo.stroke.pts[(i)])
 
   // init corners with 0th point.
@@ -364,7 +427,7 @@ static inline void _paulson_corners() {
   paleo.stroke.crnrs = realloc(paleo.stroke.crnrs,
       paleo.stroke.num_crnrs * sizeof(pal_point_t*));
 
-#undef _pal_add_to_corners
+  #undef _pal_add_to_corners
 
   // Merge corners and replace with highest in region until no change.
   while(_paulson_merge_corners() || _paulson_replace_corners());
@@ -465,9 +528,13 @@ static inline void _break_stroke(int first_i, int last_i) {
 }
 
 
-// Finds the rank of the shape in a result.
-//    type: The type of the shape.
-//    res: The result.
+/*! Finds the rank of the shape in a result.
+ *
+ * \param type The type of the shape.
+ * \param res The result.
+ *
+ * \return The rank of the shape.
+ */
 static inline int _rank_res(pal_type_e type, const void* res);
 
 pal_type_e pal_recognize(const stroke_t* stroke) {
@@ -689,3 +756,5 @@ int pal_shape_rank(pal_type_e type, const void* shape) {
 pal_type_e pal_last_type() { return TYPE(); }
 
 const pal_stroke_t* pal_last_stroke() { return &paleo.stroke; }
+
+/*! @} */

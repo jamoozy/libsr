@@ -1,3 +1,10 @@
+/*! \addtogroup pal
+ * \{
+ *
+ * \file composite.c
+ * Implements the interface defined in composite.h.
+ */
+
 #include <string.h>
 #include <strings.h>
 
@@ -136,6 +143,11 @@ pal_composite_result_t* pal_composite_test(const pal_stroke_t* stroke) {
   // why it shouldn't be put here, so here it goes.
 }
 
+/*! Splits the stroke into 2 separate substrokes and re-runs the composite test.
+ *
+ * \param stroke
+ * \param x
+ */
 static void _split(stroke_t stroke[2], int x) {
 }
 

@@ -1,3 +1,10 @@
+/*! \addtogroup pal
+ * \{
+ *
+ * \file curve.c
+ * Implements the interface defined in curve.h
+ */
+
 #include <config.h>
 #include <string.h>
 #include <strings.h>
@@ -49,8 +56,29 @@ pal_curve_t* pal_curve_create_points(long num, const point2d_t* points) {
   return self;
 }
 
-static void _b(
-    point2d_t* p, const point2d_t* pts, int num_pts, int i, int j, double t) {
+/*! Computes a single point in a Bézier curve recursively using the following
+ * general method.
+ *
+ * The base case can be defined as the Bézier curve containing one control
+ * point.  This curve is just the point, thus:
+ * \f[ B_0(t) = B_{p_0}(t) = p_0 \f]
+ *
+ * The general Bézier curve is a linear combination of the lower-dimensional
+ * curves.  Thus, the recursive definition is:
+ * \f{eqnarray*}{
+ *  B_n(t) &=& B_{p_0,p_1,\ldots,p_n} \\
+ *         &=& (1-t)B_{p_0,\ldots,p_{n-1}}(t) + tB_{p_1,\ldots,p_n}(t)
+ * \f}
+ *
+ * \param point The return point.
+ * \param pts The control points of the curve.
+ * \param num_pts The number of control points.
+ * \param i The index of the first control point to use.
+ * \param j The index of the last control point to use.
+ * \param t The parametric value of the point.
+ */
+static void
+_b(point2d_t* p, const point2d_t* pts, int num_pts, int i, int j, double t) {
   // First, check the params.
   assert(0 <= i && i <= j && j < num_pts);
   assert(0 <= t && t <= 1);
@@ -89,7 +117,7 @@ void pal_curve_util_compute_point(point2d_t *p,
 // ----------------------------- Test Functions ----------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
 
-// The curve test context.
+//! The curve test context.
 static pal_curve_context_t context;
 
 void pal_curve_init() { bzero(&context, sizeof(pal_curve_context_t)); }
@@ -103,12 +131,34 @@ static void _reset(const pal_stroke_t* stroke) {
 }
 
 
-// The inverse of the M4 matrix (see docs/bezier.pdf).
+/*! The inverse of the M4 matrix.  See docs/bezier.pdf for complete details.
+ *
+ * The resultant matrix looks like this:
+ * \f[
+ *   \left[\begin{array}{cccc}
+ *     0 & 0 & 0 & 1 \\
+ *     0 & 0 & ^1/_3 & 1 \\
+ *     0 & ^1/_3 & ^2/_3 & 1 \\
+ *     1 & 1 & 1 & 1
+ *   \end{array}\right]
+ * \f]
+ */
 static const double M4_INV[] = {
   0, 0, 0, 1, 0, 0, 1.0/3, 1, 0, 1.0/3, 2.0/3, 1, 1, 1, 1, 1
 };
 
-// The inverse of the M5 matrix (see docs/bezier.pdf).
+/*! The inverse of the M5 matrix (see docs/bezier.pdf).
+ * The resultant matrix looks like this:
+ * \f[
+ *   \left[\begin{array}{ccccc}
+ *     0 & 0 & 0 & 0 & 1 \\
+ *     0 & 0 & 0 & ^1/_4 & 1 \\
+ *     0 & 0 & ^1/_6 & ^1/_2 & 1 \\
+ *     0 & ^1/_4 & ^1/_2 & ^3/_4 & 1 \\
+ *     1 & 1 & 1 & 1 & 1
+ *   \end{array}\right]
+ * \f]
+ */
 static const double M5_INV[] = {
   0, 0, 0, 0, 1,
   0, 0, 0, .25, 1,
@@ -123,11 +173,24 @@ static const double M5_INV[] = {
 // ------------------------------- Curve Test ------------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Attempt to fit the stroke to a Bezier curve of degree d.
-void _fit(const double* m_inv, const int d);
+/*! Attempt to fit the stroke to a Bezier curve of degree \c d.
+ *
+ * \param m_inv inverse of M matrix.
+ * \param d Degree of the Bézier curve.
+ *
+ * \note
+ * The degree of the curve cannot be anything but 4 or 5.
+ */
+static void _fit(const double* m_inv, const int d);
 
-// Compute the squared distance between two points (for square error
-// calculation).
+/*! Compute the squared distance between two points (for square error
+ * calculation).
+ *
+ * \param a One point.
+ * \param b Another point.
+ *
+ * \return The squared error.
+ */
 static inline double _sq_err(const point2d_t a, const point2d_t b) {
   double dx = b.x-a.x;
   double dy = b.y-a.y;
@@ -191,11 +254,29 @@ const pal_curve_result_t* pal_curve_test(const pal_stroke_t* stroke) {
   return &context.result;
 }
 
-// Finds the inverse of the nxn matrix m, m_inv.
-int _inv(double* m_inv, const double* m, int n);
+/*! Finds the inverse of the \f$n\times n\f$ matrix \c m, \c m_inv.
+ *
+ * \param m_inv Return value: the inverted (square) matrix \c m.
+ * \param m The input (square) matrix.
+ * \param n The dimension of the matrices.
+ *
+ * \return 0 on success, 1 on failure.
+ *
+ * \see LAPACKE_dgetrf
+ */
+static inline int _inv(double* m_inv, const double* m, int n);
 
-// Multiplies the 2 nxn matrices 'a' and 'b' and puts the result into 'c'.
-// 'a' is assumed to be nxk and 'b' is assumed to be kxm, so 'c' will be nxm.
+/*! Multiplies the 2 \f$n\times n\f$ matrices \c a and \c b and puts the result
+ * into \c c.  \c a is assumed to be \f$n\times k\f$ and \c b is assumed to be
+ * \f$k\times m\f$ so \c c will be \f$n\times m\f$.
+ *
+ * \param c The result.
+ * \param a A matrix.
+ * \param b Another matrix.
+ * \param m A dimension.
+ * \param k A dimension.
+ * \param n A dimension.
+ */
 static inline void _mul(double* c, const double* a, const double* b, int m, int k, int n);
 
 void _fit(const double* m_inv, const int d) {
@@ -280,7 +361,7 @@ void _fit(const double* m_inv, const int d) {
   free(T);
 }
 
-int _inv(double* m_inv, const double* m, int n) {
+static inline int _inv(double* m_inv, const double* m, int n) {
   memcpy(m_inv, m, n * n * sizeof(double));
   int* ipiv = calloc(n, sizeof(double));
 
@@ -306,3 +387,5 @@ static inline void _mul(double* c, const double* a, const double* b, int m, int 
   return cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
       m, n, k, 1, a, m, b, k, 0, c, m);
 }
+
+/*! \} */
