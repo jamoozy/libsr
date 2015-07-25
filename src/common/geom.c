@@ -1,4 +1,8 @@
-/*! @file geom.c
+/*!
+ * \addtogroup common
+ * \{
+ *
+ * \file geom.c
  * Implementation of interface defined in geom.h.
  */
 
@@ -15,7 +19,8 @@
 // ----------------------- Line/Segment Intersection ------------------------ //
 ////////////////////////////////////////////////////////////////////////////////
 
-/*! Has to do with the intersection technique described in:
+/*!
+ * Has to do with the intersection technique described in:
  * [http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect]
  */
 typedef struct {
@@ -24,7 +29,8 @@ typedef struct {
   char intersects;  //!< Does this even intersect?
 } intersection_t;
 
-/*! Performs the intersection technique described in:
+/*!
+ * Performs the intersection technique described in:
  * [http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect]
  *
  * Computes the intersection struct for the two lines defined by a1 --> a2 and
@@ -176,3 +182,5 @@ double geom_quad_area(const point2d_t* p1, const point2d_t* p2,
   }
   return area;
 }
+
+/*! \} */

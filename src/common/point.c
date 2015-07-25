@@ -1,4 +1,8 @@
-/*! @file point.c
+/*!
+ * \addtogroup common
+ * \{
+ *
+ * \file point.c
  * Implementation of interface defined in point.h.
  */
 
@@ -47,3 +51,5 @@ void point2d_bis(point2d_t* o1, point2d_t* o2,
   o2->x = c.x - cb.y;
   o2->y = c.y + cb.x;
 }
+
+/*! \} */

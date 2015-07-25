@@ -1,4 +1,8 @@
-/*! @file stroke.c
+/*!
+ * \addtogroup common
+ * \{
+ *
+ * \file stroke.c
  * Implementation of interface defined in stroke.h.
  */
 
@@ -11,8 +15,12 @@
 
 
 
-// Increases the size of the array of points in the stroke.  Usees assert.h to
-// ensure that new_size > old size.
+/*! Increases the size of the array of points in the stroke.  Uses `assert()` to
+ * ensure that `new_size > old size`.
+ *
+ * \param self The stroke to grow.
+ * \param new_size The size to make the stroke.
+ */
 static inline void _increase_point_size_to(stroke_t* self, long new_size) {
   assert(new_size > self->size);
   self->pts = realloc(self->pts, (self->size = new_size) * sizeof(point_t));
@@ -121,3 +129,5 @@ stroke_t* stroke_from_file(const char* fname) {
 point_t* stroke_get(const stroke_t* self, int i) {
   return &self->pts[i];
 }
+
+/*! \} */

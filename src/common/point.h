@@ -9,7 +9,32 @@
  * 2. `point2dt_t`
  * 3. `point_t`
  *
- * And several function-specific convenience functions.
+ * As well as several function-specific convenience functions and convenience
+ * macros for you to "extend" points.  For example, `pal_point_t`'s definition
+ * looks like this:
+ *
+ * \code{.c}
+ * typedef struct {
+ *   POINT_UNION;   //!< Inheriting from points.
+ *   int corner;    //!< Is this a corner?
+ *   double dir;    //!< Direction of stroke here.
+ *   double dy_dx;  //!< dy/dx wrt last point.
+ *   double sp;     //!< Speed of pen when drawing this point.
+ *   double curv;   //!< Curvature at this point.
+ * } pal_point_t;
+ * \endcode
+ *
+ * Note that it starts with the `POINT_UNION`.  This allows you to use all of
+ * the following syntax sugar:
+ *
+ * \code{.c}
+ * pal_point_t pal_point;
+ * int x = pal_point.x;
+ * long t = pal_point.t;
+ * point_t* point = &pal_point.p;
+ * point2dt_t point2dt* = &pal_point.p2dt;
+ * point2d_t point2d* = &pal_point.p2d;
+ * \endcode
  *
  * The structures defined here take advantage of unions and the way structures
  * are stored to disk with a little macro magic to create a kind of object

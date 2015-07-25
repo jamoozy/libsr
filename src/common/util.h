@@ -1,5 +1,13 @@
-/*! @file util.h
+/*!
+ * \addtogroup common
+ * \{
+ *
+ * \file util.h
  * A collection of several generally useful utility function.
+ *
+ * \note
+ * Min and max copied from the GNU manual:
+ * [https://gcc.gnu.org/onlinedocs/cpp/Duplication-of-Side-Effects.html#Duplication-of-Side-Effects]
  */
 
 #ifndef __util_h__
@@ -11,10 +19,6 @@
 
 //! Gets the current time.
 #define get_utime() ((long)time(NULL))
-
-// Min and max copied from the GNU manual:
-//    https://gcc.gnu.org/onlinedocs/cpp/
-//          Duplication-of-Side-Effects.html#Duplication-of-Side-Effects
 
 //! Gets the maximum of `X` and `Y`.
 #define MAX(X, Y)           \
@@ -53,3 +57,4 @@
 
 #endif  // __util_h__
 
+/*! \} */
