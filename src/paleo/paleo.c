@@ -44,18 +44,18 @@
  * checks.
  *
  * \param I The index to add the result at.
- * \param type The type of the result.
- * \param res The result.
+ * \param TYPE The type of the result.
+ * \param RES The result.
  *
  * \note This is not a full deep copy
  * A simple \c memcpy is sufficient here, because a deep copy of the original
  * result was already made down where \c PUSH_H and \c ENQ_H are called.
  */
-#define ADD_H_AT(I, type, res) do {                 \
-  paleo.h.elems[I].type = PAL_TYPE(type);           \
-  paleo.h.elems[I].res = calloc(1, sizeof(res));    \
-  memcpy(&paleo.h.elems[I].res, &res, sizeof(res)); \
-  paleo.h.mask &= PAL_MASK(type);                   \
+#define ADD_H_AT(I, TYPE, RES) do {                 \
+  paleo.h.elems[I].type = PAL_TYPE(TYPE);           \
+  paleo.h.elems[I].res = calloc(1, sizeof(RES));    \
+  memcpy(&paleo.h.elems[I].res, &RES, sizeof(RES)); \
+  paleo.h.mask &= PAL_MASK(TYPE);                   \
   paleo.h.num++;                                    \
 } while (0)
 
@@ -63,26 +63,26 @@
  * Checks that the type of the result hasn't already been added before adding
  * it to the top of the hierarchy.
  *
- * \param type The type of the result.
- * \param res The result.
+ * \param TYPE The type of the result.
+ * \param RES The result.
  */
-#define PUSH_H(type, res) do {                        \
-  if (!TYPE_ADDED(type)) {                            \
+#define PUSH_H(TYPE, RES) do {                        \
+  if (!TYPE_ADDED(TYPE)) {                            \
     memmove(&paleo.h.elems[1], &paleo.h.elems[0],     \
         (PAL_TYPE(NUM)-1) * sizeof(pal_hier_elem_t)); \
-    ADD_H_AT(0, type, res);                           \
+    ADD_H_AT(0, TYPE, RES);                           \
   }                                                   \
 } while (0)
 
 /*! Checks that the type of the result hasn't already been added before adding
  * it to the end of the hierarchy.
  *
- * \param type The type of the result.
- * \param res The result.
+ * \param TYPE The type of the result.
+ * \param RES The result.
  */
-#define ENQ_H(type, res) do {         \
-  if (!TYPE_ADDED(type)) {            \
-    ADD_H_AT(paleo.h.num, type, res); \
+#define ENQ_H(TYPE, RES) do {         \
+  if (!TYPE_ADDED(TYPE)) {            \
+    ADD_H_AT(paleo.h.num, TYPE, RES); \
   }                                   \
 } while(0)
 
