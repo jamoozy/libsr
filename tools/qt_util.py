@@ -1,25 +1,28 @@
 from PyQt5 import QtWidgets
 
 
-## Convenience class that creates a QMessageBox with Save, Don't Save, Cancel
+##
+# Convenience class that creates a QMessageBox with Save, Don't Save, Cancel
 # options.
 class SaveDestroyCancelBox(QtWidgets.QMessageBox):
-  ## \var message
+  ##
+  # \var message
   # (str) The message to print.
-
-  ## \var b_save
+  #
+  # \var b_save
   # (QButton) The save button.
-
-  ## \var b_destroy
+  #
+  # \var b_destroy
   # (QButton) The destroy button.
-
-  ## \var b_cancel
+  #
+  # \var b_cancel
   # (QButton) The cancel button.
-
-  ## \var cb
+  #
+  # \var cb
   # (method) Callback function.  Will be passed `self` and the pushed button.
 
-  ## Creates a new QMessageBox with a Save, Don't Save, and Cancel button.
+  ##
+  # Creates a new QMessageBox with a Save, Don't Save, and Cancel button.
   #
   # \param self The same thing `self` always represents.
   # \param parent (QWidget) The parent widget.
@@ -36,13 +39,29 @@ class SaveDestroyCancelBox(QtWidgets.QMessageBox):
     self.cb = cb
     self.buttonClicked.connect(self._cb)
 
-  ## Internal callback delegation.
+  ##
+  # Internal callback delegation.
   #
   # \param button (QButton) The button.
   def _cb(self, button):
     self.cb(self, button)
 
-## Pops up a small dialog with a message.
+##
+# Pops up a Yes/No question dialog.
+#
+# \param parent (QWidget) The dialog's parent.
+# \param message (str) The message to display.
+#
+# \return `True` if "Yes" was clicked, `False` otherwise.
+def yn_popup(parent, message):
+  popup = QtWidgets.QMessageBox(parent)
+  popup.setText(message)
+  popup.addButton("Yes", QtWidgets.QMessageBox.YesRole)
+  popup.addButton("No", QtWidgets.QMessageBox.NoRole)
+  return QtWidgets.QMessageBox.YesRole == popup.exec_()
+
+##
+# Pops up a small dialog with a message.
 #
 # \param parent (QWidget) The parent of the popup.
 # \param message (str) The message to display.
