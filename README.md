@@ -1,11 +1,11 @@
-= `libsr` =
+# `libsr`
 
 `libsr` is a sketch recognition library.  What is sketch recognition?  Well,
 it's a field of research that attempts to recognize a list of timestamped
 coordinates as some number of geometric shapes.
 
 
-== Building & Installing ==
+## Building & Installing
 
 `libsr` is still in its infancy!  Please contribute by downloading, compiling,
 and installing it, then the stroke collector and sending me the resultant files.
@@ -25,8 +25,9 @@ And for bindings into other languages (currently only Python):
 * Python Qt5 bindings.
 
 Do build its docs, you'll also need:
-* doxygen
-* graphviz
+* `doxygen`
+* `graphviz`
+* `pdflatex`
 
 To build `libsr` in a separate `build/` directory, start from the location you
 checked out `libsr` and run:
@@ -41,7 +42,7 @@ If all goes well, `/usr/local/lib/libsr.so` (and if you've installed `swig` and
 Python's Qt5 bindings, `/usr/local/lib/python2.7/libsr/`) will be created.
 
 
-== Contributing ==
+## Contributing
 
 Currently, I'm most in need of stroke data to test against!  To create some
 stroke data, download, build, and install `libsr` as described above; make sure
