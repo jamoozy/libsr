@@ -43,10 +43,10 @@ AC_TYPE_SIZE_T
 AC_SEARCH_LIBS([sqrt], [m], [], [
   AC_MSG_ERROR([No math library found.])
 ])
-AC_SEARCH_LIBS([cblas_dgemm], [openblas blas], [], [
+AC_SEARCH_LIBS([cblas_dgemm], [openblas cblas blas], [], [
   AC_MSG_ERROR([OpenBLAS/BLAS not found])
 ])
-AC_SEARCH_LIBS([LAPACKE_dgetri], [lapacke], [], [
+AC_SEARCH_LIBS([LAPACKE_dgetri], [lapacke lapack], [], [
   AC_MSG_ERROR([Lapacke (C version) not found.])
 ])
 PKG_CHECK_MODULES([CHECK], [check >= 0.9], [have_check="yes"], [
