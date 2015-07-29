@@ -24,9 +24,7 @@ check_shapes_LDADD = $(libs) @CHECK_LIBS@
 check_paleo_SOURCES = paleo.c \
 	$(top_srcdir)/src/paleo/paleo.h
 check_paleo_CFLAGS = @CHECK_CFLAGS@
-check_paleo_LDADD = \
-	$(libs) \
-	@CHECK_LIBS@
+check_paleo_LDADD = $(libs) @CHECK_LIBS@
 
 check_recs_SOURCES = recs.c \
 	$(top_srcdir)/src/common/point.h \
