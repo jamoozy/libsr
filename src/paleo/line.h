@@ -124,7 +124,8 @@ void pal_line_init();
 /*! De-initializes the line test by freeing its memory. */
 void pal_line_deinit();
 
-/* Does a deep copy of a line result.
+/*! Does a shallow copy of a line result.  Assumes the source and destination
+ * results have sufficient memory allocated.
  *
  * \param dst The destination line result.
  * \param src The source line result.
