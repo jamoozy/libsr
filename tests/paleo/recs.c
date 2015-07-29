@@ -52,37 +52,45 @@
 
 // ---- 1a ------------
 
-LINE_RESULT_CPY_TEST(c_line_result_cpy_possible,
-    );
+//LINE_RESULT_CPY_TEST(c_line_result_cpy_possible,
+//    );
 
 START_TEST(c_line_result_cpy_possible) {
-  pal_line_result_t res = { { 40.09, -2.1, "success", 1, }, 1 };
-  pal_line_result_t cpy;
+  // Keep it on the stack!
+  pal_line_sub_result_t sub_res = { 40.09, -2.1, "success", 1 };
+  pal_line_result_t res = { &sub_res, 1 };
 
-  pal_line_result_cpy(cpy, res);
+  // Set up memory for test.
+  pal_line_sub_result_t sub_res_cpy;
+  pal_line_result_t res_cpy;
+  bzero(&sub_res_cpy, sizeof(pal_line_sub_result_t));
+  bzero(&res_cpy, sizeof(pal_line_result_t));
+  res_cpy.res = &sub_res_cpy;
 
-  ck_assert_msg(res.num == cpy.num,
-      "num differs: %d vs. %d", res.num, cpy.num);
+  pal_line_result_cpy(&res_cpy, &res);
+
+  ck_assert_msg(res.num == res_cpy.num,
+      "num differs: %d vs. %d", res.num, res_cpy.num);
 
   for (int i = 0; i < res.num; i++) {
-    CK_ASSERT_PAL_RES_EQ(res.res[i], cpy.res[i]);
-    ck_assert_msg(res.res[i].num == cpy.res[i].num,
-        "num differs: %d vs. %d", res.num, cpy.num);
+    CK_ASSERT_PAL_RES_EQ(res.res[i], res_cpy.res[i]);
+    ck_assert_msg(res.res[i].line.num == res_cpy.res[i].line.num,
+        "num differs: %d vs. %d", res.num, res_cpy.num);
   }
 } END_TEST
 
 // ---- 1b ------------
 
 START_TEST(c_pline_result_cpy_3_pts_not) {
-  ck_assert_msg(0, "not impl")
+  ck_assert_msg(0, "not impl");
 } END_TEST
 
 START_TEST(c_pline_result_cpy_4_pts_possible) {
-  ck_assert_msg(0, "not impl")
+  ck_assert_msg(0, "not impl");
 } END_TEST
 
 START_TEST(c_pline_result_cpy_8_pts_not) {
-  ck_assert_msg(0, "not impl")
+  ck_assert_msg(0, "not impl");
 } END_TEST
 
 
