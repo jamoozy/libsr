@@ -9,13 +9,15 @@ import random
 import sys
 
 
-## A `libsr.Stroke` object wraps a C `stroke_t` (defined in
-# [\ref src/common/stroke.h]) into a Python-like class.
+##
+# A `libsr.Stroke` object wraps a C `stroke_t` (defined in src/common/stroke.h)
+# into a Python-like class.
 class Stroke(object):
-  ## \var _stroke
+  ##
+  # \var _stroke
   # (stroke_t) The underlying libsr C stroke struct/object.
-
-  ## \var bbox
+  #
+  # \var bbox
   # (tuple) The 4-tuple representing the bounding box of this stroke.  Contains
   #         the top-left coordinate as the first two elements, and the size as
   #         the second two.  I.e.: `(x, y, w, h)`.
@@ -23,7 +25,8 @@ class Stroke(object):
   ## Store this here so we can call it when Python starts shutting down.
   stroke_destroy = b.stroke_destroy
 
-  ## Creates a new Stroke.  Will either wrap `_stroke` or a newly-created
+  ##
+  # Creates a new Stroke.  Will either wrap `_stroke` or a newly-created
   # `stroke_t` object.
   #
   # \param _stroke `stroke_t` (optional) The stroke to wrap.  Defaults to a new
@@ -37,14 +40,16 @@ class Stroke(object):
   def __del__(self):
     self.stroke_destroy(self._stroke)
 
-  ## Gets the number of points in this stroke.
+  ##
+  # Gets the number of points in this stroke.
   #
   # \return `int` The number of points in the stroke.
   def __len__(self):
     return self._stroke.num
 
-  ## Gets the `i`th point from this stroke.  If `i` is a slice, gets the slice
-  # as a generator.
+  ##
+  # Gets the `i`th point from this stroke.  If `i` is a slice, gets the slice as
+  # a generator.
   #
   # \param i `int` The index to the stroke to get.
   #
@@ -63,7 +68,8 @@ class Stroke(object):
 
     return Point(b.stroke_get(self._stroke, int(i)))
 
-  ## Adds a point to this stroke.  If `t` is greater than that maximum int on
+  ##
+  # Adds a point to this stroke.  If `t` is greater than that maximum int on
   # this system, raises and OverflowError.
   #
   # \param x `int` X coordinate.
@@ -86,27 +92,30 @@ class Stroke(object):
             t, sys.maxint))
       b.stroke_add_timed(self._stroke, x, y, t)
 
-  ## Creates a `libsr.StrokeIter` over this `libsr.Stroke`'s
-  # `libsr.Point`s.
+  ##
+  # Creates a `libsr.StrokeIter` over this `libsr.Stroke`'s `libsr.Point`s.
   #
   # \return The iterator.
   def __iter__(self):
     return StrokeIter(self)
 
-  ## Saves the underlying stroke to file in a libsr-specific way.
+  ##
+  # Saves the underlying stroke to file in a libsr-specific way.
   #
   # \param fname `str` The file name to save to.
   def save(self, fname):
     b.stroke_save(self._stroke, str(fname))
 
-  ## Pickles this `libsr.Stroke`.
+  ##
+  # Pickles this `libsr.Stroke`.
   #
   # \param fname `str` The file name to pickle to.
   def pickle(self, fname):
     with open(fname, 'w') as f:
       pickle.dump(self, f)
 
-  ## Loads a stroke stroke in a `libsr`-specific way and returns it.
+  ##
+  # Loads a stroke stroke in a `libsr`-specific way and returns it.
   #
   # \param fname (str) The file name to save to.
   #
@@ -115,7 +124,8 @@ class Stroke(object):
   def load(cls, fname):
     return Stroke(b.stroke_from_file(str(fname)))
 
-  ## Unpickles the Stroke in `fname`.
+  ##
+  # Unpickles the Stroke in `fname`.
   #
   # \param fname (str) The name of the file to unpickle from.
   #
@@ -128,26 +138,30 @@ class Stroke(object):
 
 ## An iterator over a Stroke object.
 class StrokeIter(object):
-  ## \var _stroke
+  ##
+  # \var _stroke
   # (stroke_t) The underlying C stroke_t object to iterate over.
-
-  ## \var i
+  #
+  # \var i
   # (int) The index of the next point in the iteration.
 
-  ## Creates a new iterator over a stroke.
+  ##
+  # Creates a new iterator over a stroke.
   #
   # \param stroke `libsr.Stroke` The stroke to iterate over.
   def __init__(self, stroke):
     self._stroke = stroke._stroke
     self.i = 0
 
-  ## Returns itself.
+  ##
+  # Returns itself.
   #
   # \return `libsr.StrokeIter` `self`
   def __iter__(self):
     return self
 
-  ## Gets the next point in the underlying stroke as an `(x, y, t)` tuple.
+  ##
+  # Gets the next point in the underlying stroke as an `(x, y, t)` tuple.
   #
   # \return `tuple` The next point as an `(x, y, t)` tuple.
   #
@@ -160,23 +174,26 @@ class StrokeIter(object):
     return Point(p)
 
 
-## Wraps a `point_t` structure (defined in [\ref src/common/point.h]) into a
+##
+# Wraps a `point_t` structure (defined in [\ref src/common/point.h]) into a
 # Pythonic class.
 class Point(object):
-  ## \var created_point
+  ##
+  # \var created_point
   # (bool) Whether this Point class created the underlying point_t object
   #        referenced by `self._point`.  Do not alter this method!  If it is set
   #        to `True`, it will attempt to destroy `_point`.
-
-  ## \var _point
+  #
+  # \var _point
   # (point_t) A reference to the underlying C struct.
 
   ## Store this here so we can call it when Python starts shutting down.
   point_destroy = b.point_destroy
 
-  ## Creates a new `point_t` object wrapped around `_point` or a new `point_t`
+  ##
+  # Creates a new `point_t` object wrapped around `_point` or a new `point_t`
   # object.
-
+  #
   # \param _point `point_t` (default: new `point_t`) The `point_t` to wrap.  If
   #                         this is `None`, manages its own memory.
   def __init__(self, _point=None):
@@ -200,7 +217,8 @@ class Point(object):
   def __str__(self):
     return 'Point(%d, %d, %d, %d)' % (self.x, self.y, self.t, self.i)
 
-  ## Returns the `(x, y)` tuple of this point.
+  ##
+  # Returns the `(x, y)` tuple of this point.
   #
   # \return `tuple` The `(x, y)` coordinates of this point.
   def pos(self):
@@ -244,6 +262,5 @@ def _make_random_stroke(num_pts=20, max_int=100):
                for i in xrange(num_pts)):
     stroke.add(x, y)
   return stroke
-
 
 ## \endcond
