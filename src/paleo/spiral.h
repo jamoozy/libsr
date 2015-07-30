@@ -70,7 +70,9 @@ void pal_spiral_destroy(pal_spiral_t* self);
  */
 void pal_spiral_points(const pal_spiral_t* self, point2d_t *pts, int n);
 
-/* Computes a single point that is \c t through the spiral.
+/*!
+ * Computes a single point that is `t` through the spiral, where `t` is a
+ * parametric value s.t. \f$t\in[0,1]\f$.
  *
  * \param self The spiral to draw.
  * \param p The return point to compute.
@@ -119,6 +121,15 @@ pal_spiral_result_cln(const pal_spiral_result_t* self) {
   pal_spiral_result_t* clone = malloc(sizeof(pal_spiral_result_t));
   pal_spiral_result_cpy(clone, self);
   return clone;
+}
+
+/*!
+ * Destroys the result and frees its memory.
+ *
+ * \param self The result to free.
+ */
+static inline void pal_spiral_result_destroy(pal_spiral_result_t* self) {
+  free(self);
 }
 
 #endif // __pal_spiral_h__

@@ -3,6 +3,9 @@
  *
  * \file composite.h
  * Defines the interface to PaleoSketch's composite test submodule.
+ *
+ * \todo This is largely unimplemented, but it needs lots of designing, first.
+ * When there's time, do that.
  */
 
 #ifndef __pal_composite_h__
@@ -74,7 +77,8 @@ void pal_composite_cpy(pal_composite_t* dst, const pal_composite_t* src);
  */
 int pal_composite_rank(const pal_composite_t* self);
 
-/* Determines whether the composite is just a line/pline.
+/*!
+ * Determines whether the composite is just a line/pline.
  *
  * \param self The composite.
  *
@@ -125,6 +129,15 @@ pal_composite_result_cln(const pal_composite_result_t* self) {
   return clone;
 }
 
-#endif  // __paleo_composite_h__
+/*!
+ * Frees the memory associated with the result.
+ *
+ * \param self The result to free.
+ */
+static inline void pal_composite_result_destroy(pal_composite_result_t* self) {
+  free(self);
+}
+
+#endif  // __pal_composite_h__
 
 /*! \} */

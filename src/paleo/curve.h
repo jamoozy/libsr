@@ -164,6 +164,15 @@ pal_curve_result_cln(const pal_curve_result_t* self) {
   return clone;
 }
 
+/*!
+ * Destroys the result and frees its memory.
+ *
+ * \param self The result to free.
+ */
+static inline void pal_curve_result_destroy(pal_curve_result_t* self) {
+  free(self);
+}
+
 #endif // __pal_curve_h__
 
 /*! \} */

@@ -222,6 +222,15 @@ pal_ellipse_result_cln(const pal_ellipse_result_t* self) {
 }
 
 /*!
+ * Destroys the result and frees its memory.
+ *
+ * \param self The result to free.
+ */
+static inline void pal_ellipse_result_destroy(pal_ellipse_result_t* self) {
+  free(self);
+}
+
+/*!
  * Does the circle test on the paleo stroke.
  *
  * \param stroke The stroke to test.
@@ -254,6 +263,15 @@ pal_circle_result_cln(const pal_circle_result_t* self) {
   pal_circle_result_t* clone = malloc(sizeof(pal_circle_result_t));
   pal_circle_result_cpy(clone, self);
   return clone;
+}
+
+/*!
+ * Destroys the result and frees its memory.
+ *
+ * \param self The result to free.
+ */
+static inline void pal_circle_result_destroy(pal_circle_result_t* self) {
+  free(self);
 }
 
 #endif // __pal_ellipse_h__

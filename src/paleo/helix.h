@@ -114,6 +114,15 @@ pal_helix_result_cln(const pal_helix_result_t* self) {
   return clone;
 }
 
+/*!
+ * Destroys the result and frees its memory.
+ *
+ * \param self The result to free.
+ */
+static inline void pal_helix_result_destroy(pal_helix_result_t* self) {
+  free(self);
+}
+
 #endif // __pal_helix_h__
 
 /*! \} */

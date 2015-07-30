@@ -120,6 +120,15 @@ pal_arc_result_cln(const pal_arc_result_t* self) {
   return clone;
 }
 
+/*!
+ * Frees the memory associated with the arc result.
+ *
+ * \param self The result to free.
+ */
+static inline void pal_arc_result_destroy(pal_arc_result_t* self) {
+  free(self);
+}
+
 #endif // __pal_arc_h__
 
 /*! \} */

@@ -114,40 +114,41 @@ static void _hier_reset(pal_hier_t* h) {
     switch (e->type) {
       case PAL_TYPE_LINE:
       case PAL_TYPE_PLINE:
-        pal_line_result_destroy(e->res);
+        pal_line_result_destroy((pal_line_result_t*)e->res);
         break;
 
       case PAL_TYPE_CIRCLE:
-        pal_circle_result_destroy(e->res);
+        pal_circle_result_destroy((pal_circle_result_t*)e->res);
         break;
 
       case PAL_TYPE_ELLIPSE:
-        pal_ellipse_result_destroy(e->res);
+        pal_ellipse_result_destroy((pal_ellipse_result_t*)e->res);
         break;
 
       case PAL_TYPE_ARC:
-        pal_arc_result_destroy(e->res);
+        pal_arc_result_destroy((pal_arc_result_t*)e->res);
         break;
 
       case PAL_TYPE_CURVE:
-        pal_curve_result_destroy(e->res);
+        pal_curve_result_destroy((pal_curve_result_t*)e->res);
         break;
 
       case PAL_TYPE_SPIRAL:
-        pal_spiral_result_destroy(e->res);
+        pal_spiral_result_destroy((pal_spiral_result_t*)e->res);
         break;
 
       case PAL_TYPE_HELIX:
-        pal_helix_result_destroy(e->res);
+        pal_helix_result_destroy((pal_helix_result_t*)e->res);
         break;
 
       case PAL_TYPE_COMPOSITE:
-        pal_composite_result_destroy(e->res);
+        pal_composite_result_destroy((pal_composite_result_t*)e->res);
         break;
 
       default:
-        sprintf(stderr, "Fatal error: unrecognized type: %d", e->type);
+        fprintf(stderr, "Fatal error: unrecognized type: %d", e->type);
         abort();
+    }
   }
 
   bzero(h, sizeof(pal_hier_t));

@@ -165,6 +165,16 @@ pal_line_result_cln(const pal_line_result_t* self) {
 }
 
 /*!
+ * Destroys the result and frees its memory.
+ *
+ * \param self The result to free.
+ */
+static inline void pal_line_result_destroy(pal_line_result_t* self) {
+  free(self->res);
+  free(self);
+}
+
+/*!
  * Does the line test on the paleo stroke.
  *
  * \param stroke The stroke to test.
