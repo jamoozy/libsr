@@ -424,6 +424,10 @@ class Canvas(QtWidgets.QGraphicsView):
   def resizeEvent(self, e):
     self.scene().setSceneRect(0, 0, e.size().width(), e.size().height())
 
+  ## See `QGraphicsView.tabletEvent`
+  def tabletEvent(self, e):
+    print 'Received tablet event.  Treating as mouse event.'
+
   ## See `QGraphicsView.mousePressEvent`.
   def mousePressEvent(self, e):
     self.scene().addItem(StrokeGraphiscItem(self.stroke_pen, e.x(), e.y()))
@@ -481,7 +485,7 @@ class StrokeGraphiscItem(QtWidgets.QGraphicsItem):
   # \param x (float) X-coordinate of mouse event.
   # \param y (float) Y-coordinate of mouse event.
   def _add_scene_point(self, x, y):
-    self.stroke.add(int(x), int(y))
+    self.stroke.add(x, y)
     self.prepareGeometryChange()
 
   ##
