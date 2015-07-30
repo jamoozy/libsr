@@ -9,9 +9,6 @@ import random
 import sys
 
 
-## Used to get utime -- seconds since the epoc.
-UTC_0 = datetime.datetime(1970, 1, 1)
-
 ## A `libsr.Stroke` object wraps a C `stroke_t` (defined in
 # [\ref src/common/stroke.h]) into a Python-like class.
 class Stroke(object):
@@ -58,26 +55,36 @@ class Stroke(object):
               for j in xrange(i.start or 0,
                               i.stop or self._stroke.num,
                               i.step or 1))
-    if i < 0:
-      i += self._stroke.num
-    if i < 0 or self._stroke.num <= i:
-      raise IndexError('%d \\nin [0,%d)' % (i, self._stroke.num))
-    return Point(b.stroke_get(self._stroke, i))
 
-  ## Adds a point to this stroke.
+    if i < 0:   # Single wrap.
+      i += self._stroke.num
+    if i < 0 or self._stroke.num <= i:    # O.O.B.
+      raise IndexError('%d \\nin [0,%d)' % (i, self._stroke.num))
+
+    return Point(b.stroke_get(self._stroke, int(i)))
+
+  ## Adds a point to this stroke.  If `t` is greater than that maximum int on
+  # this system, raises and OverflowError.
   #
   # \param x `int` X coordinate.
   # \param y `int` Y coordinate.
   # \param t `int` (default: now) The time the point was made (in micro-s).
+  #
+  # \raises OverflowError if `t > sys.maxint`.
   def add(self, x, y, t=None):
-    t = t or int((datetime.datetime.utcnow() - UTC_0).total_seconds() * 1e6)
     self.bbox = (
       min(self.bbox[0], x),
       min(self.bbox[1], y),
       max(self.bbox[2], x),
       max(self.bbox[3], y),
     )
-    b.stroke_add_timed(self._stroke, x, y, t)
+    if t is None:
+      b.stroke_add_coords(self._stroke, x, y)
+    else:
+      if t > sys.maxint:
+        raise OverflowError("utime t greater than max int: %d > %d" % (
+            t, sys.maxint))
+      b.stroke_add_timed(self._stroke, x, y, t)
 
   ## Creates a `libsr.StrokeIter` over this `libsr.Stroke`'s
   # `libsr.Point`s.
@@ -148,7 +155,7 @@ class StrokeIter(object):
   def next(self):
     if self.i >= self._stroke.num:
       raise StopIteration()
-    p = b.stroke_get(self._stroke, self.i)
+    p = b.stroke_get(self._stroke, int(self.i))
     self.i += 1
     return Point(p)
 
