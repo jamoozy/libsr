@@ -113,6 +113,10 @@ START_TEST(c_curve_create)
   ck_assert(curve != NULL);
   ck_assert_int_eq(curve->num, 4);
   ck_assert(curve->pts != NULL);
+  for (int i = 0; i < 4; i++) {
+    ck_assert(curve->pts[i].x == 0);
+    ck_assert(curve->pts[i].y == 0);
+  }
   pal_curve_destroy(curve);
 }
 END_TEST
