@@ -99,6 +99,21 @@ pal_helix_result_cpy(pal_helix_result_t* dst, const pal_helix_result_t* src) {
   memcpy(dst, src, sizeof(pal_helix_result_t));
 }
 
+/*!
+ * Clones the result.  The caller is responsible for freeing the returned
+ * memory.
+ *
+ * \param self The result to clone.
+ *
+ * \return The cloned result.
+ */
+static inline pal_helix_result_t*
+pal_helix_result_cln(const pal_helix_result_t* self) {
+  pal_helix_result_t* clone = malloc(sizeof(pal_helix_result_t));
+  pal_helix_result_cpy(clone, self);
+  return clone;
+}
+
 #endif // __pal_helix_h__
 
 /*! \} */

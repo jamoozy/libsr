@@ -207,6 +207,21 @@ static inline void pal_ellipse_result_cpy(
 }
 
 /*!
+ * Clones the ellipse result.  The caller is responsible for freeing the
+ * returned memory.
+ *
+ * \param self The result to clone.
+ *
+ * \return The cloned result.
+ */
+static inline pal_ellipse_result_t*
+pal_ellipse_result_cln(const pal_ellipse_result_t* self) {
+  pal_ellipse_result_t* clone = malloc(sizeof(pal_ellipse_result_t));
+  pal_ellipse_result_cpy(clone, self);
+  return clone;
+}
+
+/*!
  * Does the circle test on the paleo stroke.
  *
  * \param stroke The stroke to test.
@@ -224,6 +239,21 @@ const pal_circle_result_t* pal_circle_test(const pal_stroke_t* stroke);
 static inline void pal_circle_result_cpy(
     pal_circle_result_t* dst, const pal_circle_result_t* src) {
   memcpy(dst, src, sizeof(pal_circle_t));
+}
+
+/*!
+ * Clones the circle result.  The caller is responsible for freeing the returned
+ * memory.
+ *
+ * \param self The result to clone.
+ *
+ * \return The cloned result.
+ */
+static inline pal_circle_result_t*
+pal_circle_result_cln(const pal_circle_result_t* self) {
+  pal_circle_result_t* clone = malloc(sizeof(pal_circle_result_t));
+  pal_circle_result_cpy(clone, self);
+  return clone;
 }
 
 #endif // __pal_ellipse_h__

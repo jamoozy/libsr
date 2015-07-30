@@ -10,10 +10,12 @@
 #include <config.h>
 
 #include <assert.h>
+#include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <strings.h>
 #include <values.h>
-#include <math.h>
 
 #include "common/util.h"
 
@@ -33,11 +35,22 @@
 #define TYPE() (paleo.h.elems[0].type)
 
 /*!
- * Determines whether the type \c type has been added
+ * Determines whether the type `TYPE` has been added
  *
- * \param type The type to check for.
+ * \param TYPE The type to check for.
  */
-#define TYPE_ADDED(type) (paleo.h.mask & PAL_MASK(type))
+#define TYPE_ADDED(TYPE) (paleo.h.mask & PAL_MASK(TYPE))
+
+// Several convenience result-cloning macros; used by `ADD_H_AT`.
+#define _cr_LINE pal_line_result_cln
+#define _cr_PLINE pal_line_result_cln
+#define _cr_CIRCLE pal_circle_result_cln
+#define _cr_ELLIPSE pal_ellipse_result_cln
+#define _cr_ARC pal_arc_result_cln
+#define _cr_CURVE pal_curve_result_cln
+#define _cr_SPIRAL pal_spiral_result_cln
+#define _cr_HELIX pal_helix_result_cln
+#define _cr_COMPOSITE pal_composite_result_cln
 
 /*!
  * Adds the result to the hierarchy at the specified location without doing any
@@ -45,18 +58,13 @@
  *
  * \param I The index to add the result at.
  * \param TYPE The type of the result.
- * \param RES The result.
- *
- * \note This is not a full deep copy
- * A simple \c memcpy is sufficient here, because a deep copy of the original
- * result was already made down where \c PUSH_H and \c ENQ_H are called.
+ * \param RES A pointer to the result.
  */
-#define ADD_H_AT(I, TYPE, RES) do {                 \
-  paleo.h.elems[I].type = PAL_TYPE(TYPE);           \
-  paleo.h.elems[I].res = calloc(1, sizeof(RES));    \
-  memcpy(&paleo.h.elems[I].res, &RES, sizeof(RES)); \
-  paleo.h.mask &= PAL_MASK(TYPE);                   \
-  paleo.h.num++;                                    \
+#define ADD_H_AT(I, TYPE, RES) do {                       \
+  paleo.h.elems[I].type = PAL_TYPE(TYPE);                 \
+  paleo.h.elems[I].res = (pal_result_t*)_cr_##TYPE(RES);  \
+  paleo.h.mask &= PAL_MASK(TYPE);                         \
+  paleo.h.num++;                                          \
 } while (0)
 
 /*!
@@ -66,15 +74,16 @@
  * \param TYPE The type of the result.
  * \param RES The result.
  */
-#define PUSH_H(TYPE, RES) do {                        \
-  if (!TYPE_ADDED(TYPE)) {                            \
-    memmove(&paleo.h.elems[1], &paleo.h.elems[0],     \
-        (PAL_TYPE(NUM)-1) * sizeof(pal_hier_elem_t)); \
-    ADD_H_AT(0, TYPE, RES);                           \
-  }                                                   \
+#define PUSH_H(TYPE, RES) do {                         \
+  if (!TYPE_ADDED(TYPE)) {                             \
+    memmove(&paleo.h.elems[1], &paleo.h.elems[0],      \
+        (PAL_TYPE_NUM - 1) * sizeof(pal_hier_elem_t)); \
+    ADD_H_AT(0, TYPE, RES);                            \
+  }                                                    \
 } while (0)
 
-/*! Checks that the type of the result hasn't already been added before adding
+/*!
+ * hecks that the type of the result hasn't already been added before adding
  * it to the end of the hierarchy.
  *
  * \param TYPE The type of the result.
@@ -94,11 +103,53 @@
 /*! The paleo context. */
 static pal_context_t paleo;
 
-/*! Initializes the paleo heirarchy.
+/*!
+ * Resets the Paleo hierarchy.
  *
- * \param h The hierarchy to init.
+ * \param h The hierarchy to reset.
  */
-static void _hier_init(pal_hier_t* h) {
+static void _hier_reset(pal_hier_t* h) {
+  for (int i = 0; i < h->num; i++) {
+    pal_hier_elem_t* e = &h->elems[i];
+    switch (e->type) {
+      case PAL_TYPE_LINE:
+      case PAL_TYPE_PLINE:
+        pal_line_result_destroy(e->res);
+        break;
+
+      case PAL_TYPE_CIRCLE:
+        pal_circle_result_destroy(e->res);
+        break;
+
+      case PAL_TYPE_ELLIPSE:
+        pal_ellipse_result_destroy(e->res);
+        break;
+
+      case PAL_TYPE_ARC:
+        pal_arc_result_destroy(e->res);
+        break;
+
+      case PAL_TYPE_CURVE:
+        pal_curve_result_destroy(e->res);
+        break;
+
+      case PAL_TYPE_SPIRAL:
+        pal_spiral_result_destroy(e->res);
+        break;
+
+      case PAL_TYPE_HELIX:
+        pal_helix_result_destroy(e->res);
+        break;
+
+      case PAL_TYPE_COMPOSITE:
+        pal_composite_result_destroy(e->res);
+        break;
+
+      default:
+        sprintf(stderr, "Fatal error: unrecognized type: %d", e->type);
+        abort();
+  }
+
   bzero(h, sizeof(pal_hier_t));
   for (int i = 0; i < PAL_TYPE_NUM; i++) {
     paleo.h.elems[i].type = PAL_TYPE_UNRUN;
@@ -107,6 +158,7 @@ static void _hier_init(pal_hier_t* h) {
 
 void pal_init() {
   bzero(&paleo, sizeof(pal_context_t));
+  paleo.h.elems[0].type = PAL_TYPE_UNRUN;
 
   pal_line_init();
   pal_ellipse_init();
@@ -139,7 +191,8 @@ void pal_deinit() {
 //////////////////////////////////////////////////////////////////////////////
 
 
-/*! Computes speed in px/s between the two timed points.
+/*!
+ * Computes speed in px/s between the two timed points.
  *
  * \param a A point.
  * \param b Another point.
@@ -151,7 +204,8 @@ static inline double _speed(const point2dt_t* a, const point2dt_t* b) {
   return point2d_distance((point2d_t*)a, (point2d_t*)b) / abs(b->t - a->t);
 }
 
-/*! Based on paper by Bo Yu & Shijie Cai in 2003 entitled:
+/*!
+ * Based on paper by Bo Yu & Shijie Cai in 2003 entitled:
  *   "A Domain-Independent System for Sketch Recognition"
  * See \cite YuSketch page 142 (PDF page 2) for the definition of direction.
  *
@@ -166,14 +220,15 @@ static inline double _speed(const point2dt_t* a, const point2dt_t* b) {
  */
 static inline double _yu_direction(const point2d_t* a, const point2d_t* b);
 
-/*! Based on paper by Bo Yu & Shijie Cai in 2003 entitled:
+/*!
+ * Based on paper by Bo Yu & Shijie Cai in 2003 entitled:
  *   "A Domain-Independent System for Sketch Recognition"
  * See \cite YuSketch page 142 (PDF page 2) for the definition of direction.
  *
  * \note A note on implementation.
  * This finds the curvature given a section of a stroke defined by the window
- * size parameter \c k (see the paper for a full definition).  This function
- * assumes that there are \f$2k+1\f$ points in \c sub_strk.  If this assumption
+ * size parameter `k` (see the paper for a full definition).  This function
+ * assumes that there are \f$2k+1\f$ points in `sub_strk`.  If this assumption
  * is not met, this will cause memory corruption and/or a segfault.  I.e.,
  * behavior is not defined.
  *
@@ -184,7 +239,8 @@ static inline double _yu_direction(const point2d_t* a, const point2d_t* b);
  */
 static inline double _yu_curvature(int k, const pal_point_t* sub_strk);
 
-/*! Determines the simple \f$\frac{dy}{dx}\f$ for \c b given a was the last
+/*!
+ * Determines the simple \f$\frac{dy}{dx}\f$ for `b` given a was the last
  * point in the stroke.
  *
  * \param a The first point.
@@ -194,7 +250,8 @@ static inline double _yu_curvature(int k, const pal_point_t* sub_strk);
  */
 static inline double _dy_dx_direction(const point2d_t* a, const point2d_t* b);
 
-/*! Based on PaleoSketch \cite PaleoSketch -- 2nd to last and final paragraphs.
+/*!
+ * Based on PaleoSketch \cite PaleoSketch -- 2nd to last and final paragraphs.
  *
  * Finds corners in the paleo stroke by iteratively merging close corners and
  * finding the most curved region to reassign the corner to.
@@ -203,18 +260,20 @@ static inline void _paulson_corners();
 
 #define K 3  //!< The default K used to compute stroke point window.
 
-/*! Computes DCR of \c paleo.stroke. */
+/*! Computes DCR of `paleo.stroke`. */
 static inline void _compute_dcr();
 
-/*! Breaks the stroke's tails off.
+/*!
+ * Breaks the stroke's tails off.
  *
  * \param first_i The index of the first point (incl.).
  * \param last_i The index of the last point (incl.).
  */
 static inline void _break_stroke(int first_i, int last_i);
 
-/*! Does pre-processing on a stroke to create a paleo stroke: a stroke with more
- * information, used by the individual recognizers.
+/*!
+ * Does pre-processing on a stroke to create a paleo stroke.  Paleo strokes
+ * have some extra information that is used by the individual recognizers.
  *
  * \param strk The stroke to process/recognize.
  */
@@ -384,17 +443,19 @@ static inline double _dy_dx_direction(const point2d_t* a, const point2d_t* b) {
   return (b->y - a->y) / (b->x - a->x);
 }
 
-/* Merges corners sufficiently close together.  Returns whether something was
- * changed in the \c crnrs array.
+/*!
+ * Merges corners sufficiently close together.  Returns whether something was
+ * changed in the `crnrs` array.
  *
- * \return A \c bool value; 0 means nothing merged, 1 means something was.
+ * \return A `bool` value; 0 means nothing merged, 1 means something was.
  */
 static inline short _paulson_merge_corners();
 
-/* Find highest curvature in each corner's neighbor hood and set that as the
- * corner.  Whether something was changed in the \c crnrs array.
+/*!
+ * Find highest curvature in each corner's neighbor hood and set that as the
+ * corner.  Whether something was changed in the `crnrs` array.
  *
- * \return A \c bool value; 0 means nothing changed, 1 means something was.
+ * \return A `bool` value; 0 means nothing changed, 1 means something was.
  */
 static inline short _paulson_replace_corners();
 
@@ -532,7 +593,8 @@ static inline void _break_stroke(int first_i, int last_i) {
 }
 
 
-/*! Finds the rank of the shape in a result.
+/*!
+ * Finds the rank of the shape in a result.
  *
  * \param type The type of the shape.
  * \param res The result.
@@ -542,32 +604,36 @@ static inline void _break_stroke(int first_i, int last_i) {
 static inline int _rank_res(pal_type_e type, const void* res);
 
 pal_type_e pal_recognize(const stroke_t* stroke) {
+  if (stroke->num <= 0) {
+    return PAL_TYPE_INDET;
+  }
+
   // Process simple stroke to create Paleo stroke.
   _process_stroke(stroke);
 
-  // Create a structure to hold all the 
+  // Create a structure to hold all the test results.
   struct {
-    pal_line_result_t line;
-    pal_line_result_t pline;
-    pal_ellipse_result_t ellipse;
-    pal_circle_result_t circle;
-    pal_arc_result_t arc;
-    pal_curve_result_t curve;
-    pal_spiral_result_t spiral;
-    pal_helix_result_t helix;
-    pal_composite_result_t composite;
+    pal_line_result_t* line;
+    pal_line_result_t* pline;
+    pal_ellipse_result_t* ellipse;
+    pal_circle_result_t* circle;
+    pal_arc_result_t* arc;
+    pal_curve_result_t* curve;
+    pal_spiral_result_t* spiral;
+    pal_helix_result_t* helix;
+    pal_composite_result_t* composite;
   } r;
 
   // Run each test in turn, copying over the result into the Paleo object.
-  pal_line_result_cpy(&r.line, pal_line_test(&paleo.stroke));
-  pal_line_result_cpy(&r.pline, pal_pline_test(&paleo.stroke));
-  pal_ellipse_result_cpy(&r.ellipse, pal_ellipse_test(&paleo.stroke));
-  pal_circle_result_cpy(&r.circle, pal_circle_test(&paleo.stroke));
-  pal_arc_result_cpy(&r.arc, pal_arc_test(&paleo.stroke));
-  pal_curve_result_cpy(&r.curve, pal_curve_test(&paleo.stroke));
-  pal_spiral_result_cpy(&r.spiral, pal_spiral_test(&paleo.stroke));
-  pal_helix_result_cpy(&r.helix, pal_helix_test(&paleo.stroke));
-  pal_composite_result_cpy(&r.composite, pal_composite_test(&paleo.stroke));
+  r.line = pal_line_result_cln(pal_line_test(&paleo.stroke));
+  r.pline = pal_line_result_cln(pal_pline_test(&paleo.stroke));
+  r.ellipse = pal_ellipse_result_cln(pal_ellipse_test(&paleo.stroke));
+  r.circle = pal_circle_result_cln(pal_circle_test(&paleo.stroke));
+  r.arc = pal_arc_result_cln(pal_arc_test(&paleo.stroke));
+  r.curve = pal_curve_result_cln(pal_curve_test(&paleo.stroke));
+  r.spiral = pal_spiral_result_cln(pal_spiral_test(&paleo.stroke));
+  r.helix = pal_helix_result_cln(pal_helix_test(&paleo.stroke));
+  r.composite = pal_composite_result_cln(pal_composite_test(&paleo.stroke));
 
   // Go through a hierarchy to determine which shape should be the final one.
   //
@@ -582,14 +648,14 @@ pal_type_e pal_recognize(const stroke_t* stroke) {
 
   // Do hierarchy; the following comment stanzas just quote the paper's
   // hierarchy section.
-  _hier_init(&paleo.h);
+  _hier_reset(&paleo.h);
 
   // 1. All lines.
   ENQ_H(LINE, r.line);
 
   // 2. Arcs whose feature area error is less than the feature area of its
   //    polyline interpretation.
-  if (r.arc.fa < r.pline.res[0].fa) {
+  if (r.arc->fa < r.pline->res[0].fa) {
     ENQ_H(ARC, r.arc);
   }
 
@@ -603,8 +669,8 @@ pal_type_e pal_recognize(const stroke_t* stroke) {
     passed = 0;
   }
 
-  for (int i = 1; i < r.pline.num && passed; i++) {
-    passed = passed && r.pline.res[i].possible;
+  for (int i = 1; i < r.pline->num && passed; i++) {
+    passed = passed && r.pline->res[i].possible;
   }
 
   if (passed) {
@@ -617,10 +683,10 @@ pal_type_e pal_recognize(const stroke_t* stroke) {
   //    the circle (as determined by the ranking algorithm) then polyline is
   //    added in front of the circle interpretation. This exception does not
   //    apply to small circles [N].
-  if ((!paleo.stroke.overtraced && r.circle.fa < r.pline.res[0].fa)) {
-    // Remember that r.pline.num = rank + 1.
-    if (r.circle.circle.r >= PAL_THRESH_N &&
-        r.pline.res[0].possible && r.pline.num <= PAL_RANK_CIRCLE) {
+  if ((!paleo.stroke.overtraced && r.circle->fa < r.pline->res[0].fa)) {
+    // Remember that r.pline->num = rank + 1.
+    if (r.circle->circle.r >= PAL_THRESH_N &&
+        r.pline->res[0].possible && r.pline->num <= PAL_RANK_CIRCLE) {
       ENQ_H(PLINE, r.pline);
     }
     ENQ_H(CIRCLE, r.circle);
@@ -631,9 +697,9 @@ pal_type_e pal_recognize(const stroke_t* stroke) {
   //    polylines that meet the conditions mentioned in part 4.  Again, this
   //    would not apply to small ellipses [L]. A circle fit will also be added
   //    with the ellipse as an alternative interpretation.
-  if ((!paleo.stroke.overtraced && r.ellipse.fa < r.pline.res[0].fa)) {
-    if (r.ellipse.ellipse.maj >= PAL_THRESH_L &&
-        r.pline.res[0].possible && r.pline.num <= PAL_RANK_ELLIPSE) {
+  if ((!paleo.stroke.overtraced && r.ellipse->fa < r.pline->res[0].fa)) {
+    if (r.ellipse->ellipse.maj >= PAL_THRESH_L &&
+        r.pline->res[0].possible && r.pline->num <= PAL_RANK_ELLIPSE) {
       ENQ_H(PLINE, r.pline);
     }
     ENQ_H(ELLIPSE, r.ellipse);
@@ -659,7 +725,7 @@ pal_type_e pal_recognize(const stroke_t* stroke) {
 
   // 10. All helixes with scores less than the complex interpretation score. If
   //    the complex score is lower then it is added, followed by the helix.
-  if (PAL_RANK_HELIX < pal_composite_rank(&r.composite.composite)) {
+  if (PAL_RANK_HELIX < pal_composite_rank(&r.composite->composite)) {
     ENQ_H(HELIX, r.helix);
   }
 
@@ -692,9 +758,9 @@ pal_type_e pal_recognize(const stroke_t* stroke) {
   if (paleo.h.num == 0 ||
       paleo.h.elems[0].type == PAL_TYPE_CURVE ||
       paleo.h.elems[0].type == PAL_TYPE_PLINE) {
-    if (pal_composite_is_line(&r.composite.composite)) {
+    if (pal_composite_is_line(&r.composite->composite)) {
       ENQ_H(PLINE, r.pline);
-    } else if (pal_composite_rank(&r.composite.composite) <
+    } else if (pal_composite_rank(&r.composite->composite) <
        _rank_res(paleo.h.elems[0].type, paleo.h.elems[0].res)) {
       PUSH_H(COMPOSITE, r.composite);
     } else {

@@ -45,21 +45,24 @@ typedef struct {
 /*! Creates a new spiral. */
 pal_spiral_t* pal_spiral_create();
 
-/*! Destroys the spiral by freeing its memory.
+/*!
+ * Destroys the spiral by freeing its memory.
  *
  * \param self The spiral to destroy.
  */
 void pal_spiral_destroy(pal_spiral_t* self);
 
-/* Does a deep copy of an spiral.
+/*!
+ * Does a deep copy of an spiral.
  *
  * \param dst The destination spiral.
  * \param src The source spiral.
  */
 #define pal_spiral_cpy(dst,src) memcpy(dst, src, sizeof(pal_spiral_t));
 
-/*! Draws \c n evenly distributed points in the spiral and returns them in the
- * \c pts array.
+/*!
+ * Draws `n` evenly distributed points in the spiral and returns them in the
+ * `pts` array.
  *
  * \param self The spiral to create points for.
  * \param pts The points.
@@ -83,7 +86,8 @@ void pal_spiral_init();
 /*! De-initializes the curve test. */
 void pal_spiral_deinit();
 
-/* Does the spiral test on the Paleo stroke.
+/*!
+ * Does the spiral test on the Paleo stroke.
  *
  * \param stroke The stroke to test.
  *
@@ -91,7 +95,8 @@ void pal_spiral_deinit();
  */
 const pal_spiral_result_t* pal_spiral_test(const pal_stroke_t* stroke);
 
-/* Does a deep copy of a curve result.
+/*!
+ * Does a deep copy of a curve result.
  *
  * \param dst The destination curve result.
  * \param src The source curve result.
@@ -99,6 +104,21 @@ const pal_spiral_result_t* pal_spiral_test(const pal_stroke_t* stroke);
 static inline void pal_spiral_result_cpy(
     pal_spiral_result_t* dst, const pal_spiral_result_t* src) {
   memcpy(dst, src, sizeof(pal_spiral_result_t));
+}
+
+/*!
+ * Clones the result.  The caller is responsible for freeing the returned
+ * result.
+ *
+ * \param self The result to clone.
+ *
+ * \return The clone.
+ */
+static inline pal_spiral_result_t*
+pal_spiral_result_cln(const pal_spiral_result_t* self) {
+  pal_spiral_result_t* clone = malloc(sizeof(pal_spiral_result_t));
+  pal_spiral_result_cpy(clone, self);
+  return clone;
 }
 
 #endif // __pal_spiral_h__

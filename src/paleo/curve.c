@@ -36,6 +36,7 @@
 pal_curve_t* pal_curve_create(long num) {
   pal_curve_t* self = calloc(1, sizeof(pal_curve_t));
   bzero(self->pts, CURVE_CONTROL_POINT_CAP * sizeof(point2d_t));
+  self->num = num;
   return self;
 }
 

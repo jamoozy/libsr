@@ -1,10 +1,10 @@
-/*! \file line.c
- * Implements the interface in line.h
- *
+/*!
  * \addtogroup pal
  * \{
+ *
+ * \file line.c
+ * Implements the interface in line.h
  */
-
 
 #include <stdio.h>
 #include <string.h>
@@ -79,7 +79,8 @@ void pal_line_deinit() {
   free(context.res.res);
 }
 
-/*! Resets the line context.
+/*!
+ * Resets the line context.
  *
  * \param stroke The stroke to recognize.
  * \param num The number of joints in the line.
@@ -98,7 +99,8 @@ static inline void _reset(const pal_stroke_t* stroke, int num) {
 
 
 
-/*! Does the line segment test on the ranges provided.
+/*!
+ * Does the line segment test on the ranges provided.
  *
  * \param first_i Index (incl.) of the first point to use.
  * \param last_i Index (excl.) of the last point to use.
@@ -153,21 +155,24 @@ const pal_line_result_t* pal_pline_test(const pal_stroke_t* stroke) {
   return &context.res;
 }
 
-/*! Creates the best fit line segment between the two point indexes and stores it
+/*!
+ * Creates the best fit line segment between the two point indexes and stores it
  * in the context.
  *
  * \param first_i The first 
  */
 static inline void _best_fit_line_seg(int first_i, int last_i);
 
-/*! Computes the projection of p to the ideal line.
+/*!
+ * Computes the projection of p to the ideal line.
  *
  * \param proj Return value (projection)
  * \param p The point to project.
  */
 static inline void _projection_to_ideal(point2d_t* proj, const point2d_t* p);
 
-/*! Computes the orthogonal distance from the point to the ideal line.
+/*!
+ * Computes the orthogonal distance from the point to the ideal line.
  *
  * \param p The point.
  *
@@ -226,7 +231,9 @@ static inline void  _line_test(int first_i, int last_i) {
 }
 
 static inline void _best_fit_line_seg(int first_i, int last_i) {
-  assert(0 <= first_i && first_i < last_i && last_i <= context.stroke->num_pts);
+  assert(0 <= first_i);
+  assert(first_i < last_i);
+  assert(last_i <= context.stroke->num_pts);
 
   // Used the algorithm found here:
   //   http://faculty.cs.niu.edu/~hutchins/csci230/best-fit.htm

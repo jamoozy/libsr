@@ -105,6 +105,21 @@ pal_arc_result_cpy(pal_arc_result_t* dst, const pal_arc_result_t* src) {
   memcpy(dst, src, sizeof(pal_arc_t));
 }
 
+/*!
+ * Clones the arc result.  Returns a newly allocated copy.  The caller is
+ * responsible for freeing the return value's memory.
+ *
+ * \param self The arc result to clone.
+ *
+ * \return The cloned arc result.
+ */
+static inline pal_arc_result_t*
+pal_arc_result_cln(const pal_arc_result_t* self) {
+  pal_arc_result_t* clone = malloc(sizeof(pal_arc_result_t));
+  pal_arc_result_cpy(clone, self);
+  return clone;
+}
+
 #endif // __pal_arc_h__
 
 /*! \} */

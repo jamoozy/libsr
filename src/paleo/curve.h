@@ -1,4 +1,5 @@
-/*! \addtogroup pal PaleoSketch
+/*!
+ * \addtogroup pal PaleoSketch
  * \{
  *
  * \file curve.h
@@ -54,7 +55,8 @@ typedef struct {
 // ------------------------------- Functions -------------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
 
-/*! Creates a new curve at with the specified number of points, all of which are
+/*!
+ * Creates a new curve at with the specified number of points, all of which are
  * at \f$(0,0)\f$.
  *
  * \param num The number of points in the curve.
@@ -63,7 +65,8 @@ typedef struct {
  */
 pal_curve_t* pal_curve_create(long num);
 
-/*! Creates a curve with newly created points at the specified coordinates.
+/*!
+ * Creates a curve with newly created points at the specified coordinates.
  *
  * \param num The number of points in the curve.
  * \param xs X coordinates.
@@ -73,7 +76,8 @@ pal_curve_t* pal_curve_create(long num);
  */
 pal_curve_t* pal_curve_create_coords(long num, long* xs, long* ys);
 
-/*! Creates a curve with the given points.
+/*!
+ * Creates a curve with the given points.
  *
  * \param num The number of points.
  * \param points The points.
@@ -82,7 +86,8 @@ pal_curve_t* pal_curve_create_coords(long num, long* xs, long* ys);
  */
 pal_curve_t* pal_curve_create_points(long num, const point2d_t* points);
 
-/*! Computes \c num evenly separated points the Bézier curve.
+/*!
+ * Computes \c num evenly separated points the Bézier curve.
  *
  * \param self The curve.
  * \param out The output points.
@@ -90,20 +95,23 @@ pal_curve_t* pal_curve_create_points(long num, const point2d_t* points);
  */
 void pal_curve_compute_points(pal_curve_t* self, point2d_t* out, int num);
 
-/*! Does a deep copy of an curve.
+/*!
+ * Does a deep copy of an curve.
  *
  * \param dst The destination curve .
  * \param src The source curve.
  */
 #define pal_curve_cpy(dst,src) memcpy(dst, src, sizeof(pal_curve_t));
 
-/*! Destroys the curve by freeing its memory.
+/*!
+ * Destroys the curve by freeing its memory.
  *
  * \param self The curve to free.
  */
 static inline void pal_curve_destroy(pal_curve_t* self) { free(self); }
 
-/* Recursively computes a point on a Bézier curve.
+/*!
+ * Recursively computes a point on a Bézier curve.
  *
  * \param p The return point.
  * \param pts The control points.
@@ -121,7 +129,8 @@ void pal_curve_init();
 /*! De-initializes the curve test by freeing its memory. */
 void pal_curve_deinit();
 
-/* Does the curve test on the Paleo stroke.
+/*!
+ * Does the curve test on the Paleo stroke.
  *
  * \param stroke The stroke to test.
  *
@@ -129,7 +138,8 @@ void pal_curve_deinit();
  */
 const pal_curve_result_t* pal_curve_test(const pal_stroke_t* stroke);
 
-/* Does a deep copy of a curve.
+/*!
+ * Does a deep copy of a curve.
  *
  * \param dst The destination curve.
  * \param src The source curve.
@@ -137,6 +147,21 @@ const pal_curve_result_t* pal_curve_test(const pal_stroke_t* stroke);
 static inline void
 pal_curve_result_cpy(pal_curve_result_t* dst, const pal_curve_result_t* src) {
   memcpy(dst, src, sizeof(pal_curve_t));
+}
+
+/*!
+ * Clones a curve result.  The caller is responsible for freeing the returned
+ * clone.
+ *
+ * \param self The curve result to clone.
+ *
+ * \return The cloned result.
+ */
+static inline pal_curve_result_t*
+pal_curve_result_cln(const pal_curve_result_t* self) {
+  pal_curve_result_t* clone = malloc(sizeof(pal_curve_result_t));
+  pal_curve_result_cpy(clone, self);
+  return clone;
 }
 
 #endif // __pal_curve_h__

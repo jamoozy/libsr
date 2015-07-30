@@ -19,7 +19,14 @@
 #include "spiral.h"
 #include "helix.h"
 
+//! Maximum recursive calls this test function will make.
 #define PAL_COMP_MAX_REC_DEPTH 4
+
+/*!
+ * Amount of memory required to store the results???
+ *
+ * \todo Verify this is still needed.
+ */
 #define PAL_COMP_MAX_REC_SIZE (exp(2,PAL_COMP_MAX_REC_DEPTH)-1)
 
 //! A sub-shape recognized from a sub-stroke in the composite shape.
@@ -52,14 +59,16 @@ typedef struct {
 // ------------------------------- Functions -------------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
 
-/* Copies the composite shape from \c src to \c dst.
+/*!
+ * Copies the composite shape from \c src to \c dst.
  *
  * \param dst Destination composite.
  * \param src Source composite.
  */
 void pal_composite_cpy(pal_composite_t* dst, const pal_composite_t* src);
 
-/* Computes the rank of the composite.
+/*!
+ * Computes the rank of the composite.
  *
  * \param self The composite.
  */
@@ -80,7 +89,8 @@ void pal_composite_init();
 /*! De-initializes the curve test. */
 void pal_composite_deinit();
 
-/* Performs the composite shape test.
+/*!
+ * Performs the composite shape test.
  *
  * \param stroke The stroke to recognize.
  *
@@ -88,7 +98,8 @@ void pal_composite_deinit();
  */
 pal_composite_result_t* pal_composite_test(const pal_stroke_t* stroke);
 
-/* Does a deep copy of the composite result.
+/*!
+ * Does a deep copy of the composite result.
  *
  * \param dst The destination composite result.
  * \param src The source composite result.
@@ -99,6 +110,20 @@ static inline void pal_composite_result_cpy(
   pal_composite_cpy(&dst->composite, &src->composite);
 }
 
+/*!
+ * Completely clones a composite result.  The caller is responsible for freeing
+ * the newly allocated, returned result.
+ *
+ * \param self The composite result to clone.
+ *
+ * \return The cloned result.
+ */
+static inline pal_composite_result_t*
+pal_composite_result_cln(const pal_composite_result_t* self) {
+  pal_composite_result_t* clone = malloc(sizeof(pal_composite_result_t));
+  pal_composite_result_cpy(clone, self);
+  return clone;
+}
 
 #endif  // __paleo_composite_h__
 
