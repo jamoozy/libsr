@@ -9,9 +9,17 @@
 // ------------------------------ Vec Tests ------------------------------- //
 //////////////////////////////////////////////////////////////////////////////
 
-// Tests that ||<x1,y1> x <x2,y2>|| == e.
-static inline void _test_vec_cross_prod(double e,
-    double x1, double y1, double x2, double y2) {
+/*!
+ * Tests that \f$\|\langle x_1,y_1\rangle \cross \langle x_2,y_2\rangle\|=e\f$.
+ *
+ * \param e The expected result.
+ * \param x1 X-coordinate of vector 1.
+ * \param y1 Y-coordinate of vector 1.
+ * \param x2 X-coordinate of vector 2.
+ * \param y2 Y-coordinate of vector 2.
+ */
+static inline void
+_test_vec_cross_prod(double e, double x1, double y1, double x2, double y2) {
   point2d_t a = { x1, y1 }, b = { x2, y2 };
   double r = vec_cross_prod(&a, &b);
   ck_assert_msg(r == e, "Expected %.2f, got %.2f", e, r);
@@ -32,8 +40,19 @@ START_TEST(c_vec_cross_prod_opp) {
 
 // ---- Vector Subtraction ------------
 
+/*!
+ * Tests that \f$\langle x_e,y_e\rangle =
+ * \langle x_1,y_1\rangle - \langle x_2,y_2\rangle\f$
+ *
+ * \param xe X-coordinate of expected result vector.
+ * \param xe Y-coordinate of expected result vector.
+ * \param x1 X-coordinate of vector 1.
+ * \param x1 Y-coordinate of vector 1.
+ * \param x2 X-coordinate of vector 2.
+ * \param x2 Y-coordinate of vector 2.
+ */
 static inline void _test_vec_sub(double xe, double ye,
-    double x1, double y1, double x2, double y2) {
+                                 double x1, double y1, double x2, double y2) {
   point2d_t a = { x1, y1 }, b = { x2, y2 }, r;
   vec_sub(&r, &a, &b);
   ck_assert_msg(r.x == xe, "Expected %.2f, got %.2f", xe, r.x);
@@ -57,8 +76,20 @@ START_TEST(c_vec_sub_opp) {
 // ------------------------------ Area Tests ------------------------------ //
 //////////////////////////////////////////////////////////////////////////////
 
-static inline void _test_triangle_area(double e,
-    double x1, double y1, double x2, double y2, double x3, double y3) {
+/*!
+ * Ensures that the triangle with the specified points has the expected area.
+ *
+ * \param e The expected area of the triangle.
+ * \param x1 The X-coordinate of point 1 in the triangle.
+ * \param y1 The Y-coordinate of point 1 in the triangle.
+ * \param x2 The X-coordinate of point 2 in the triangle.
+ * \param y2 The Y-coordinate of point 2 in the triangle.
+ * \param x3 The X-coordinate of point 3 in the triangle.
+ * \param y3 The Y-coordinate of point 3 in the triangle.
+ */
+static inline void _test_triangle_area(double e, double x1, double y1,
+                                       double x2, double y2,
+                                       double x3, double y3) {
   point2d_t a = { x1, y1 }, b = { x2, y2 }, c = { x3, y3 };
   double r = geom_triangle_area(&a, &b, &c);
   ck_assert_msg(r == e, "Expected %.2f, got %.2f", e, r);
@@ -92,9 +123,23 @@ START_TEST(c_triangle_area_eq) {
 
 // ---- Quad Area ------------
 
+/*!
+ * Ensures that the quadrilateral with the specified points has the expected
+ * area.
+ *
+ * \param e The expected area of the quadrilateral.
+ * \param x1 The X-coordinate of point 1 in the quadrilateral.
+ * \param y1 The Y-coordinate of point 1 in the quadrilateral.
+ * \param x2 The X-coordinate of point 2 in the quadrilateral.
+ * \param y2 The Y-coordinate of point 2 in the quadrilateral.
+ * \param x3 The X-coordinate of point 3 in the quadrilateral.
+ * \param y3 The Y-coordinate of point 3 in the quadrilateral.
+ * \param x4 The X-coordinate of point 4 in the quadrilateral.
+ * \param y4 The Y-coordinate of point 4 in the quadrilateral.
+ */
 static inline void _test_quad_area(double e,
-    double x1, double y1, double x2, double y2,
-    double x3, double y3, double x4, double y4) {
+                                   double x1, double y1, double x2, double y2,
+                                   double x3, double y3, double x4, double y4) {
   point2d_t a = { x1, y1 }, b = { x2, y2 }, c = { x3, y3 }, d = { x4, y4 };
   double r = geom_quad_area(&a, &b, &c, &d);
   ck_assert_msg(r == e, "Expected %.2f, got %.2f", e, r);
@@ -109,18 +154,22 @@ START_TEST(c_quad_area_crossing) {
 } END_TEST
 
 START_TEST(c_quad_area_square) {
+  //! \todo write c_quad_area_square
   ck_assert_msg(0, "not impl");
 } END_TEST
 
 START_TEST(c_quad_area_deg) {
+  //! \todo write c_quad_area_deg
   ck_assert_msg(0, "not impl");
 } END_TEST
 
 START_TEST(c_quad_area_ovlp) {
+  //! \todo write c_quad_area_ovlp
   ck_assert_msg(0, "not impl");
 } END_TEST
 
 START_TEST(c_quad_area_normal) {
+  //! \todo write c_quad_area_normal
   ck_assert_msg(0, "not impl");
 } END_TEST
 
@@ -132,7 +181,21 @@ START_TEST(c_quad_area_normal) {
 
 // ---- geom_seg_seg_intersect ------------
 
-static inline void _test_seg_seg_intersect(char e,
+/*!
+ * Tests whether the two line segments intersect.
+ *
+ * \param e Whether they should be found to intersect.
+ * \param x1 The X-coordinate of one of line 1's endpoints.
+ * \param y1 The Y-coordinate of one of line 1's endpoints.
+ * \param x2 The X-coordinate of one of line 1's endpoints.
+ * \param y2 The Y-coordinate of one of line 1's endpoints.
+ * \param x3 The X-coordinate of one of line 2's endpoints.
+ * \param y3 The Y-coordinate of one of line 2's endpoints.
+ * \param x4 The X-coordinate of one of line 2's endpoints.
+ * \param y4 The Y-coordinate of one of line 2's endpoints.
+ */
+static inline void _test_seg_seg_intersect(
+    char e,
     double x1, double y1, double x2, double y2,
     double x3, double y3, double x4, double y4) {
   point2d_t a = { x1, y1 }, b = { x2, y2 }, c = { x3, y3 }, d = { x4, y4 };
@@ -141,29 +204,48 @@ static inline void _test_seg_seg_intersect(char e,
 }
 
 START_TEST(c_seg_seg_intersect_parallel) {
+  //! \todo write c_seg_seg_intersect_parallel
   ck_assert_msg(0, "not impl");
 } END_TEST
 
 START_TEST(c_seg_seg_intersect_overlapping) {
+  //! \todo write c_seg_seg_intersect_overlapping
   ck_assert_msg(0, "not impl");
 } END_TEST
 
 START_TEST(c_seg_seg_intersect_same) {
+  //! \todo write c_seg_seg_intersect_same
   ck_assert_msg(0, "not impl");
 } END_TEST
 
 START_TEST(c_seg_seg_intersect_cross) {
+  //! \todo write c_seg_seg_intersect_cross
   ck_assert_msg(0, "not impl");
 } END_TEST
 
 START_TEST(c_seg_seg_intersect_cross_front) {
+  //! \todo write c_seg_seg_intersect_cross_front
   ck_assert_msg(0, "not impl");
 } END_TEST
 
 
 // ---- geom_seg_line_intersect ------------
 
-static inline void _test_seg_line_intersect(char e,
+/*!
+ * Tests whether the line segment and line intersect.
+ *
+ * \param e Whether they should be found to intersect.
+ * \param x1 The X-coordinate of one of the segment's endpoints.
+ * \param y1 The Y-coordinate of one of the segment's endpoints.
+ * \param x2 The X-coordinate of one of the segment's endpoints.
+ * \param y2 The Y-coordinate of one of the segment's endpoints.
+ * \param x3 The X-coordinate of one point on the line.
+ * \param y3 The Y-coordinate of one point on the line.
+ * \param x4 The X-coordinate of one point on the line.
+ * \param y4 The Y-coordinate of one point on the line.
+ */
+static inline void _test_seg_line_intersect(
+    char e,
     double x1, double y1, double x2, double y2,
     double x3, double y3, double x4, double y4) {
   point2d_t a = { x1, y1 }, b = { x2, y2 }, c = { x3, y3 }, d = { x4, y4 };
@@ -171,12 +253,26 @@ static inline void _test_seg_line_intersect(char e,
   ck_assert_msg(r == e, "Expected %.2f, got %.2f", e, r);
 }
 
-// TODO
+//! \todo write `geom_seg_line_intersect` tests.
 
 
 // ---- geom_seg_line_intersection ------------
 
-static inline void _test_seg_line_intersection(point2d_t* e,
+/*!
+ * Tests that the line segment and line intersect at the specified point.
+ *
+ * \param e Where the line and segment are expected to intersect.
+ * \param x1 The X-coordinate of one of the segment's endpoints.
+ * \param y1 The Y-coordinate of one of the segment's endpoints.
+ * \param x2 The X-coordinate of one of the segment's endpoints.
+ * \param y2 The Y-coordinate of one of the segment's endpoints.
+ * \param x3 The X-coordinate of one point on the line.
+ * \param y3 The Y-coordinate of one point on the line.
+ * \param x4 The X-coordinate of one point on the line.
+ * \param y4 The Y-coordinate of one point on the line.
+ */
+static inline void _test_seg_line_intersection(
+    const point2d_t* e,
     double x1, double y1, double x2, double y2,
     double x3, double y3, double x4, double y4) {
   point2d_t isect = { -1, -1 };
@@ -190,12 +286,26 @@ static inline void _test_seg_line_intersection(point2d_t* e,
   }
 }
 
-// TODO
+//! \todo write `geom_seg_line_intersection` tests.
 
 
 // ---- geom_line_line_intersection ------------
 
-static inline void _test_line_line_intersection(point2d_t* e,
+/*!
+ * Tests that the lines intersect at the specified point.
+ *
+ * \param e Where the line and segment are expected to intersect.
+ * \param x1 The X-coordinate of one point on line #1.
+ * \param y1 The Y-coordinate of one point on line #1.
+ * \param x2 The X-coordinate of one point on line #1.
+ * \param y2 The Y-coordinate of one point on line #1.
+ * \param x3 The X-coordinate of one point on line #2.
+ * \param y3 The Y-coordinate of one point on line #2.
+ * \param x4 The X-coordinate of one point on line #2.
+ * \param y4 The Y-coordinate of one point on line #2.
+ */
+static inline void _test_line_line_intersection(
+    const point2d_t* e,
     double x1, double y1, double x2, double y2,
     double x3, double y3, double x4, double y4) {
   point2d_t isect = { -1, -1 };
@@ -209,7 +319,7 @@ static inline void _test_line_line_intersection(point2d_t* e,
   }
 }
 
-// TODO
+//! \todo write `geom_line_line_intersection` tests.
 
 
 
@@ -224,6 +334,11 @@ static inline void _test_line_line_intersection(point2d_t* e,
 // ----------------------------- Entry Point ------------------------------ //
 //////////////////////////////////////////////////////////////////////////////
 
+/*!
+ * Builds the geometry test suite.
+ *
+ * \return The newly created geometry test suite.
+ */
 static Suite* geom_suite() {
   Suite* suite = suite_create("geom");
 
