@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby -w
+#!/usr/bin/ruby -w
 
 require 'rubygems'
 require 'optparse'
@@ -29,18 +29,18 @@ def parse! args
       $options[:builddir] = builddir
     end
   end.parse!
-
-  puts 'Warning: no build dir set.' if $options[:builddir] == nil
 end
 
-def run args
+def test args
   parse! args
 
   if $options[:debug] then
     run(%{CK_FORK=no gdb #{$options[:target]} -ex run})
   elsif $options[:target]
-    run("./#{$options[:target]}")
+    run(File.join($options[:builddir], $options[:target]))
+  else
+    STDERR.puts 'No command line args given!'
   end
 end
 
-run ARGV if $0 == __FILE__
+test ARGV if $0 == __FILE__
