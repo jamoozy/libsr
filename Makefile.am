@@ -14,8 +14,17 @@ endif
 
 
 ################################################################################
-#                           Building Docs with Doxygen                         #
+#                                Building Docs                                 #
 ################################################################################
+
+# ---- Doxygen ----
 
 html-local :
 	$(srcdir)/docs/build.rb -v --indir="$(srcdir)" --outdir="$(builddir)"
+
+# ---- README ----
+
+readme : readme.html
+
+readme.html : README.md
+	marked -i $< -o $@

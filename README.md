@@ -59,3 +59,35 @@ to follow the instructions concerning Python Qt5:
 I'll download it and incorporate the data.
 
 Thank you!
+
+## Roadmap
+
+The scope of project:
+
+| Initial Implementation  | Suppplimentary | Long-term Goals |
+|       (core)            |    (utils)     |    (demos)      |
+|-------------------------|----------------|-----------------|
+| `common/` -- the basics | Stroke collection | Free body diagram simulator |
+|   + tests               | Real-time testing | |
+| Paleo + Nea             | (also serves as bare bones example | |
+|   + tests               | other language bindings | |
+| DollarP                 | | |
+|   + tests               | | |
+| Ouyang Sumbol Rec.      | | |
+|   + tests               | | |
+
+These will be delivered (roughly) in this order:
+  - [x] common/ (basic impl)
+    - [o] tests
+  - [o] Paleo + Nea (with tests)
+    - [o] tests
+  - [o] Other language bindings
+    - [o] SWIG
+    - [o] Python
+  - [x] Stroke Collector (`tools/collector.py`)
+  - [ ] DollarP
+    - [ ] tests
+  - [ ] Ouyang Symbol Recognizer
+    - [ ] tests
+  - [ ] 
+    - [ ] tests
