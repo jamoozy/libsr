@@ -65,7 +65,6 @@ Thank you!
 The scope of project:
 
 | Initial Implementation  | Suppplimentary | Long-term Goals |
-|       (core)            |    (utils)     |    (demos)      |
 | ----------------------- | -------------- | --------------- |
 | `common/` -- the basics | Stroke collection | Free body diagram simulator |
 |   + tests               | Real-time testing | |
