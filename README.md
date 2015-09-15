@@ -66,7 +66,7 @@ The scope of project:
 
 | Initial Implementation  | Suppplimentary | Long-term Goals |
 |       (core)            |    (utils)     |    (demos)      |
-|-------------------------|----------------|-----------------|
+| ----------------------- | -------------- | --------------- |
 | `common/` -- the basics | Stroke collection | Free body diagram simulator |
 |   + tests               | Real-time testing | |
 | Paleo + Nea             | (also serves as bare bones example | |
@@ -77,14 +77,49 @@ The scope of project:
 |   + tests               | | |
 
 These will be delivered (roughly) in this order:
-  - [x] common/ (basic impl)
-    - [o] tests
-  - [o] Paleo + Nea (with tests)
-    - [o] tests
-  - [o] Other language bindings
-    - [o] SWIG
-    - [o] Python
+  - [x] `common/` (basic impl)
+    - [ ] impl.
+    - [ ] tests
+      - [ ] point
+      - [ ] stroke
+      - [ ] geom
+      - [ ] util
+  - [x] Language Bindings (Phase I)
+    - [x] `common/` SWIG
+    - [x] `common/` Python
   - [x] Stroke Collector (`tools/collector.py`)
+  - [ ] Paleo + Nea
+    - [ ] Paleo
+      - [x] Dot
+      - [x] Line
+      - [x] Pline
+      - [x] Circle
+      - [x] Ellipse
+      - [x] Arc
+      - [x] Curve
+      - [x] Spiral
+      - [x] Helix
+      - [ ] Composite
+      - [ ] Hierarchy
+    - [ ] Paleo tests
+      - [ ] Dot
+      - [ ] Line
+      - [ ] Pline
+      - [ ] Circle
+      - [ ] Ellipse
+      - [ ] Arc
+      - [ ] Curve
+      - [ ] Spiral
+      - [ ] Helix
+      - [ ] Composite
+      - [ ] Hierarchy
+    - [ ] Nea
+    - [ ] Nea tests
+  - [ ] Language Bindings (Phase II)
+    - [ ] Paleo SWIG
+    - [ ] Paleo Python
+    - [ ] Nea SWIG
+    - [ ] Nea Python
   - [ ] DollarP
     - [ ] tests
   - [ ] Ouyang Symbol Recognizer
