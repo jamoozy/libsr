@@ -46,15 +46,15 @@ Python's Qt5 bindings, `/usr/local/lib/python2.7/libsr/`) will be created.
 
 Currently, I'm most in need of stroke data to test against!  To create some
 stroke data, download, build, and install `libsr` as described above; make sure
-to follow the instructions concerning Python Qt5: 
+to follow the instructions concerning Python Qt5:
 
 1. Run `tools/collector.py`
 2. Draw some strokes.
 3. Save the strokes to a file (with a descriptive name, please) using the File
    --> Save dialog.
-4. Post them publicly, somewhere, online.
-5. Create an issue at [https://github.com/jamoozy/libsr/issues/new], mentioning
-   "@jamoozy" in the text of the issue, with a link to the data.
+4. Create a [GitHub issue](https://github.com/jamoozy/libsr/issues/new) with the
+   [stroke data](https://github.com/jamoozy/libsr/labels/stroke%20data) tag.
+   Attach your stroke files to the issue.
 
 I'll download it and incorporate the data.
 
@@ -62,66 +62,41 @@ Thank you!
 
 ## Roadmap
 
-The scope of project:
+Here's a rough roadmap.  This section should help you know what to expect going
+forward, and outlines the final vision for `libsr`.
 
-| Initial Implementation  | Suppplimentary | Long-term Goals |
-| ----------------------- | -------------- | --------------- |
-| `common/` -- the basics | Stroke collection | Free body diagram simulator |
-|   + tests               | Real-time testing | |
-| Paleo + Nea             | (also serves as bare bones example | |
-|   + tests               | other language bindings | |
-| DollarP                 | | |
-|   + tests               | | |
-| Ouyang Sumbol Rec.      | | |
-|   + tests               | | |
+### Core Libraries
 
-These will be delivered (roughly) in this order:
-  - [x] `common/` (basic impl)
-    - [ ] impl.
-    - [ ] tests
-      - [ ] point
-      - [ ] stroke
-      - [ ] geom
-      - [ ] util
-  - [x] Language Bindings (Phase I)
-    - [x] `common/` SWIG
-    - [x] `common/` Python
-  - [x] Stroke Collector (`tools/collector.py`)
-  - [ ] Paleo + Nea
-    - [ ] Paleo
-      - [x] Dot
-      - [x] Line
-      - [x] Pline
-      - [x] Circle
-      - [x] Ellipse
-      - [x] Arc
-      - [x] Curve
-      - [x] Spiral
-      - [x] Helix
-      - [ ] Composite
-      - [ ] Hierarchy
-    - [ ] Paleo tests
-      - [ ] Dot
-      - [ ] Line
-      - [ ] Pline
-      - [ ] Circle
-      - [ ] Ellipse
-      - [ ] Arc
-      - [ ] Curve
-      - [ ] Spiral
-      - [ ] Helix
-      - [ ] Composite
-      - [ ] Hierarchy
-    - [ ] Nea
-    - [ ] Nea tests
-  - [ ] Language Bindings (Phase II)
-    - [ ] Paleo SWIG
-    - [ ] Paleo Python
-    - [ ] Nea SWIG
-    - [ ] Nea Python
-  - [ ] DollarP
-    - [ ] tests
-  - [ ] Ouyang Symbol Recognizer
-    - [ ] tests
-  - [ ] 
-    - [ ] tests
+The core libraries are the goal of the project.  They include several sketch
+recognizers, and some geometry and general utilities.
+
+**`common/` (library)**:
+Generally useful library consisting of some geometry utilities.
+
+**PaleoSketch:**
+PaleoSketch, by Brandon Paulson.  I'll also include a derivative of mine,
+NeaSketch.
+
+**DollarP (or "$P"?):**
+A simple template-based recognizer.
+
+**Ouyang:**
+That symbol recognizer by Tom Ouyang.
+
+### Tools
+
+**Stroke Collector**: To collect test data from different people.  Could be
+used for creating academic test suites.
+
+**Real-time Testing Suite:** This will also serves as bare bones example.
+
+(other language bindings?)
+
+### Demos
+
+**Free Body Diagram Simulator**: Like that one MIT project: ASSIST, but
+completely [Free](http://fsf.org).
+
+### Timeline
+
+See [TASKS.md](/TASKS.md).

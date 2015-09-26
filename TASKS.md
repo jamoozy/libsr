@@ -1,0 +1,52 @@
+# Timeline
+This is still a work in progress.
+  - [x] `common/` (basic impl)
+    - [ ] impl.
+    - [ ] tests
+      - [ ] point
+      - [ ] stroke
+      - [ ] geom
+      - [ ] util
+  - [x] Language Bindings (Phase I)
+    - [x] `common/` SWIG
+    - [x] `common/` Python
+  - [x] Stroke Collector (`tools/collector.py`)
+  - [ ] Paleo + Nea
+    - [ ] Paleo
+      - [x] Dot
+      - [x] Line
+      - [x] Pline
+      - [x] Circle
+      - [x] Ellipse
+      - [x] Arc
+      - [x] Curve
+      - [x] Spiral
+      - [x] Helix
+      - [ ] Composite
+      - [ ] Hierarchy
+    - [ ] Paleo tests
+      - [ ] Dot
+      - [ ] Line
+      - [ ] Pline
+      - [ ] Circle
+      - [ ] Ellipse
+      - [ ] Arc
+      - [ ] Curve
+      - [ ] Spiral
+      - [ ] Helix
+      - [ ] Composite
+      - [ ] Hierarchy
+    - [ ] Nea
+    - [ ] Nea tests
+  - [ ] Language Bindings (Phase II)
+    - [ ] Paleo SWIG
+    - [ ] Paleo Python
+    - [ ] Nea SWIG
+    - [ ] Nea Python
+  - [ ] DollarP
+    - [ ] tests
+  - [ ] Ouyang Symbol Recognizer
+    - [ ] tests
+  - [ ] 
+    - [ ] tests
+
