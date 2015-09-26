@@ -10,6 +10,9 @@ endif
 if HAVE_SWIG
 SUBDIRS += swig
 endif
+if HAVE_GO
+SUBDIRS += go
+endif
 
 
 

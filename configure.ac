@@ -86,6 +86,8 @@ AS_IF([test -n "$SWIG"], [
   AM_CONDITIONAL([HAVE_PYTHON_DEV], test "x" != "x")
 ])
 
+AC_PATH_PROG(GO, [go])
+AM_CONDITIONAL([HAVE_GO], test -n "$GO")
 
 
 # Output files.
@@ -96,6 +98,7 @@ AC_CONFIG_FILES([
       src/paleo/Makefile
       src/common/Makefile
     swig/Makefile
+    go/Makefile
     tests/Makefile
       tests/paleo/Makefile
       tests/common/Makefile
