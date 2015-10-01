@@ -94,7 +94,7 @@ static inline void _test_triangle_area(double e, double x1, double y1,
             b = { x2, y2 },
             c = { x3, y3 };
   double r = geom_triangle_area(&a, &b, &c);
-  ck_assert_msg(r == e, "Expected %.2f, got %.2f", e, r);
+  ck_assert_msg(GEOM_EQ_0(r - e), "Expected %.2f, got %.2f", e, r);
 }
 
 START_TEST(c_triangle_area_0) {
@@ -102,27 +102,23 @@ START_TEST(c_triangle_area_0) {
 } END_TEST
 
 START_TEST(c_triangle_area_big) {
-  _test_triangle_area(0, 40,40, 80,90, 200,500);
+  _test_triangle_area(5200, 40,40, 80,90, 200,500);
 } END_TEST
 
 START_TEST(c_triangle_area_small) {
-  //! \todo write c_triangle_area_small
-  ck_assert_msg(0, "not impl");
+  _test_triangle_area(93, 30,12, 27,30, 20,10);
 } END_TEST
 
 START_TEST(c_triangle_area_iso) {
-  //! \todo write c_triangle_area_iso
-  ck_assert_msg(0, "not impl");
+  _test_triangle_area(1050, 20,10, 0,60, 50,40);
 } END_TEST
 
 START_TEST(c_triangle_area_right) {
-  //! \todo write c_triangle_area_right
-  ck_assert_msg(0, "not impl");
+  _test_triangle_area(650, 30,4, 82,29, 82,4);
 } END_TEST
 
 START_TEST(c_triangle_area_eq) {
-  //! \todo write c_triangle_area_eq
-  ck_assert_msg(0, "not impl");
+  _test_triangle_area(426.95, 24,30, 29,61, 53.346787517318, 41.169872981078);
 } END_TEST
 
 
