@@ -143,7 +143,7 @@ static inline void _test_quad_area(double e,
                                    double x3, double y3, double x4, double y4) {
   point2d_t a = { x1, y1 }, b = { x2, y2 }, c = { x3, y3 }, d = { x4, y4 };
   double r = geom_quad_area(&a, &b, &c, &d);
-  ck_assert_msg(r == e, "Expected %.2f, got %.2f", e, r);
+  ck_assert_msg(GEOM_EQ_0(r - e), "Expected %.2f, got %.2f", e, r);
 }
 
 START_TEST(c_quad_area_0) {
@@ -155,8 +155,7 @@ START_TEST(c_quad_area_crossing) {
 } END_TEST
 
 START_TEST(c_quad_area_square) {
-  //! \todo write c_quad_area_square
-  ck_assert_msg(0, "not impl");
+  _test_quad_area(400, 20,20, 20,40, 40,40, 40,20);
 } END_TEST
 
 START_TEST(c_quad_area_deg) {
@@ -205,8 +204,7 @@ static inline void _test_seg_seg_intersect(
 }
 
 START_TEST(c_seg_seg_intersect_parallel) {
-  //! \todo write c_seg_seg_intersect_parallel
-  ck_assert_msg(0, "not impl");
+  _test_seg_seg_intersect(0, 40,60, 60,40, 65,35, 85,15);
 } END_TEST
 
 START_TEST(c_seg_seg_intersect_overlapping) {
