@@ -177,7 +177,8 @@ double geom_triangle_area(const point2d_t* p1, const point2d_t* p2,
 double geom_quad_area(const point2d_t* p1, const point2d_t* p2,
                       const point2d_t* p3, const point2d_t* p4) {
   double area = geom_triangle_area(p1, p2, p3) + geom_triangle_area(p1, p3, p4);
-  if (geom_seg_seg_intersect(p1, p3, p2, p4)) {
+  if (geom_seg_seg_intersect(p1, p2, p3, p4) ||
+      geom_seg_seg_intersect(p1, p4, p2, p3)) {
     area /= 2;
   }
   return area;
