@@ -8,7 +8,7 @@ import (
 // #cgo LDFLAGS: -lsr -lm -lcblas -llapacke
 // #include "paleo/paleo.h"
 import "C"
-// Got to add pkg-config stuff!
+// TODO Got to add pkg-config stuff!
 
 type Stroke struct {
   Pts [][3]int64
