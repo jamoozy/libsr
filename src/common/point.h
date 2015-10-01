@@ -58,7 +58,7 @@
  */
 
 /*! The body of a `point2d_t` */
-#define POINT2D_BODY long x; long y;
+#define POINT2D_BODY double x; double y;
 /*! The actual `point2d_t` structure. */
 #define POINT2D_STRUCT struct { POINT2D_BODY }
 #ifndef SWIG
@@ -175,8 +175,8 @@ void point_destroy(point_t* self);
  * \return The distance between the points.
  */
 static inline double point2d_distance(const point2d_t* a, const point2d_t* b) {
-  const long diff_x = a->x - b->x;
-  const long diff_y = a->y - b->y;
+  const double diff_x = a->x - b->x;
+  const double diff_y = a->y - b->y;
   return sqrt(diff_x * diff_x + diff_y * diff_y);
 }
 
