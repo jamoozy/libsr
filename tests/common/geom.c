@@ -158,19 +158,17 @@ START_TEST(c_quad_area_square) {
   _test_quad_area(400, 20,20, 20,40, 40,40, 40,20);
 } END_TEST
 
+//! This is a degenerate quadrilateral -- equivalent to a triangle.
 START_TEST(c_quad_area_deg) {
-  //! \todo write c_quad_area_deg
-  ck_assert_msg(0, "not impl");
+  _test_quad_area(300, 10,40, 20,10, 30,40, 40,40);
 } END_TEST
 
 START_TEST(c_quad_area_ovlp) {
-  //! \todo write c_quad_area_ovlp
-  ck_assert_msg(0, "not impl");
+  _test_quad_area(650, 30,4, 82,29, 82,29, 82,4);
 } END_TEST
 
 START_TEST(c_quad_area_normal) {
-  //! \todo write c_quad_area_normal
-  ck_assert_msg(0, "not impl");
+  _test_quad_area(10 * 1000, -10,-10, -10,90, 90,90, 90,-10);
 } END_TEST
 
 
@@ -200,31 +198,28 @@ static inline void _test_seg_seg_intersect(
     double x3, double y3, double x4, double y4) {
   point2d_t a = { x1, y1 }, b = { x2, y2 }, c = { x3, y3 }, d = { x4, y4 };
   char r = geom_seg_seg_intersect(&a, &b, &c, &d);
-  ck_assert_msg(r == e, "Expected %.2f, got %.2f", e, r);
+  ck_assert_msg(!!(r) == !!(e), "Expected %.2f, got %.2f", e, r);
 }
 
 START_TEST(c_seg_seg_intersect_parallel) {
   _test_seg_seg_intersect(0, 40,60, 60,40, 65,35, 85,15);
 } END_TEST
 
+//! 2 segements on the line \f$y = 4x+10\f$ where \f$x\in{20,42,89,200}\f$.
 START_TEST(c_seg_seg_intersect_overlapping) {
-  //! \todo write c_seg_seg_intersect_overlapping
-  ck_assert_msg(0, "not impl");
+  _test_seg_seg_intersect(0, 20,90, 89,366, 42,178, 200,810);
 } END_TEST
 
 START_TEST(c_seg_seg_intersect_same) {
-  //! \todo write c_seg_seg_intersect_same
-  ck_assert_msg(0, "not impl");
+  _test_seg_seg_intersect(0, 89,42, 36,202, 89,42, 36,202);
 } END_TEST
 
 START_TEST(c_seg_seg_intersect_cross) {
-  //! \todo write c_seg_seg_intersect_cross
-  ck_assert_msg(0, "not impl");
+  _test_seg_seg_intersect(1, 20,20, 80,80, 20,80, 80,20);
 } END_TEST
 
-START_TEST(c_seg_seg_intersect_cross_front) {
-  //! \todo write c_seg_seg_intersect_cross_front
-  ck_assert_msg(0, "not impl");
+START_TEST(c_seg_seg_intersect_cross_vert) {
+  _test_seg_seg_intersect(1, 30,40, 30,20, 40,30, 20,30);
 } END_TEST
 
 
@@ -376,7 +371,7 @@ static Suite* geom_suite() {
   tcase_add_test(tc, c_seg_seg_intersect_overlapping);
   tcase_add_test(tc, c_seg_seg_intersect_same);
   tcase_add_test(tc, c_seg_seg_intersect_cross);
-  tcase_add_test(tc, c_seg_seg_intersect_cross_front);
+  tcase_add_test(tc, c_seg_seg_intersect_cross_vert);
   suite_add_tcase(suite, tc);
 
   return suite;
