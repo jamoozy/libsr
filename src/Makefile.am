@@ -1,4 +1,4 @@
-SUBDIRS = common paleo
+SUBDIRS = common dollarp paleo
 
 lib_LTLIBRARIES = libsr.la
 libsr_la_SOURCES = main.c

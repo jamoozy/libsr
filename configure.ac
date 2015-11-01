@@ -94,6 +94,7 @@ AC_CONFIG_FILES([
   Makefile
     src/Makefile
       src/paleo/Makefile
+      src/dollarp/Makefile
       src/common/Makefile
     swig/Makefile
     tests/Makefile
