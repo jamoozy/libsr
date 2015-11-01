@@ -88,7 +88,7 @@ int stroke_save(stroke_t* self, const char* fname) {
     return 0;
   }
   for (int i = 0; i < self->num; i++) {
-    if (fprintf(fp, "%ld,%ld,%ld\n",
+    if (fprintf(fp, "%.1f,%.1f,%ld\n",
                 self->pts[i].x, self->pts[i].y, self->pts[i].t) < 0) {
       fclose(fp);
       return 0;
@@ -114,7 +114,7 @@ stroke_t* stroke_from_file(const char* fname) {
 
   self->pts = calloc(sizeof(point_t), self->num);
   for (int i = 0; i < self->num; i++) {
-    if (fscanf(fp, "%ld,%ld,%ld",
+    if (fscanf(fp, "%lf,%lf,%ld",
                &self->pts[i].x, &self->pts[i].y, &self->pts[i].t) == EOF) {
       stroke_destroy(self);
       fclose(fp);
