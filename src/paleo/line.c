@@ -289,8 +289,9 @@ static inline void _projection_to_ideal(point2d_t* proj, const point2d_t* p) {
     proj->x = context.ideal.p0.x;
     proj->y = p->y;
   } else {
-    const double m_x = 1;
-    const double m_y = context.ideal.slope;
+    // FIXME was this meant to be here?
+//    const double m_x = 1;
+//    const double m_y = context.ideal.slope;
 
     // This is the dividend of two dot products:
     //    v . s / s . s

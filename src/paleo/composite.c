@@ -125,9 +125,10 @@ pal_composite_result_t* pal_composite_test(const pal_stroke_t* stroke) {
     subs[1].pts[i].i = i;
   }
 
-  // Test each individually.
-  &context, pal_recognize(&subs[0]);
-  &context, pal_recognize(&subs[1]);
+// FIXME Not sure what this was doing here ...
+//  // Test each individually.
+//  &context, pal_recognize(&subs[0]);
+//  &context, pal_recognize(&subs[1]);
 
   assert(0);  // still have to figure out how to implement this ...
 
@@ -148,8 +149,10 @@ pal_composite_result_t* pal_composite_test(const pal_stroke_t* stroke) {
  * \param stroke
  * \param x
  */
-static void _split(stroke_t stroke[2], int x) {
-}
+//TODO continue writing this. (commented out to suppress warning).
+//static void _split(stroke_t stroke[2], int x) {
+//  assert(0);  // not impl
+//}
 
 
 /*! \} */
