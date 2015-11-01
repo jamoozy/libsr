@@ -160,10 +160,12 @@ START_TEST(c_quad_area_square) {
 
 //! This is a degenerate quadrilateral -- equivalent to a triangle.
 START_TEST(c_quad_area_deg) {
+//  printf("c_quad_area_deg\n");
   _test_quad_area(300, 10,40, 20,10, 30,40, 40,40);
 } END_TEST
 
 START_TEST(c_quad_area_ovlp) {
+//  printf("c_quad_area_ovlp\n");
   _test_quad_area(650, 30,4, 82,29, 82,29, 82,4);
 } END_TEST
 

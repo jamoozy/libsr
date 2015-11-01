@@ -21,6 +21,9 @@
 //! Determines if the value is low enough to be considered 0.
 #define GEOM_EQ_0(x) (abs(x) <= GEOM_ERR)
 
+//! Determines if the values are "equal enough" (using `GEOM_ERR`).
+#define GEOM_EQ(a, b) (GEOM_EQ_0((a) - (b)))
+
 //! Returns whether \f$x\in[a,z]\f$ subject to `GEOM_ERR`.
 #define GEOM_IN_R(x,a,z) ((a) - GEOM_ERR < (x) && (x) < (z) + GEOM_ERR)
 

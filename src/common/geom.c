@@ -164,6 +164,28 @@ char geom_line_line_intersection(point2d_t* isect,
 
 
 
+////////////////////////////////////////////////////////////////////////////////
+//                              Polynomial Area                               //
+////////////////////////////////////////////////////////////////////////////////
+
+/*! Computs area of a polynomial defined by the `len` points in `pts`.
+ *
+ * \param pts The points in the polynomial.
+ * \param len The number of points in pts.
+ *
+ * \return The area of the polynomial.
+ */
+static inline double _poly_area(const point2d_t* pts, int len) {
+  assert(len > 1);
+
+  double sum = pts[len-1].x * pts[0].y - pts[0].x * pts[len-1].y;
+  for (int i = 1; i < len; i++) {
+    sum += pts[i-1].x * pts[i].y - pts[i].x * pts[i-1].y;
+  }
+
+  return abs(sum) / 2;
+}
+
 double geom_triangle_area(const point2d_t* p1, const point2d_t* p2,
                           const point2d_t* p3) {
   // XXX This uses Heron's formula.  Should it?
@@ -174,14 +196,31 @@ double geom_triangle_area(const point2d_t* p1, const point2d_t* p2,
   return sqrt(s * (s-a) * (s-b) * (s-c));
 }
 
+char geom_point2d_eq(const point2d_t* a, const point2d_t* b) {
+  return GEOM_EQ_0(a->x - b->x) && GEOM_EQ_0(a->y - b->y);
+}
+
 double geom_quad_area(const point2d_t* p1, const point2d_t* p2,
                       const point2d_t* p3, const point2d_t* p4) {
   double area = geom_triangle_area(p1, p2, p3) + geom_triangle_area(p1, p3, p4);
-  if (geom_seg_seg_intersect(p1, p2, p3, p4) ||
-      geom_seg_seg_intersect(p1, p4, p2, p3)) {
-    area /= 2;
+  if (!(point2d_equal(p1, p3) || point2d_equal(p1, p4) ||
+        point2d_equal(p2, p3) || point2d_equal(p2, p4))) {
+    if (geom_seg_seg_intersect(p1, p2, p3, p4)) {
+//      printf("1 --> 2  &  3 --> 4\n");
+      area /= 2;
+    } else if (geom_seg_seg_intersect(p1, p4, p2, p3)) {
+//      printf("2 --> 3  &  1 --> 4\n");
+      area /= 2;
+    }
   }
   return area;
+//  point2d_t pts[] = {
+//    {p1->x, p1->y},
+//    {p2->x, p2->y},
+//    {p3->x, p3->y},
+//    {p4->x, p4->y}
+//  };
+//  return _poly_area(pts, 4);
 }
 
 /*! \} */
