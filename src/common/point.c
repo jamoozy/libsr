@@ -7,6 +7,7 @@
  */
 
 #include "point.h"
+#include "geom.h"
 
 point_t* point_create() {
   point_t* self = calloc(1, sizeof(point_t));
@@ -50,6 +51,16 @@ void point2d_bis(point2d_t* o1, point2d_t* o2,
   o1->y = c.y - cb.x;
   o2->x = c.x - cb.y;
   o2->y = c.y + cb.x;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                          Point Utility Functions                           //
+////////////////////////////////////////////////////////////////////////////////
+
+char point2d_equal(const point2d_t* a, const point2d_t* b) {
+  return GEOM_EQ(a->x, b->x) && GEOM_EQ(a->y, b->y);
 }
 
 /*! \} */

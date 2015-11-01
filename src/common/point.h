@@ -46,15 +46,18 @@
 #define __point_h__
 
 #include <assert.h>
-#include <stdlib.h>
 #include <math.h>
+#include <stdlib.h>
 
 /*!
  * \struct point2d_t
- * A simple 2D point.
+ * A simple 2D point.  Modeled (insofar as one can in C) after an
+ * object-oriented design.
  *
  * \param long x The X-coordinate.
  * \param long y The Y-coordinate.
+ *
+ * \see `point2dt_t` `point_t`
  */
 
 /*! The body of a `point2d_t` */
@@ -76,6 +79,7 @@ typedef POINT2D_STRUCT point2d_t;
  * \param t Unix time of creation (for drawn points)
  */
 #ifdef SWIG
+// Can't use unions in SWIG.
 #define POINT2DT_BODY POINT2D_BODY long t;
 #else
 /*! The body of a `point2dt_t` */
@@ -99,6 +103,7 @@ typedef POINT2DT_STRUCT point2dt_t;
  * \param i Index (for strokes)
  */
 #ifdef SWIG
+// Can't use unions in SWIG.
 #define POINT_BODY POINT2DT_BODY long i;
 #else
 /*! The body of a `point_t` */
@@ -165,6 +170,17 @@ void point_destroy(point_t* self);
 ////////////////////////////////////////////////////////////////////////////////
 // ------------------------------ Point Utils ------------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
+
+/*!
+ * Determines if two `point2d_t`s are equal, i.e., whether they represent the
+ * same point within the error range of `GEOM_ERR`.
+ *
+ * \param a A [\ref point2d_t].
+ * \param a Another [\ref point2d_t].
+ *
+ * \return 0 if they are not equal, non-zero otherwise.
+ */
+char point2d_equal(const point2d_t* a, const point2d_t* b);
 
 /*!
  * Computes the distance from `a` to `b`.
