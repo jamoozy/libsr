@@ -64,6 +64,26 @@ void stroke_add_coords(stroke_t* self, long x, long y) {
   self->num++;
 }
 
+void stroke_insert_at(stroke_t* self, int i, long x, long y) {
+  if (self->num >= self->size) {
+    _increase_point_size_to(self, self->size + 10);
+  }
+
+  // Shift all the points after `i`.
+  memmove(&self->pts[i+1], &self->pts[i], (self->num - i) * sizeof(point_t));
+  self->num++;
+
+  // Update the point to insert.
+  self->pts[i].x = x;
+  self->pts[i].y = y;
+  self->pts[i].t = 0;
+
+  // Update the i's.
+  for (int j = i; j < self->num; j++) {
+    self->pts[j].i = j;
+  }
+}
+
 void stroke_add_timed(stroke_t* self, long x, long y, long t) {
   if (self->num >= self->size) {
     _increase_point_size_to(self, self->size + 10);

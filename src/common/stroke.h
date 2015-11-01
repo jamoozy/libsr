@@ -76,6 +76,15 @@ void stroke_add_coords(stroke_t* self, long x, long y);
  */
 void stroke_add_timed(stroke_t* self, long x, long y, long t);
 
+/*! Inserts a point at a specific index in a stroke.
+ *
+ * \param self The stroke.
+ * \param i The index to insert at.
+ * \param x The X-coordinate.
+ * \param y The Y-coordinate.
+ */
+void stroke_insert_at(stroke_t* self, int i, long x, long y);
+
 /*!
  * Destroys the stroke and all its contained points by freeing their associated
  * memory.
