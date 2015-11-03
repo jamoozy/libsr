@@ -2,6 +2,7 @@
 #define __dollarp_h__
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "common/stroke.h"
 
@@ -47,14 +48,44 @@ typedef struct {
  */
 dp_context_t* dp_create();
 
-/*! Sets the epsilon value for the context.
+/*! Sets the number of points in a normalized template/stroke.  Must be greater
+ * than 0.
+ *
+ * \param self The $P context.
+ * \param n The number of points to set per template/stroke.
+ *
+ * \return 0 on success, 1 if `n` is too low.
+ */
+static inline int dp_set_n(dp_context_t* self, size_t n) {
+  if (n <= 0) {
+    fprintf(stderr, "Error: dp_set_n called with n = %zd", n);
+    return 1;
+  }
+
+  self->n = n;
+  self->step = round(pow(self->n, 1 - self->epsilon));
+  return 0;
+}
+
+/*! Sets the epsilon value for the context.  Must be \f$\in [0,1]\f$.
  *
  * \param self The context.
  * \param epsilon The new value.
+ *
+ * \return 0 on success, -1 if `epsilon` is too low, and 1 if it's too high.
  */
-static inline void dp_set_epsilon(dp_context_t* self, double epsilon) {
+static inline int dp_set_epsilon(dp_context_t* self, double epsilon) {
+  if (epsilon < 0.0) {
+    fprintf(stderr, "Error: dp_set_epsilon called with epsilon = %f", epsilon);
+    return -1;
+  } else if (1.0 < epsilon) {
+    fprintf(stderr, "Error: dp_set_epsilon called with epsilon = %f", epsilon);
+    return 1;
+  }
+
   self->epsilon = epsilon;
-  self->step = floor(pow(self->n, 1 - self->epsilon));
+  self->step = round(pow(self->n, 1 - self->epsilon));
+  return 0;
 }
 
 /*! Adds a new template to the $P context.  The $P context takes ownership of
