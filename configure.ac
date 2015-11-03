@@ -99,6 +99,7 @@ AC_CONFIG_FILES([
     swig/Makefile
     tests/Makefile
       tests/paleo/Makefile
+      tests/dollarp/Makefile
       tests/common/Makefile
     docs/Makefile])
 AC_OUTPUT

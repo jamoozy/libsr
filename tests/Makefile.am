@@ -1,1 +1,1 @@
-SUBDIRS = common paleo
+SUBDIRS = common dollarp paleo
