@@ -45,7 +45,7 @@ typedef struct {
 /*! Creates a new $P context.
  * \return The context.
  */
-dp_context_t* dp_context_create();
+dp_context_t* dp_create();
 
 /*! Sets the epsilon value for the context.
  *
@@ -79,6 +79,6 @@ dp_result_t dp_recognize(const dp_context_t* self, stroke_t* strk);
  *
  * \param self The $P context to delete.
  */
-void destroy_dollarp(dp_context_t* self);
+void dp_destroy(dp_context_t* self);
 
 #endif

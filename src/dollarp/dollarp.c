@@ -193,7 +193,7 @@ _greedy_cloud_match(const dp_context_t* self, const stroke_t* c1,
 //! The amount to increase the template size by, each time it needs increasing.
 #define _DP_TMPL_INC 100
 
-dp_context_t* create_dollarp() {
+dp_context_t* dp_create() {
   dp_context_t* self = calloc(1, sizeof(dp_context_t));
   self->n = DP_DEFAULT_N;
   dp_set_epsilon(self, DP_DEFAULT_EPSILON);
@@ -236,7 +236,7 @@ dp_result_t dp_recognize(const dp_context_t* self, stroke_t* strk) {
   return result;
 }
 
-void destroy_dollarp(dp_context_t* self) {
+void dp_destroy(dp_context_t* self) {
   for (int i = 0; i < self->num; i++) {
     stroke_destroy(self->tmpls[i].strk);
   }
