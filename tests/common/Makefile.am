@@ -4,7 +4,8 @@ libcommon = $(top_builddir)/src/common/libcommon.la
 noinst_LIBRARIES = libmockpoint.a
 libmockpoint_a_SOURCES = \
 	$(top_srcdir)/src/common/point.h \
-	mock_point.c
+	mock_point.c \
+	mock_stroke.c
 
 TESTS = check_stroke check_geom
 check_PROGRAMS = check_stroke check_geom
