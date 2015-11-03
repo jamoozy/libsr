@@ -54,8 +54,8 @@
  * A simple 2D point.  Modeled (insofar as one can in C) after an
  * object-oriented design.
  *
- * \param long x The X-coordinate.
- * \param long y The Y-coordinate.
+ * \param x The X-coordinate.
+ * \param y The Y-coordinate.
  *
  * \see `point2dt_t` `point_t`
  */
@@ -77,6 +77,8 @@ typedef POINT2D_STRUCT point2d_t;
  * \param x The X-coordinate.
  * \param y The Y-coordinate.
  * \param t Unix time of creation (for drawn points)
+ *
+ * \see `point2d_t` `point_t`
  */
 #ifdef SWIG
 // Can't use unions in SWIG.
@@ -101,6 +103,8 @@ typedef POINT2DT_STRUCT point2dt_t;
  * \param y The Y-coordinate.
  * \param t Unix time of creation (for drawn points)
  * \param i Index (for strokes)
+ *
+ * \see `point2d_t` `point2dt_t`
  */
 #ifdef SWIG
 // Can't use unions in SWIG.

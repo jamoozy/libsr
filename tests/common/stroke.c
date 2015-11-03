@@ -83,12 +83,12 @@ END_TEST
 
 START_TEST(c_stroke_create_point2dts)
 {
-  point2dt_t points[] = {
-    {  4,  8, 12 },
-    {  2,  4,  8 },
-    { 12, 13, 14 },
-    {  0, 14, 28 },
-    { 99,180, LONG_MAX }
+  point2dt_t points[5] = {
+    {  4.0,   8.0, 12 },
+    {  2.0,   4.0,  8 },
+    { 12.0,  13.0, 14 },
+    {  0.0,  14.0, 28 },
+    { 99.0, 180.0, LONG_MAX }
   };
   stroke_t* stroke = stroke_create_point2dts(5, (point2dt_t*)points);
   ck_assert(stroke != NULL);
@@ -124,6 +124,7 @@ static Suite* stroke_suite() {
 
   tc = tcase_create("stroke");
   tcase_add_test(tc, c_stroke_create);
+  tcase_add_test(tc, c_stroke_create_point2dts);
   suite_add_tcase(suite, tc);
 
   return suite;

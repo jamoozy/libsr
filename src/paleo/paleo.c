@@ -781,23 +781,21 @@ static inline int _rank_res(pal_type_e type, const void* res) {
   switch (type) {
     case PAL_TYPE_LINE:
       return pal_line_rank(&((const pal_line_result_t*)res)->res[0].line);
-      break;
 
-    case PAL_TYPE_ELLIPSE: return PAL_RANK_ELLIPSE; break;
-    case PAL_TYPE_CIRCLE:  return PAL_RANK_CIRCLE;  break;
-    case PAL_TYPE_ARC:     return PAL_RANK_ARC;     break;
-    case PAL_TYPE_CURVE:   return PAL_RANK_CURVE;   break;
-    case PAL_TYPE_SPIRAL:  return PAL_RANK_SPIRAL;  break;
-    case PAL_TYPE_HELIX:   return PAL_RANK_HELIX;   break;
+    case PAL_TYPE_ELLIPSE: return PAL_RANK_ELLIPSE;
+    case PAL_TYPE_CIRCLE:  return PAL_RANK_CIRCLE;
+    case PAL_TYPE_ARC:     return PAL_RANK_ARC;
+    case PAL_TYPE_CURVE:   return PAL_RANK_CURVE;
+    case PAL_TYPE_SPIRAL:  return PAL_RANK_SPIRAL;
+    case PAL_TYPE_HELIX:   return PAL_RANK_HELIX;
 
     case PAL_TYPE_COMPOSITE:
       return pal_composite_rank(&((const pal_composite_result_t*)res)->composite);
-      break;
 
     default:
       fprintf(stderr, "Got bad type: %d", type);
-      break;
   }
+  return -1;
 }
 
 int pal_shape_rank(pal_type_e type, const void* shape) {
