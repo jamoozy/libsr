@@ -1,6 +1,6 @@
 # Prelude
 AC_PREREQ(2.69)
-AC_INIT([libsr], [0.1.0], [libsr-bugs@jamoozy.com])
+AC_INIT([libsr], [0.2.0], [libsr-bugs@jamoozy.com])
 AC_CONFIG_AUX_DIR([.build-aux])
 AC_SUBST([CFLAGS], ['-Wall -g -O2 -I$(top_srcdir)/src'])
 
