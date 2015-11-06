@@ -108,6 +108,36 @@ char geom_seg_line_intersect(const point2d_t* s1, const point2d_t* s2,
   return 0;
 }
 
+char geom_seg_seg_intersection(point2d_t* isect,
+    const point2d_t* a1, const point2d_t* a2,
+    const point2d_t* b1, const point2d_t* b2) {
+  // Compute the intersection
+  intersection_t inter;
+  _intersect(&inter, a1, a2, b1, b2);
+
+  // No intersection;
+  if (!inter.intersects) {
+    return 1;
+  }
+
+  // Remaining checks.
+  if (GEOM_IN_R(inter.t, 0, 1) && GEOM_IN_R(inter.u, 0, 1)) {
+    // Compute the intersection point.
+    isect->x = a1->x + inter.t * (a2->x - a1->x);
+    isect->y = a1->y + inter.t * (a2->y - a1->y);
+
+    // Sanity check.
+    assert(isect->x == b1->x + inter.u * (b2->x - b1->x));
+    assert(isect->y == b1->y + inter.u * (b2->y - b1->y));
+
+    // ... and return.
+    return 1;
+  }
+
+  // The lines intersect, but not the segments.
+  return 0;
+}
+
 char geom_seg_line_intersection(point2d_t* isect,
     const point2d_t* s1, const point2d_t* s2,
     const point2d_t* l1, const point2d_t* l2) {
@@ -168,22 +198,28 @@ char geom_line_line_intersection(point2d_t* isect,
 //                              Polynomial Area                               //
 ////////////////////////////////////////////////////////////////////////////////
 
-/*! Computs area of a polynomial defined by the `len` points in `pts`.
+/*! Computs area of a polynomial defined by the `num` points in `pts`.  See
+ * http://www.mathopenref.com/coordpolygonarea2.html for more details.
  *
+ * \param num The number of points in pts.
  * \param pts The points in the polynomial.
- * \param len The number of points in pts.
  *
  * \return The area of the polynomial.
  */
-static inline double _poly_area(const point2d_t* pts, int len) {
-  assert(len > 1);
+static inline double _poly_area(int num, point2d_t pts[]) {
+  assert(num > 2);
 
-  double sum = pts[len-1].x * pts[0].y - pts[0].x * pts[len-1].y;
-  for (int i = 1; i < len; i++) {
-    sum += pts[i-1].x * pts[i].y - pts[i].x * pts[i-1].y;
+  double area = 0;
+  point2d_t* curr = &pts[num-1];
+  point2d_t* prev = NULL;
+  for (int i = 0; i < num; i++) {
+    prev = curr;
+    curr = &pts[i];
+    area += (prev->x + curr->x) * (prev->y - curr->y);
   }
 
-  return abs(sum) / 2;
+  printf("\n");
+  return abs(area / 2);
 }
 
 double geom_triangle_area(const point2d_t* p1, const point2d_t* p2,
@@ -196,31 +232,34 @@ double geom_triangle_area(const point2d_t* p1, const point2d_t* p2,
   return sqrt(s * (s-a) * (s-b) * (s-c));
 }
 
-char geom_point2d_eq(const point2d_t* a, const point2d_t* b) {
-  return GEOM_EQ_0(a->x - b->x) && GEOM_EQ_0(a->y - b->y);
-}
-
 double geom_quad_area(const point2d_t* p1, const point2d_t* p2,
                       const point2d_t* p3, const point2d_t* p4) {
-  double area = geom_triangle_area(p1, p2, p3) + geom_triangle_area(p1, p3, p4);
+  // _poly_area does not work when a pair of lines intersects, so just compute
+  // the two triangles' areas.
+  point2d_t isect = {0, 0};
   if (!(point2d_equal(p1, p3) || point2d_equal(p1, p4) ||
         point2d_equal(p2, p3) || point2d_equal(p2, p4))) {
-    if (geom_seg_seg_intersect(p1, p2, p3, p4)) {
-//      printf("1 --> 2  &  3 --> 4\n");
-      area /= 2;
-    } else if (geom_seg_seg_intersect(p1, p4, p2, p3)) {
-//      printf("2 --> 3  &  1 --> 4\n");
-      area /= 2;
+    if (geom_seg_seg_intersection(&isect, p1, p2, p3, p4)) {
+      printf("1 --> 2 ^ 3 --> 4\n");
+      printf("  intersection: (%.0f, %.0f)\n", isect.x, isect.y);
+      return geom_triangle_area(p1, p2, &isect) +
+             geom_triangle_area(p3, p4, &isect);
+    } else if (geom_seg_seg_intersection(&isect, p1, p4, p2, p3)) {
+      printf("1 --> 4 ^ 3 --> 2\n");
+      printf("  intersection: (%.0f, %.0f)\n", isect.x, isect.y);
+      return geom_triangle_area(p1, p4, &isect) +
+             geom_triangle_area(p3, p2, &isect);
     }
   }
-  return area;
-//  point2d_t pts[] = {
-//    {p1->x, p1->y},
-//    {p2->x, p2->y},
-//    {p3->x, p3->y},
-//    {p4->x, p4->y}
-//  };
-//  return _poly_area(pts, 4);
+
+  printf("calling _poly_area\n");
+  point2d_t pts[] = {
+    {p1->x, p1->y},
+    {p2->x, p2->y},
+    {p3->x, p3->y},
+    {p4->x, p4->y}
+  };
+  return _poly_area(4, pts);
 }
 
 /*! \} */

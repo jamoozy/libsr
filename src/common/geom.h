@@ -83,6 +83,22 @@ char geom_seg_line_intersect(const point2d_t* s1, const point2d_t* s2,
                              const point2d_t* l1, const point2d_t* l2);
 
 /*!
+ * Computes the intersection point between the two line segments defined by
+ * `a1`\f$\rightarrow\f$`a2` and `b1`\f$\rightarrow\f$`b2`.
+ *
+ * \param isect Return intersection point.
+ * \param a1 Line #1's 1st point.
+ * \param a2 Line #1's 2nd point.
+ * \param b1 Line #2's 1st point.
+ * \param b2 Line #2's 2nd point.
+ *
+ * \return 1 on success and 0 on failure.
+ */
+char geom_seg_seg_intersection(point2d_t* isect,
+    const point2d_t* a1, const point2d_t* a2,
+    const point2d_t* b1, const point2d_t* b2);
+
+/*!
  * Computes the intersection point between the line segment defined by
  * `s1`\f$\rightarrow\f$`s2` and the infinite line defined by
  * `l1`\f$\rightarrow\f$`l2`.
