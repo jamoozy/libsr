@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <values.h>
 
 #include "stroke.h"
 #include "util.h"
@@ -25,6 +26,30 @@ static inline void _increase_point_size_to(stroke_t* self, long new_size) {
   assert(new_size > self->size);
   self->pts = realloc(self->pts, (self->size = new_size) * sizeof(point_t));
 }
+
+//! The amount that `stroke_t->size` gets increased by when needed.
+#define _PT_SZ_INC 10
+
+/*! Increases the size of the point array if it is already full.
+ * \param self The stroke to (possibly) increase.
+ * \return 0 if there's enough room, 1 if there's
+ */
+static inline int _increase_point_size_if_full(stroke_t* self) {
+  if (self->num >= self->size) {
+    if (self->size > INT_MAX - _PT_SZ_INC) {
+      // Overflow!
+      fprintf(stderr, "Error: possible overflow!");
+      return 1;
+    }
+
+    // This can cause an overflow error during compile time.  That's okay, we
+    // checked for this in the previous if statement.
+    _increase_point_size_to(self, self->size + _PT_SZ_INC);
+  }
+  return 0;
+}
+
+#undef _PT_SZ_INC
 
 
 stroke_t* stroke_create(int size) {
@@ -43,8 +68,8 @@ stroke_t* stroke_create_point2dts(int size, const point2dt_t* pts) {
 }
 
 void stroke_add_point2dt(stroke_t* self, const point2dt_t* point) {
-  if (self->num >= self->size) {
-    _increase_point_size_to(self, self->size + 10);
+  if(!_increase_point_size_if_full(self)) {
+    return;
   }
 
   memcpy(&self->pts[self->num], point, sizeof(point2dt_t));
@@ -53,8 +78,8 @@ void stroke_add_point2dt(stroke_t* self, const point2dt_t* point) {
 }
 
 void stroke_add_coords(stroke_t* self, long x, long y) {
-  if (self->num >= self->size) {
-    _increase_point_size_to(self, self->size + 10);
+  if(!_increase_point_size_if_full(self)) {
+    return;
   }
 
   self->pts[self->num].x = x;
@@ -65,8 +90,8 @@ void stroke_add_coords(stroke_t* self, long x, long y) {
 }
 
 void stroke_insert_at(stroke_t* self, int i, long x, long y) {
-  if (self->num >= self->size) {
-    _increase_point_size_to(self, self->size + 10);
+  if(!_increase_point_size_if_full(self)) {
+    return;
   }
 
   // Shift all the points after `i`.
