@@ -83,13 +83,12 @@ END_TEST
 
 START_TEST(c_stroke_create_point2dts)
 {
-  point2dt_t points[5] = {
-    {  4.0,   8.0, 12 },
-    {  2.0,   4.0,  8 },
-    { 12.0,  13.0, 14 },
-    {  0.0,  14.0, 28 },
-    { 99.0, 180.0, LONG_MAX }
-  };
+  point2dt_t points[5];
+  points[0].x =  4.0, points[0].y =   8.0, points[0].t =       12;
+  points[1].x =  2.0, points[1].y =   4.0, points[1].t =        8;
+  points[2].x = 12.0, points[2].y =  13.0, points[2].t =       14;
+  points[3].x =  0.0, points[3].y =  14.0, points[3].t =       28;
+  points[4].x = 99.0, points[4].y = 180.0, points[4].t = LONG_MAX;
   stroke_t* stroke = stroke_create_point2dts(5, (point2dt_t*)points);
   ck_assert(stroke != NULL);
   ck_assert_int_eq(stroke->num, 5);
