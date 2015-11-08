@@ -66,7 +66,7 @@
 #define POINT2D_STRUCT struct { POINT2D_BODY }
 #ifndef SWIG
 /*! Union for syntax sugar. (only available outside swig). */
-#define POINT2D_UNION union { point2d_t p2d; POINT2D_STRUCT; };
+#define POINT2D_UNION union { point2d_t p2d; POINT2D_STRUCT; }
 #endif
 typedef POINT2D_STRUCT point2d_t;
 
@@ -85,13 +85,13 @@ typedef POINT2D_STRUCT point2d_t;
 #define POINT2DT_BODY POINT2D_BODY long t;
 #else
 /*! The body of a `point2dt_t` */
-#define POINT2DT_BODY POINT2D_UNION long t;
+#define POINT2DT_BODY POINT2D_UNION; long t;
 #endif
 /*! The actual `point2dt_t` structure */
 #define POINT2DT_STRUCT struct { POINT2DT_BODY }
 #ifndef SWIG
 /*! Union for syntax sugar. (only available outside swig). */
-#define POINT2DT_UNION union { point2dt_t p2dt; POINT2DT_STRUCT; };
+#define POINT2DT_UNION union { point2dt_t p2dt; POINT2DT_STRUCT; }
 #endif
 typedef POINT2DT_STRUCT point2dt_t;
 
@@ -111,13 +111,13 @@ typedef POINT2DT_STRUCT point2dt_t;
 #define POINT_BODY POINT2DT_BODY long i;
 #else
 /*! The body of a `point_t` */
-#define POINT_BODY POINT2DT_UNION long i;
+#define POINT_BODY POINT2DT_UNION; long i;
 #endif
 /*! The actual `point_t` structure */
 #define POINT_STRUCT struct { POINT_BODY }
 #ifndef SWIG
 /*! Union for syntax sugar. (only available outside swig). */
-#define POINT_UNION union { point_t p; POINT_STRUCT; };
+#define POINT_UNION union { point_t p; POINT_STRUCT; }
 #endif
 typedef POINT_STRUCT point_t;
 
