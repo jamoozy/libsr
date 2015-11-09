@@ -1,5 +1,5 @@
 #include <check.h>
-#include <limits.h>
+#include <values.h>
 
 #include "common/geom.h"
 #include "dollarp/dollarp.h"

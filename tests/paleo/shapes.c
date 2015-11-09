@@ -1,4 +1,4 @@
-#include <limits.h>
+#include <values.h>
 #include <check.h>
 
 #include "common/mock_point.h"
@@ -28,8 +28,8 @@ END_TEST
 
 START_TEST(c_pal_line_create_points_with_points)
 {
-  point_t a = { 5, 10, 20, 40};
-  point_t b = {12, 24, 36, 48};
+  point_t a = {.x = 5, .y = 10, .t = 20, .i = 40};
+  point_t b = {.x =12, .y = 24, .t = 36, .i = 48};
   pal_line_t* line = pal_line_create_points_with_points(
       (point2d_t*)&a, (point2d_t*)&b);
 
@@ -91,7 +91,7 @@ END_TEST
 
 START_TEST(c_circle_create_with_point)
 {
-  point_t point = { 4, 8, 32, 49};
+  point_t point = {.x = 4, .y = 8, .t = 32, .i = 49};
   pal_circle_t* circle = pal_circle_create_with_point(40, (point2d_t*)&point);
 
   ck_assert(circle != NULL);

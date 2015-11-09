@@ -57,7 +57,13 @@
 
 START_TEST(c_line_result_cpy_possible) {
   // Keep it on the stack!
-  pal_line_sub_result_t sub_res = { 40.09, -2.1, "success", 1 };
+  pal_line_sub_result_t sub_res = {
+    .lse = 40.09,
+    .fa = -2.1,
+    .fmsg = "success",
+    .possible = 1,
+    .line = { 0, NULL }
+  };
   pal_line_result_t res = { &sub_res, 1 };
 
   // Set up memory for test.
@@ -103,6 +109,10 @@ static Suite* recs_suite() {
   Suite* suite = suite_create("recognition");
 
   TCase* tc = tcase_create("line");
+  tcase_add_test(tc, c_line_result_cpy_possible);
+  tcase_add_test(tc, c_pline_result_cpy_3_pts_not);
+  tcase_add_test(tc, c_pline_result_cpy_4_pts_possible);
+  tcase_add_test(tc, c_pline_result_cpy_8_pts_not);
   suite_add_tcase(suite, tc);
 
   tc = tcase_create("circle");

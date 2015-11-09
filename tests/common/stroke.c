@@ -1,5 +1,5 @@
 #include <check.h>
-#include <limits.h>
+#include <values.h>
 
 #include "point.h"
 #include "stroke.h"
@@ -84,11 +84,11 @@ END_TEST
 START_TEST(c_stroke_create_point2dts)
 {
   point2dt_t points[5] = {
-    {  4.0,   8.0, 12 },
-    {  2.0,   4.0,  8 },
-    { 12.0,  13.0, 14 },
-    {  0.0,  14.0, 28 },
-    { 99.0, 180.0, LONG_MAX }
+    { .x =  4.0, .y =   8.0, .t =       12},
+    { .x =  2.0, .y =   4.0, .t =        8},
+    { .x = 12.0, .y =  13.0, .t =       14},
+    { .x =  0.0, .y =  14.0, .t =       28},
+    { .x = 99.0, .y = 180.0, .t = LONG_MAX}
   };
   stroke_t* stroke = stroke_create_point2dts(5, (point2dt_t*)points);
   ck_assert(stroke != NULL);
