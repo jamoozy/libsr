@@ -1,4 +1,4 @@
-#include <limits.h>
+#include <values.h>
 #include <check.h>
 
 #include "common/mock_point.h"

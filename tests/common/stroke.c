@@ -1,5 +1,5 @@
 #include <check.h>
-#include <limits.h>
+#include <values.h>
 
 #include "point.h"
 #include "stroke.h"
