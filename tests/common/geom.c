@@ -151,12 +151,10 @@ START_TEST(c_quad_area_0) {
 } END_TEST
 
 START_TEST(c_quad_area_crossing) {
-  printf("c_quad_area_crossing\t");
   _test_quad_area(400, 20,100, 60,60, 60,80, 20,80);
 } END_TEST
 
 START_TEST(c_quad_area_square) {
-  printf("c_quad_area_square\t");
   _test_quad_area(400, 20,20, 20,40, 40,40, 40,20);
 } END_TEST
 
@@ -165,18 +163,15 @@ START_TEST(c_quad_area_square) {
  * three of its points line up to make a straight line.
  */
 START_TEST(c_quad_area_deg) {
-  printf("c_quad_area_deg\t");
   _test_quad_area(300, 10,40, 20,10, 30,40, 40,40);
 } END_TEST
 
 //! This is an overlapping quadrilateral -- 2 of its points are the same.
 START_TEST(c_quad_area_ovlp) {
-  printf("c_quad_area_ovlp\t");
   _test_quad_area(650, 30,4, 82,29, 82,29, 82,4);
 } END_TEST
 
 START_TEST(c_quad_area_normal) {
-  printf("c_quad_area_normal\t");
   _test_quad_area(10 * 1000, -10,-10, -10,90, 90,90, 90,-10);
 } END_TEST
 

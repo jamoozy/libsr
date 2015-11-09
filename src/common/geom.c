@@ -117,7 +117,7 @@ char geom_seg_seg_intersection(point2d_t* isect,
 
   // No intersection;
   if (!inter.intersects) {
-    return 1;
+    return 0;
   }
 
   // Remaining checks.
@@ -215,10 +215,11 @@ static inline double _poly_area(int num, point2d_t pts[]) {
   for (int i = 0; i < num; i++) {
     prev = curr;
     curr = &pts[i];
-    area += (prev->x + curr->x) * (prev->y - curr->y);
+    if (!point2d_equal(prev, curr)) {
+      area += (prev->x + curr->x) * (prev->y - curr->y);
+    }
   }
 
-  printf("\n");
   return abs(area / 2);
 }
 
@@ -240,19 +241,14 @@ double geom_quad_area(const point2d_t* p1, const point2d_t* p2,
   if (!(point2d_equal(p1, p3) || point2d_equal(p1, p4) ||
         point2d_equal(p2, p3) || point2d_equal(p2, p4))) {
     if (geom_seg_seg_intersection(&isect, p1, p2, p3, p4)) {
-      printf("1 --> 2 ^ 3 --> 4\n");
-      printf("  intersection: (%.0f, %.0f)\n", isect.x, isect.y);
+      return geom_triangle_area(p2, p3, &isect) +
+             geom_triangle_area(p4, p1, &isect);
+    } else if (geom_seg_seg_intersection(&isect, p1, p4, p2, p3)) {
       return geom_triangle_area(p1, p2, &isect) +
              geom_triangle_area(p3, p4, &isect);
-    } else if (geom_seg_seg_intersection(&isect, p1, p4, p2, p3)) {
-      printf("1 --> 4 ^ 3 --> 2\n");
-      printf("  intersection: (%.0f, %.0f)\n", isect.x, isect.y);
-      return geom_triangle_area(p1, p4, &isect) +
-             geom_triangle_area(p3, p2, &isect);
     }
   }
 
-  printf("calling _poly_area\n");
   point2d_t pts[] = {
     {p1->x, p1->y},
     {p2->x, p2->y},
