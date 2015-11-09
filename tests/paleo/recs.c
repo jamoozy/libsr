@@ -109,6 +109,10 @@ static Suite* recs_suite() {
   Suite* suite = suite_create("recognition");
 
   TCase* tc = tcase_create("line");
+  tcase_add_test(tc, c_line_result_cpy_possible);
+  tcase_add_test(tc, c_pline_result_cpy_3_pts_not);
+  tcase_add_test(tc, c_pline_result_cpy_4_pts_possible);
+  tcase_add_test(tc, c_pline_result_cpy_8_pts_not);
   suite_add_tcase(suite, tc);
 
   tc = tcase_create("circle");
