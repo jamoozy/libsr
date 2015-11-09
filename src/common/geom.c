@@ -229,7 +229,7 @@ double geom_triangle_area(const point2d_t* p1, const point2d_t* p2,
   const double b = point2d_distance(p2, p3);
   const double c = point2d_distance(p3, p1);
   const double s = (a + b + c) / 2;
-  return sqrt(s * (s-a) * (s-b) * (s-c));
+  return sqrt(s * (s - a) * (s - b) * (s - c));
 }
 
 double geom_quad_area(const point2d_t* p1, const point2d_t* p2,
