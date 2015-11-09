@@ -38,3 +38,10 @@ Makefile.in
 /configure.scan
 
 /readme.html
+
+# If you're running ./configure in the root dir:
+/bindings
+/libtool
+/scripts/
+/stamp-h1
+check_*
