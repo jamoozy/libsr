@@ -3,7 +3,8 @@ AM_CPPFLAGS = -I$(top_srcdir)/tests -I$(top_srcdir)/src/paleo
 dollarp_shape_headers = $(top_srcdir)/src/dollarp/dollarp.h
 libcommon = $(top_builddir)/src/common/.libs/libcommon.a
 libdollarp = $(top_builddir)/src/dollarp/.libs/libdollarp.a
-libs = $(libdollarp) $(libcommon)
+libmockstroke = $(top_builddir)/tests/common/libmockstroke.a
+libs = $(libdollarp) $(libcommon) $(top_builddir)/tests/common/libmockstroke.a
 
 TESTS = check_dollarp
 check_PROGRAMS = check_dollarp
