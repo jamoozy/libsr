@@ -28,8 +28,8 @@ START_TEST(c_dp_set_n_epsilon_1)
   dp_set_n(ctx, 32);
   dp_set_epsilon(ctx, 0.5);
 
-  ck_assert(DP_DEFAULT_N == ctx->n);
-  ck_assert(0.5 == ctx->n);
+  ck_assert(32 == ctx->n);
+  ck_assert(0.5 == ctx->epsilon);
   ck_assert(GEOM_EQ(5.656854249492381, ctx->step));
 
   dp_destroy(ctx);
@@ -43,7 +43,7 @@ START_TEST(c_dp_set_n_epsilon_2)
   dp_set_epsilon(ctx, 0.2);
 
   ck_assert(1279 == ctx->n);
-  ck_assert(0.2 == ctx->n);
+  ck_assert(0.2 == ctx->epsilon);
   ck_assert(GEOM_EQ(305.8415144851744, ctx->step));
 
   dp_destroy(ctx);
@@ -56,8 +56,8 @@ START_TEST(c_dp_set_n_epsilon_3)
   dp_set_n(ctx, 9);
   dp_set_epsilon(ctx, 0.8);
 
-  ck_assert(DP_DEFAULT_N == ctx->n);
-  ck_assert(0.5 == ctx->n);
+  ck_assert(9 == ctx->n);
+  ck_assert(0.8 == ctx->epsilon);
   ck_assert(GEOM_EQ(1.5518455739153598, ctx->step));
 
   dp_destroy(ctx);
@@ -91,7 +91,7 @@ END_TEST
 START_TEST(c_dp_set_n_too_high_2)
 {
   dp_context_t* ctx = dp_create();
-  ck_assert(dp_set_epsilon(ctx, 2) == -1);
+  ck_assert(dp_set_epsilon(ctx, 2) == 1);
   dp_destroy(ctx);
 }
 END_TEST
@@ -99,7 +99,7 @@ END_TEST
 START_TEST(c_dp_set_n_too_high_3)
 {
   dp_context_t* ctx = dp_create();
-  ck_assert(dp_set_epsilon(ctx, 2872) == -1);
+  ck_assert(dp_set_epsilon(ctx, 2872) == 1);
   dp_destroy(ctx);
 }
 END_TEST
