@@ -10,7 +10,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 /*!
- * Tests that \f$\|\langle x_1,y_1\rangle \cross \langle x_2,y_2\rangle\|=e\f$.
+ * Tests that \f$\|\langle x_1,y_1\rangle \times \langle x_2,y_2\rangle\|=e\f$.
  *
  * \param e The expected result.
  * \param x1 X-coordinate of vector 1.
@@ -158,10 +158,8 @@ START_TEST(c_quad_area_square) {
   _test_quad_area(400, 20,20, 20,40, 40,40, 40,20);
 } END_TEST
 
-/*!
- * This is a degenerate quadrilateral.  It's equivalent to a triangle because
- * three of its points line up to make a straight line.
- */
+//! This is a degenerate quadrilateral.  It's equivalent to a triangle because
+//! three of its points line up to make a straight line.
 START_TEST(c_quad_area_deg) {
   _test_quad_area(300, 10,40, 20,10, 30,40, 40,40);
 } END_TEST
@@ -226,6 +224,75 @@ START_TEST(c_seg_seg_intersect_cross_vert) {
   _test_seg_seg_intersect(1, 30,40, 30,20, 40,30, 20,30);
 } END_TEST
 
+START_TEST(c_seg_seg_intersect_colinear) {
+  _test_seg_seg_intersect(0, 20,100, 40,100, 41,100, 51,100);
+} END_TEST
+
+START_TEST(c_seg_seg_intersect_just_touching) {
+  _test_seg_seg_intersect(1, 20,100, 40,100, 40,100, 40,80);
+} END_TEST
+
+
+// ---- geom_seg_seg_intersection ------------
+
+/*!
+ * Tests whether the two line segments intersect.
+ *
+ * \param e The intersection point or `NULL` if the lines shouldn't intersect.
+ * \param x1 The X-coordinate of one of line 1's endpoints.
+ * \param y1 The Y-coordinate of one of line 1's endpoints.
+ * \param x2 The X-coordinate of one of line 1's endpoints.
+ * \param y2 The Y-coordinate of one of line 1's endpoints.
+ * \param x3 The X-coordinate of one of line 2's endpoints.
+ * \param y3 The Y-coordinate of one of line 2's endpoints.
+ * \param x4 The X-coordinate of one of line 2's endpoints.
+ * \param y4 The Y-coordinate of one of line 2's endpoints.
+ */
+static inline void _test_seg_seg_intersection(
+    point2d_t* e,
+    double x1, double y1, double x2, double y2,
+    double x3, double y3, double x4, double y4) {
+  point2d_t a = { x1, y1 }, b = { x2, y2 }, c = { x3, y3 }, d = { x4, y4 }, r;
+  char i = geom_seg_seg_intersection(&r, &a, &b, &c, &d);
+  ck_assert_msg(!(i) == !(e), "%s intersection.",
+                e == NULL ? "Did not expect" : "Expected");
+  if (e != NULL) {
+    ck_assert_msg(GEOM_EQ(r.x, e->x) && GEOM_EQ(r.y, e->y),
+                  "Expected %.2f, got %.2f", e, r);
+  }
+}
+
+START_TEST(c_seg_seg_intersection_parallel) {
+  _test_seg_seg_intersection(NULL, 40,60, 60,40, 65,35, 85,15);
+} END_TEST
+
+//! 2 segments on the line \f$y = 4x+10\f$ where \f$x\in{20,42,89,200}\f$.
+START_TEST(c_seg_seg_intersection_overlapping) {
+  _test_seg_seg_intersection(NULL, 20,90, 89,366, 42,178, 200,810);
+} END_TEST
+
+START_TEST(c_seg_seg_intersection_same) {
+  _test_seg_seg_intersection(NULL, 89,42, 36,202, 89,42, 36,202);
+} END_TEST
+
+START_TEST(c_seg_seg_intersection_cross) {
+  point2d_t e = {50, 50};
+  _test_seg_seg_intersection(&e, 20,20, 80,80, 20,80, 80,20);
+} END_TEST
+
+START_TEST(c_seg_seg_intersection_cross_vert) {
+  point2d_t e = {30, 30};
+  _test_seg_seg_intersection(&e, 30,40, 30,20, 40,30, 20,30);
+} END_TEST
+
+START_TEST(c_seg_seg_intersection_colinear) {
+  _test_seg_seg_intersection(NULL, 20,100, 40,100, 41,100, 51,100);
+} END_TEST
+
+START_TEST(c_seg_seg_intersection_just_touching) {
+  point2d_t e = {40, 100};
+  _test_seg_seg_intersection(&e, 20,100, 40,100, 40,100, 40,80);
+} END_TEST
 
 // ---- geom_seg_line_intersect ------------
 
@@ -370,12 +437,24 @@ static Suite* geom_suite() {
   tcase_add_test(tc, c_quad_area_normal);
   suite_add_tcase(suite, tc);
 
-  tc = tcase_create("segs intersect");
+  tc = tcase_create("seg-seg intersect");
   tcase_add_test(tc, c_seg_seg_intersect_parallel);
   tcase_add_test(tc, c_seg_seg_intersect_overlapping);
   tcase_add_test(tc, c_seg_seg_intersect_same);
   tcase_add_test(tc, c_seg_seg_intersect_cross);
   tcase_add_test(tc, c_seg_seg_intersect_cross_vert);
+  tcase_add_test(tc, c_seg_seg_intersect_colinear);
+  tcase_add_test(tc, c_seg_seg_intersect_just_touching);
+  suite_add_tcase(suite, tc);
+
+  tc = tcase_create("seg-seg intersection");
+  tcase_add_test(tc, c_seg_seg_intersection_parallel);
+  tcase_add_test(tc, c_seg_seg_intersection_overlapping);
+  tcase_add_test(tc, c_seg_seg_intersection_same);
+  tcase_add_test(tc, c_seg_seg_intersection_cross);
+  tcase_add_test(tc, c_seg_seg_intersection_cross_vert);
+  tcase_add_test(tc, c_seg_seg_intersection_colinear);
+  tcase_add_test(tc, c_seg_seg_intersection_just_touching);
   suite_add_tcase(suite, tc);
 
   return suite;
