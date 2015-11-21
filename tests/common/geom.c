@@ -209,7 +209,7 @@ START_TEST(c_seg_seg_intersect_parallel) {
   _test_seg_seg_intersect(0, 40,60, 60,40, 65,35, 85,15);
 } END_TEST
 
-//! 2 segements on the line \f$y = 4x+10\f$ where \f$x\in{20,42,89,200}\f$.
+//! 2 segments on the line \f$y = 4x+10\f$ where \f$x\in{20,42,89,200}\f$.
 START_TEST(c_seg_seg_intersect_overlapping) {
   _test_seg_seg_intersect(0, 20,90, 89,366, 42,178, 200,810);
 } END_TEST
