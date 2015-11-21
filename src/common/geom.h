@@ -28,7 +28,9 @@
 #define GEOM_IN_R(x,a,z) ((a) - GEOM_ERR < (x) && (x) < (z) + GEOM_ERR)
 
 /*!
- * Finds the cross-product of the two lines.
+ * Finds the scalar value of the cross-product of the two lines.  More formally,
+ * this function returns \f$\|\langle u_x,u_y\rangle \times \langle
+ * v_x,v_y\rangle\|\f$.
  *
  * \param u A "vector" (from the origin).
  * \param v Another "vector" (from the origin).
@@ -40,7 +42,7 @@ static inline double vec_cross_prod(const point2d_t* u, const point2d_t* v) {
 }
 
 /*!
- * Computes cross product: \f$u \times v\f$ and stores into `rtn`.
+ * Populates `rtn` with the difference between the two vectors `u` and `v`.
  *
  * \param rtn "Return value"
  * \param u A "vector" (from the origin).
@@ -55,7 +57,7 @@ vec_sub(point2d_t* rtn, const point2d_t* u, const point2d_t* v) {
 
 
 /*!
- * Determines if the line `a1`\f$\rightarrow\f$`a2` intersects the line
+ * Determines if the line `a1`&rarr;`a2` intersects the line
  * `b1`\f$\rightarrow\f$`b2`.
  *
  * \param a1 Line #1's 1st point.
@@ -69,8 +71,8 @@ char geom_seg_seg_intersect(const point2d_t* a1, const point2d_t* a2,
                             const point2d_t* b1, const point2d_t* b2);
 
 /*!
- * Determines if the line segment `s1`\f$\rightarrow\f$`s2` intersects the
- * infinite line defined by `l1`\f$\rightarrow\f$`l2`.
+ * Determines if the line segment `s1`&rarr;`s2` intersects the
+ * infinite line defined by `l1`&rarr;`l2`.
  *
  * \param s1 First point in line segment.
  * \param s2 Second point in line segment.
@@ -84,7 +86,7 @@ char geom_seg_line_intersect(const point2d_t* s1, const point2d_t* s2,
 
 /*!
  * Computes the intersection point between the two line segments defined by
- * `a1`\f$\rightarrow\f$`a2` and `b1`\f$\rightarrow\f$`b2`.
+ * `a1`&rarr;`a2` and `b1`&rarr;`b2`.
  *
  * \param isect Return intersection point.
  * \param a1 Line #1's 1st point.
@@ -100,8 +102,7 @@ char geom_seg_seg_intersection(point2d_t* isect,
 
 /*!
  * Computes the intersection point between the line segment defined by
- * `s1`\f$\rightarrow\f$`s2` and the infinite line defined by
- * `l1`\f$\rightarrow\f$`l2`.
+ * `s1`&rarr;`s2` and the infinite line defined by `l1`&rarr;`l2`.
  *
  * \param isect Return intersection point.
  * \param s1 First point in line segment.
