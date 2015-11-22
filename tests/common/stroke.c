@@ -131,6 +131,8 @@ static inline Suite* stroke_suite() {
   tcase_add_test(tc, c_point_create_coords);
   tcase_add_test(tc, c_point_create_timed);
   tcase_add_test(tc, c_point_create_full);
+  tcase_add_test(tc, c_point2d_equal_0);
+  tcase_add_test(tc, c_point2d_equal_diff);
   suite_add_tcase(suite, tc);
 
   tc = tcase_create("stroke");
