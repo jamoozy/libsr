@@ -1,5 +1,5 @@
 /*!
- * \addtogroup pal
+ * \addtogroup common
  * \{
  *
  * \file stroke.h
