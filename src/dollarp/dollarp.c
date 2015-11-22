@@ -3,6 +3,7 @@
 #include <string.h>
 #include <values.h>
 
+#include "common/debug.h"
 #include "common/geom.h"
 #include "dollarp.h"
 
@@ -11,6 +12,7 @@
  * \param strk The stroke.
  */
 static inline void _translate_to_origin(stroke_t* strk) {
+  EN("_translate_to_origin(strk<%ld>)\n", strk->num);
   point2d_t c = { 0, 0 };
   for (int i = 0; i < strk->num; i++) {
     c.x += strk->pts[i].x;
@@ -24,6 +26,7 @@ static inline void _translate_to_origin(stroke_t* strk) {
     strk->pts[i].x -= c.x;
     strk->pts[i].y -= c.y;
   }
+  EX("_translate_to_origin(strk<%ld>)\n", strk->num);
 }
 
 /*! Scales the stroke, i.e., normalizes the size.
@@ -31,6 +34,7 @@ static inline void _translate_to_origin(stroke_t* strk) {
  * \param strk The stroke to normalize.
  */
 static inline void _scale(stroke_t* strk) {
+  EN("_scale(strk<%ld>)\n", strk->num);
   point2d_t min = { DBL_MAX, DBL_MAX };
   point2d_t max = { 0, 0 };
 
@@ -46,6 +50,7 @@ static inline void _scale(stroke_t* strk) {
     strk->pts[i].x = (strk->pts[i].x - min.x) / scale;
     strk->pts[i].y = (strk->pts[i].y - min.y) / scale;
   }
+  EX("_scale(strk<%ld>)\n", strk->num);
 }
 
 /*! Finds the length of the path along the stroke.
@@ -53,10 +58,12 @@ static inline void _scale(stroke_t* strk) {
  * \return The length along the stroke.
  */
 static inline double _path_length(const stroke_t* strk) {
+  EN("_path_length(strk<%ld>)\n", strk->num);
   double len = 0;
   for (int i = 1; i < strk->num; i++) {
     len += point2d_distance(&strk->pts[i].p2d, &strk->pts[i-1].p2d);
   }
+  EX("_path_length(strk<%ld>):%.2f\n", strk->num, len);
   return len;
 }
 
@@ -68,6 +75,7 @@ static inline double _path_length(const stroke_t* strk) {
  * \return The resampled stroke.
  */
 static inline void _resample(stroke_t* strk, int n) {
+  EN("_resample(strk<%ld>, %d)\n", strk->num, n);
   double I = _path_length(strk) / (n - 1);
   double D = 0;
   stroke_t* r_strk = stroke_create(n);
@@ -95,6 +103,7 @@ static inline void _resample(stroke_t* strk, int n) {
   // Copy the computed resampled stroke to the input stroke and clean up.
   memcpy(strk, r_strk, sizeof(stroke_t));
   stroke_destroy(r_strk);
+  EX("_resample(strk<%ld>, %d)\n", strk->num, n);
 }
 
 /*! "Normalizes" the stroke to have just `n` points in it centered at the
@@ -104,9 +113,11 @@ static inline void _resample(stroke_t* strk, int n) {
  * \param n The number of points to keep in the stroke.
  */
 static inline void _normalize(stroke_t* strk, int n) {
+  EN("_normalize(strk<%ld>, %d)\n", strk->num, n);
   _resample(strk, n);
   _scale(strk);
   _translate_to_origin(strk);
+  EX("_normalize(strk<%ld>, %d)\n", strk->num, n);
 }
 
 /*! Finds the distance between two clouds.
@@ -202,6 +213,8 @@ dp_context_t* dp_create() {
 }
 
 void dp_add_template(dp_context_t* self, stroke_t* strk, const char* name) {
+  EN("dp_add_template(self, strk<%ld>, \"%s\"\n", strk->num, name);
+
   // Ensure we have enough space.
   if (self->num >= self->cap) {
     self->cap += _DP_TMPL_INC;
@@ -214,6 +227,8 @@ void dp_add_template(dp_context_t* self, stroke_t* strk, const char* name) {
   dp_template_t* next = &self->tmpls[self->num++];
   next->strk = strk;
   strncpy(next->name, name, DP_MAX_TMPL_NAME_LEN);
+
+  EX("dp_add_template(self, strk<%ld>, \"%s\"\n", strk->num, name);
 }
 
 dp_result_t dp_recognize(const dp_context_t* self, stroke_t* strk) {
