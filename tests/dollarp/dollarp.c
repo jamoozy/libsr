@@ -11,19 +11,16 @@
 //              Context Creation, Destruction, and Manipulation               //
 ////////////////////////////////////////////////////////////////////////////////
 
-START_TEST(c_dp_create)
-{
+START_TEST(c_dp_create) {
   dp_context_t* ctx = dp_create();
   ck_assert(ctx != NULL);
   ck_assert(DP_DEFAULT_N == ctx->n);
   ck_assert(DP_DEFAULT_EPSILON == ctx->epsilon);
   ck_assert(ctx->num == 0);
   dp_destroy(ctx);
-}
-END_TEST
+} END_TEST
 
-START_TEST(c_dp_set_n_epsilon_1)
-{
+START_TEST(c_dp_set_n_epsilon_1) {
   dp_context_t* ctx = dp_create();
   dp_set_n(ctx, 32);
   dp_set_epsilon(ctx, 0.5);
@@ -33,11 +30,9 @@ START_TEST(c_dp_set_n_epsilon_1)
   ck_assert(GEOM_EQ(5.656854249492381, ctx->step));
 
   dp_destroy(ctx);
-}
-END_TEST
+} END_TEST
 
-START_TEST(c_dp_set_n_epsilon_2)
-{
+START_TEST(c_dp_set_n_epsilon_2) {
   dp_context_t* ctx = dp_create();
   dp_set_n(ctx, 1279);
   dp_set_epsilon(ctx, 0.2);
@@ -47,11 +42,9 @@ START_TEST(c_dp_set_n_epsilon_2)
   ck_assert(GEOM_EQ(305.8415144851744, ctx->step));
 
   dp_destroy(ctx);
-}
-END_TEST
+} END_TEST
 
-START_TEST(c_dp_set_n_epsilon_3)
-{
+START_TEST(c_dp_set_n_epsilon_3) {
   dp_context_t* ctx = dp_create();
   dp_set_n(ctx, 9);
   dp_set_epsilon(ctx, 0.8);
@@ -61,48 +54,37 @@ START_TEST(c_dp_set_n_epsilon_3)
   ck_assert(GEOM_EQ(1.5518455739153598, ctx->step));
 
   dp_destroy(ctx);
-}
-END_TEST
+} END_TEST
 
-START_TEST(c_dp_set_n_too_low_1)
-{
+START_TEST(c_dp_set_n_too_low_1) {
   dp_context_t* ctx = dp_create();
   ck_assert(dp_set_epsilon(ctx, -0.1) == -1);
   dp_destroy(ctx);
-}
-END_TEST
+} END_TEST
 
-START_TEST(c_dp_set_n_too_low_2)
-{
+START_TEST(c_dp_set_n_too_low_2) {
   dp_context_t* ctx = dp_create();
   ck_assert(dp_set_epsilon(ctx, -100000) == -1);
   dp_destroy(ctx);
-}
-END_TEST
+} END_TEST
 
-START_TEST(c_dp_set_n_too_high_1)
-{
+START_TEST(c_dp_set_n_too_high_1) {
   dp_context_t* ctx = dp_create();
   ck_assert(dp_set_epsilon(ctx, 1.001) == 1);
   dp_destroy(ctx);
-}
-END_TEST
+} END_TEST
 
-START_TEST(c_dp_set_n_too_high_2)
-{
+START_TEST(c_dp_set_n_too_high_2) {
   dp_context_t* ctx = dp_create();
   ck_assert(dp_set_epsilon(ctx, 2) == 1);
   dp_destroy(ctx);
-}
-END_TEST
+} END_TEST
 
-START_TEST(c_dp_set_n_too_high_3)
-{
+START_TEST(c_dp_set_n_too_high_3) {
   dp_context_t* ctx = dp_create();
   ck_assert(dp_set_epsilon(ctx, 2872) == 1);
   dp_destroy(ctx);
-}
-END_TEST
+} END_TEST
 
 
 
@@ -110,8 +92,7 @@ END_TEST
 //                                 Templates                                  //
 ////////////////////////////////////////////////////////////////////////////////
 
-START_TEST(c_dp_add_template)
-{
+START_TEST(c_dp_add_template) {
   // Random 10-point stroke.
   stroke_t* strk = mock_stroke(10, 20, 20, 1234,
                                    40, 40, 1274,
@@ -127,20 +108,15 @@ START_TEST(c_dp_add_template)
   dp_add_template(ctx, strk, "fake stroke");
   dp_destroy(ctx);
   stroke_destroy(strk);
-}
-END_TEST
-
-//START_TEST()
-//{
-//}
-//END_TEST
+} END_TEST
 
 
-//////////////////////////////////////////////////////////////////////////////
-// ----------------------------- Entry Point ------------------------------ //
-//////////////////////////////////////////////////////////////////////////////
 
-static Suite* dp_suite() {
+////////////////////////////////////////////////////////////////////////////////
+// ------------------------------ Entry Point ------------------------------- //
+////////////////////////////////////////////////////////////////////////////////
+
+static inline Suite* dp_suite() {
   Suite* suite = suite_create("stroke");
 
   TCase* tc = tcase_create("point");
