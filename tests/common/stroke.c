@@ -5,17 +5,23 @@
 #include "stroke.h"
 
 
+//! Convenience macro.
+#define ck_assert_double_eq(x,y) ck_assert(GEOM_EQ(x, y))
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 // ----------------------------- Point Tests ------------------------------ //
 //////////////////////////////////////////////////////////////////////////////
 
+// ---- Creation and Destruction ----
+
 START_TEST(c_point_create)
 {
   point_t* point = point_create();
   ck_assert(point != NULL);
-  ck_assert_int_eq(point->x, 0);
-  ck_assert_int_eq(point->y, 0);
+  ck_assert_double_eq(point->x, 0);
+  ck_assert_double_eq(point->y, 0);
   ck_assert_int_eq(point->t, -1);
   ck_assert_int_eq(point->i, -1);
   point_destroy(point);
@@ -26,8 +32,8 @@ START_TEST(c_point_create_coords)
 {
   point_t* point = point_create_coords(-20, 40);
   ck_assert(point != NULL);
-  ck_assert_int_eq(point->x, -20);
-  ck_assert_int_eq(point->y,  40);
+  ck_assert_double_eq(point->x, -20);
+  ck_assert_double_eq(point->y,  40);
   ck_assert_int_eq(point->t, -1);
   ck_assert_int_eq(point->i, -1);
   point_destroy(point);
@@ -38,8 +44,8 @@ START_TEST(c_point_create_timed)
 {
   point_t* point = point_create_timed(80, -80, LONG_MAX);
   ck_assert(point != NULL);
-  ck_assert_int_eq(point->x,  80);
-  ck_assert_int_eq(point->y, -80);
+  ck_assert_double_eq(point->x,  80);
+  ck_assert_double_eq(point->y, -80);
   ck_assert_int_eq(point->t, LONG_MAX);
   ck_assert_int_eq(point->i, -1);
   point_destroy(point);
@@ -50,8 +56,8 @@ START_TEST(c_point_create_full)
 {
   point_t* point = point_create_full(480, 1200, LONG_MAX, 80);
   ck_assert(point != NULL);
-  ck_assert_int_eq(point->x,  480);
-  ck_assert_int_eq(point->y, 1200);
+  ck_assert_double_eq(point->x,  480);
+  ck_assert_double_eq(point->y, 1200);
   ck_assert_int_eq(point->t, LONG_MAX);
   ck_assert_int_eq(point->i, 80);
   point_destroy(point);
