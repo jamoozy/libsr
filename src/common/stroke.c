@@ -11,6 +11,7 @@
 #include <string.h>
 #include <values.h>
 
+#include "debug.h"
 #include "stroke.h"
 #include "util.h"
 
@@ -32,21 +33,21 @@ static inline void _increase_point_size_to(stroke_t* self, long new_size) {
 
 /*! Increases the size of the point array if it is already full.
  * \param self The stroke to (possibly) increase.
- * \return 0 if there's enough room, 1 if there's
+ * \return 1 if there's enough room, 0 if there's
  */
 static inline int _increase_point_size_if_full(stroke_t* self) {
   if (self->num >= self->size) {
     if (self->size > INT_MAX - _PT_SZ_INC) {
       // Overflow!
       fprintf(stderr, "Error: possible overflow!");
-      return 1;
+      return 0;
     }
 
     // This can cause an overflow error during compile time.  That's okay, we
     // checked for this in the previous if statement.
     _increase_point_size_to(self, self->size + _PT_SZ_INC);
   }
-  return 0;
+  return 1;
 }
 
 #undef _PT_SZ_INC
@@ -110,8 +111,8 @@ void stroke_insert_at(stroke_t* self, int i, long x, long y) {
 }
 
 void stroke_add_timed(stroke_t* self, long x, long y, long t) {
-  if (self->num >= self->size) {
-    _increase_point_size_to(self, self->size + 10);
+  if(!_increase_point_size_if_full(self)) {
+    return;
   }
 
   self->pts[self->num].x = x;
