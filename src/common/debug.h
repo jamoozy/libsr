@@ -1,7 +1,7 @@
 #ifndef __debug_h__
 #define __debug_h__
 
-#if DEBUG
+#ifdef DEBUG
 
 #include <stdio.h>
 
@@ -12,27 +12,30 @@ static int __debug_indent = 0;
 //! Print the indent = (#`EN` - #`EX`) &times; 2 spaces.
 #define PRINT_INDENT() do { \
   for (int i = 0; i < __debug_indent; i++) { \
-    printf("  "); \
+    fprintf(stderr, "  "); \
   } \
 } while (0)
 
 //! Log entry into a function.
 #define EN(msg, ...) do { \
-  __debug_indent++; \
   PRINT_INDENT(); \
-  printf("-->"); \
-  printf(msg, __VA_ARGS__); \
+  fprintf(stderr, "-->"); \
+  fprintf(stderr, msg, __VA_ARGS__); \
+  __debug_indent++; \
 } while (0)
 
 //! Log a debug message.
-#define debug(msg, ...) printf(msg, __VA_ARGS__)
+#define debug(msg, ...) do { \
+  PRINT_INDENT(); \
+  fprintf(stderr, msg, __VA_ARGS__); \
+} while (0)
 
 //! Log exit from a function.
 #define EX(msg, ...) { \
-  PRINT_INDENT(); \
-  printf("<--"); \
-  printf(msg, __VA_ARGS__); \
   __debug_indent--; \
+  PRINT_INDENT(); \
+  fprintf(stderr, "<--"); \
+  fprintf(stderr, msg, __VA_ARGS__); \
 }
 
 #else  // if !DEBUG
