@@ -20,14 +20,14 @@ static int __debug_indent = 0;
 #define EN(msg, ...) do { \
   PRINT_INDENT(); \
   fprintf(stderr, "-->"); \
-  fprintf(stderr, msg, __VA_ARGS__); \
+  fprintf(stderr, msg, ##__VA_ARGS__); \
   __debug_indent++; \
 } while (0)
 
 //! Log a debug message.
 #define debug(msg, ...) do { \
   PRINT_INDENT(); \
-  fprintf(stderr, msg, __VA_ARGS__); \
+  fprintf(stderr, msg, ##__VA_ARGS__); \
 } while (0)
 
 //! Log exit from a function.
@@ -35,7 +35,7 @@ static int __debug_indent = 0;
   __debug_indent--; \
   PRINT_INDENT(); \
   fprintf(stderr, "<--"); \
-  fprintf(stderr, msg, __VA_ARGS__); \
+  fprintf(stderr, msg, ##__VA_ARGS__); \
 }
 
 #else  // if !DEBUG
