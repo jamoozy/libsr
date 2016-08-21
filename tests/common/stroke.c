@@ -17,6 +17,12 @@
 
 // ---- Creation and Destruction ----
 
+START_TEST(c_point_create_destroy_empty) {
+  point_t* point = point_create();
+  ck_assert(point != NULL);
+  point_destroy(point);
+} END_TEST
+
 START_TEST(c_point_create) {
   point_t* point = point_create();
   ck_assert(point != NULL);
@@ -79,6 +85,12 @@ START_TEST(c_point2d_equal_diff) {
 // ----------------------------- Stroke Tests ----------------------------- //
 //////////////////////////////////////////////////////////////////////////////
 
+START_TEST(c_stroke_create_destroy_empty) {
+  stroke_t* stroke = stroke_create(0);
+  ck_assert(stroke != NULL);
+  stroke_destroy(stroke);
+} END_TEST
+
 START_TEST(c_stroke_create) {
   stroke_t* stroke = stroke_create(40);
   ck_assert(stroke != NULL);
@@ -94,14 +106,15 @@ START_TEST(c_stroke_create) {
   stroke_destroy(stroke);
 } END_TEST
 
+static const point2dt_t points[5] = {
+  { .x =  4.0, .y =   8.0, .t =       12},
+  { .x =  2.0, .y =   4.0, .t =        8},
+  { .x = 12.0, .y =  13.0, .t =       14},
+  { .x =  0.0, .y =  14.0, .t =       28},
+  { .x = 99.0, .y = 180.0, .t = LONG_MAX}
+};
+
 START_TEST(c_stroke_create_point2dts) {
-  point2dt_t points[5] = {
-    { .x =  4.0, .y =   8.0, .t =       12},
-    { .x =  2.0, .y =   4.0, .t =        8},
-    { .x = 12.0, .y =  13.0, .t =       14},
-    { .x =  0.0, .y =  14.0, .t =       28},
-    { .x = 99.0, .y = 180.0, .t = LONG_MAX}
-  };
   stroke_t* stroke = stroke_create_point2dts(5, (point2dt_t*)points);
   ck_assert(stroke != NULL);
   ck_assert_int_eq(stroke->num, 5);
@@ -117,6 +130,30 @@ START_TEST(c_stroke_create_point2dts) {
   stroke_destroy(stroke);
 } END_TEST
 
+START_TEST(c_stroke_clone_compare_destroy) {
+  stroke_t* strk = stroke_create_point2dts(5, (point2dt_t*)points);
+  stroke_t* clone = stroke_clone(strk);
+
+  ck_assert_int_eq(strk->num, clone->num);
+  ck_assert_int_eq(strk->size, clone->size);
+  ck_assert_int_eq(0,
+      memcmp(strk->pts, clone->pts, strk->size * sizeof(point_t)));
+
+  stroke_destroy(clone);
+  stroke_destroy(strk);
+} END_TEST
+
+
+//////////////////////////////////////////////////////////////////////////////
+// ---------------------------- Loading Strokes --------------------------- //
+//////////////////////////////////////////////////////////////////////////////
+
+START_TEST(c_stroke_from_file) {
+  stroke_t* stroke = stroke_from_file("data/circle.stroke.srz");
+  ck_assert(stroke != NULL);
+  stroke_destroy(stroke);
+} END_TEST
+
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -127,6 +164,7 @@ static inline Suite* stroke_suite() {
   Suite* suite = suite_create("stroke");
 
   TCase* tc = tcase_create("point");
+  tcase_add_test(tc, c_point_create_destroy_empty);
   tcase_add_test(tc, c_point_create);
   tcase_add_test(tc, c_point_create_coords);
   tcase_add_test(tc, c_point_create_timed);
@@ -138,6 +176,9 @@ static inline Suite* stroke_suite() {
   tc = tcase_create("stroke");
   tcase_add_test(tc, c_stroke_create);
   tcase_add_test(tc, c_stroke_create_point2dts);
+  tcase_add_test(tc, c_stroke_from_file);
+  tcase_add_test(tc, c_stroke_create_destroy_empty);
+  tcase_add_test(tc, c_stroke_clone_compare_destroy);
   suite_add_tcase(suite, tc);
 
   return suite;

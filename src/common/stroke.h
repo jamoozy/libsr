@@ -12,7 +12,10 @@
 #define __stroke_h__
 
 #include <stdlib.h>
+#include <string.h>
+#include <strings.h>
 #include "point.h"
+#include "debug.h"
 
 /*!
  * A stroke object; basically an array of points.  This represents how the
@@ -20,7 +23,7 @@
  */
 typedef struct {
   long num;      //!< Number of points in the points array.
-  long size;     //!< Used size of points.
+  long size;     //!< Capacity of `pts` array.
   point_t* pts;  //!< The points.
 } stroke_t;
 
@@ -92,8 +95,28 @@ void stroke_insert_at(stroke_t* self, int i, long x, long y);
  * \param self The stroke to destroy.
  */
 static inline void stroke_destroy(stroke_t* self) {
+  debug("Freeing self->pts: %p ...\n", self->pts);
   free(self->pts);
+  bzero(self, sizeof(stroke_t));
+
+  debug("Freeing self: %p ...\n", self);
   free(self);
+  self = NULL;
+}
+
+/*!
+ * Performs a deep copy of the stroke and returns it.
+ *
+ * \param strk The stroke to clone.
+ *
+ * \return The clone.
+ */
+static inline stroke_t* stroke_clone(const stroke_t* strk) {
+  stroke_t* clone = malloc(sizeof(stroke_t));
+  memcpy(clone, strk, sizeof(stroke_t));
+  clone->pts = calloc(strk->size, sizeof(point_t));
+  memcpy(clone->pts, strk->pts, strk->size * sizeof(strk->pts[0]));
+  return clone;
 }
 
 
