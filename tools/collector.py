@@ -476,8 +476,10 @@ class StrokeGraphiscItem(QtWidgets.QGraphicsItem):
   def __init__(self, pen, x, y):
     super(StrokeGraphiscItem, self).__init__()
     self.stroke = libsr.Stroke()
+    print 'adding: %f,%f' % (x, y)
     self._add_scene_point(x, y)
     self.pen = pen
+    print len(self.stroke)
 
   ##
   # Adds a scene point to the underlying libsr.Stroke object.

@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define DEBUG
+#include "common/debug.h"
 #include "common/stroke.h"
 
 //! Maximum allowable name for templates.
@@ -57,8 +59,10 @@ dp_context_t* dp_create();
  * \return 0 on success, 1 if `n` is too low.
  */
 static inline int dp_set_n(dp_context_t* self, size_t n) {
+  debug("dp_set_n(%zd)\n", n);
   if (n <= 0) {
-    fprintf(stderr, "Error: dp_set_n called with n = %zd", n);
+    fprintf(stderr, "Error: dp_set_n called with n = %zd\n", n);
+    EX("dp_set_n(%zd)\n", n);
     return 1;
   }
 
@@ -75,11 +79,14 @@ static inline int dp_set_n(dp_context_t* self, size_t n) {
  * \return 0 on success, -1 if `epsilon` is too low, and 1 if it's too high.
  */
 static inline int dp_set_epsilon(dp_context_t* self, double epsilon) {
+  debug("dp_set_epsilon(%.2f)\n", epsilon);
   if (epsilon < 0.0) {
-    fprintf(stderr, "Error: dp_set_epsilon called with epsilon = %f", epsilon);
+    fprintf(stderr, "Error: dp_set_epsilon called with epsilon = %f\n",
+            epsilon);
     return -1;
   } else if (1.0 < epsilon) {
-    fprintf(stderr, "Error: dp_set_epsilon called with epsilon = %f", epsilon);
+    fprintf(stderr, "Error: dp_set_epsilon called with epsilon = %f\n",
+            epsilon);
     return 1;
   }
 
@@ -97,7 +104,7 @@ static inline int dp_set_epsilon(dp_context_t* self, double epsilon) {
  * \param strk The stroke the template is based on.
  * \param name The name of the template.
  */
-void dp_add_template(dp_context_t* self, stroke_t* strk, const char* name);
+void dp_add_template(dp_context_t* self, const stroke_t* strk, const char* name);
 
 /*! Attempts to recognize the stroke as one of the templates previously added to
  * the context with `db_add_template`.

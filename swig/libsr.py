@@ -85,7 +85,10 @@ class Stroke(object):
       max(self.bbox[3], y),
     )
     if t is None:
+      print 'got: %d points.' % self._stroke.num
+      print 'adding (%f,%f) to _stroke ...' % (x, y)
       b.stroke_add_coords(self._stroke, x, y)
+      print 'got: %d points.' % self._stroke.num
     else:
       if t > sys.maxint:
         raise OverflowError("utime t greater than max int: %d > %d" % (

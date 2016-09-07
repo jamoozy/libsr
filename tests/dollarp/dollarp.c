@@ -1,9 +1,57 @@
 #include <check.h>
+#include <errno.h>
+#include <libgen.h>
+#include <unistd.h>
 #include <values.h>
 
+#define DEBUG
+#include "common/debug.h"
 #include "common/geom.h"
-#include "dollarp/dollarp.h"
 #include "common/mock_stroke.h"
+#include "dollarp/dollarp.h"
+
+
+#define PS "/" // Path Separator
+
+#define BUF_SZ 1024
+stroke_t* load_stroke(const char* fname) {
+  char buf[BUF_SZ];
+
+  debug("__FILE__: %s\n", __FILE__);
+  const char* cwd = getcwd(buf, BUF_SZ);
+  if (cwd == NULL) {
+    const char* errstr = strerror(errno);
+    fprintf(stderr, "Could not getcwd: %s\n", errstr);
+    return NULL;
+  }
+  debug("cwd: %s\n", cwd);
+  debug("fname: %s\n", fname);
+
+  size_t sz = strlen(cwd) + strlen(fname) + 4;
+  char* path = calloc(sz, sizeof(char));
+
+  int act = snprintf(path, sz, "%s"PS"%s", cwd, fname);
+  debug("path: %s\n", path);
+  if (act > sz) {
+    fprintf(stderr, "Error: %zd extra chars not written.\n", act - sz);
+    return NULL;
+  }
+  return stroke_from_file(path);
+
+//  stroke_t* strk = NULL;
+//  char* full = realpath(path, buf);
+//  if (full == NULL) {
+//    const char* errstr = strerror(errno);
+//    fprintf(stderr, "Could not get realpath: %s\n", errstr);
+//  } else {
+//    debug("full: %s\n", full);
+//    strk = stroke_from_file(full);
+//  }
+//  free(path);
+//
+//  return strk;
+}
+#undef BUF_SZ
 
 
 
@@ -94,20 +142,19 @@ START_TEST(c_dp_set_n_too_high_3) {
 
 START_TEST(c_dp_add_template) {
   // Random 10-point stroke.
-  stroke_t* strk = mock_stroke(10, 20, 20, 1234,
-                                   40, 40, 1274,
-                                   80, 80, 1274,
-                                   40, 70, 1774,
-                                   48, 70, 2274,
-                                   20, 20, 3234,
-                                   40, 40, 7474,
-                                   80, 80, 8274,
-                                   90, 70, 8474,
-                                   28, 60, 9074);
+  stroke_t* strk = load_stroke("data/circle.stroke.srz");
+  if (strk == NULL) {
+    ck_abort_msg("Could not load stroke.");
+    return;
+  }
   dp_context_t* ctx = dp_create();
   dp_add_template(ctx, strk, "fake stroke");
-  dp_destroy(ctx);
+
+  debug("Destroying local copy of stroke: %p\n", strk);
   stroke_destroy(strk);
+
+  debug("Destroying context: %p\n", ctx);
+  dp_destroy(ctx);
 } END_TEST
 
 

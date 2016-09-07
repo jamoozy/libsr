@@ -3,7 +3,6 @@
 #include <string.h>
 #include <values.h>
 
-#include "common/debug.h"
 #include "common/geom.h"
 #include "dollarp.h"
 
@@ -60,8 +59,14 @@ static inline void _scale(stroke_t* strk) {
 static inline double _path_length(const stroke_t* strk) {
   EN("_path_length(strk<%ld>)\n", strk->num);
   double len = 0;
+  debug("Should do %ld iterations ...\n", strk->num - 1);
   for (int i = 1; i < strk->num; i++) {
-    len += point2d_distance(&strk->pts[i].p2d, &strk->pts[i-1].p2d);
+    debug("%d: comparing (%.2f,%.2f) & (%.2f,%.2f)\n", i,
+        strk->pts[i].p2d.x, strk->pts[i].p2d.y,
+        strk->pts[i-i].p2d.x, strk->pts[i-1].p2d.y);
+    double delta = point2d_distance(&strk->pts[i].p2d, &strk->pts[i-1].p2d);
+    len += delta;
+    debug("    +%.2f = %.2f\n", delta, len);
   }
   EX("_path_length(strk<%ld>):%.2f\n", strk->num, len);
   return len;
@@ -76,19 +81,28 @@ static inline double _path_length(const stroke_t* strk) {
  */
 static inline void _resample(stroke_t* strk, int n) {
   EN("_resample(strk<%ld>, %d)\n", strk->num, n);
+
   double I = _path_length(strk) / (n - 1);
   double D = 0;
+  debug("I:%.2f  D:%.2f\n", I, D);
+
   stroke_t* r_strk = stroke_create(n);
   stroke_add_coords(r_strk, strk->pts[0].x, strk->pts[0].y);
+  debug("Added coords: %.2f, %.2f\n", strk->pts[0].x, strk->pts[0].y);
   for (int i = 1; i < strk->num; i++) {
     point2d_t* curr = &strk->pts[i].p2d;
     point2d_t* prev = &strk->pts[i-1].p2d;
+    debug("%d: curr:(%.2f,%.2f)  prev:(%.2f,%.2f)\n",
+        i, curr->x, curr->y, prev->x, prev->y);
     double d = point2d_distance(curr, prev);
+    debug("  d:%.2f\n", d);
     if (D + d >= I) {
       point2d_t q = {
         prev->x + ((I - D) / d) * (curr->x - prev->x),
         prev->y + ((I - D) / d) * (curr->y - prev->y)
       };
+      debug("  q:(%.2f,%.2f)\n", q.x, q.y);
+
       stroke_add_coords(r_strk, q.x, q.y);
       D = 0;
 
@@ -98,6 +112,7 @@ static inline void _resample(stroke_t* strk, int n) {
     } else {
       D += d;
     }
+    debug("  D:%.2f\n", D);
   }
 
   // Copy the computed resampled stroke to the input stroke and clean up.
@@ -212,20 +227,23 @@ dp_context_t* dp_create() {
   return self;
 }
 
-void dp_add_template(dp_context_t* self, stroke_t* strk, const char* name) {
+// Adds a template.  Copies the stroke.
+void dp_add_template(dp_context_t* self, const stroke_t* strk, const char* name) {
   EN("dp_add_template(self, strk<%ld>, \"%s\"\n", strk->num, name);
 
   // Ensure we have enough space.
   if (self->num >= self->cap) {
     self->cap += _DP_TMPL_INC;
     self->tmpls = realloc(self->tmpls, self->cap * sizeof(dp_template_t));
+    debug("Reallocated self->tmpls to cap: %ld\n", self->cap);
   }
 
-  _normalize(strk, self->n);
+  stroke_t* clone = stroke_clone(strk);
+  _normalize(clone, self->n);
 
   // Add this template.
   dp_template_t* next = &self->tmpls[self->num++];
-  next->strk = strk;
+  next->strk = clone;
   strncpy(next->name, name, DP_MAX_TMPL_NAME_LEN);
 
   EX("dp_add_template(self, strk<%ld>, \"%s\"\n", strk->num, name);
@@ -252,9 +270,17 @@ dp_result_t dp_recognize(const dp_context_t* self, stroke_t* strk) {
 }
 
 void dp_destroy(dp_context_t* self) {
+  debug("Freeing templates:\n");
   for (int i = 0; i < self->num; i++) {
+    debug("  Freeing self->tmpls[%d].strk: %p ...\n", i, self->tmpls[i].strk);
     stroke_destroy(self->tmpls[i].strk);
   }
+  debug("  Freeing self->tmpls: %p\n", self->tmpls);
   free(self->tmpls);
+
+  debug("Zero-ing out self: %p ...\n", self);
+  bzero(self, sizeof(dp_context_t));
+
+  debug("Freeing self...\n");
   free(self);
 }
