@@ -39,7 +39,7 @@
 
 pal_line_t* pal_line_create() {
   pal_line_t* self = calloc(1, sizeof(pal_line_t));
-  self->pts = calloc(self->num = 2, sizeof(point2d_t*));
+  self->pts = calloc(self->num = 2, sizeof(point2d_t));
   return self;
 }
 

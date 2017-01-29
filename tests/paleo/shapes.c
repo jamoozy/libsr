@@ -26,10 +26,29 @@ START_TEST(c_pal_line_create)
 }
 END_TEST
 
+START_TEST(c_pal_line_create_points_with_point2d_ts)
+{
+  point2d_t a = {.x =  5, .y = 10};
+  point2d_t b = {.x = 12, .y = 24};
+  pal_line_t* line = pal_line_create_points_with_points(&a, &b);
+
+  ck_assert(line != NULL);
+  ck_assert_int_eq(line->num, 2);
+
+  ck_assert(line->pts != NULL);
+  ck_assert_int_eq(line->pts[0].x,  5);
+  ck_assert_int_eq(line->pts[0].y, 10);
+  ck_assert_int_eq(line->pts[1].x, 12);
+  ck_assert_int_eq(line->pts[1].y, 24);
+
+  pal_line_destroy(line);
+}
+END_TEST
+
 START_TEST(c_pal_line_create_points_with_points)
 {
-  point_t a = {.x = 5, .y = 10, .t = 20, .i = 40};
-  point_t b = {.x =12, .y = 24, .t = 36, .i = 48};
+  point_t a = {.x =  5, .y = 10, .t = 20, .i = 40};
+  point_t b = {.x = 12, .y = 24, .t = 36, .i = 48};
   pal_line_t* line = pal_line_create_points_with_points(
       (point2d_t*)&a, (point2d_t*)&b);
 
@@ -172,6 +191,7 @@ static Suite* shapes_suite() {
 
   TCase* tc = tcase_create("line");
   tcase_add_test(tc, c_pal_line_create);
+  tcase_add_test(tc, c_pal_line_create_points_with_point2d_ts);
   tcase_add_test(tc, c_pal_line_create_points_with_points);
   tcase_add_test(tc, c_pal_line_create_points_with_longs);
   suite_add_tcase(suite, tc);
