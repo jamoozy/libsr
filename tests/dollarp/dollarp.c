@@ -140,21 +140,147 @@ START_TEST(c_dp_set_n_too_high_3) {
 //                                 Templates                                  //
 ////////////////////////////////////////////////////////////////////////////////
 
-START_TEST(c_dp_add_template) {
-  // Random 10-point stroke.
-  stroke_t* strk = load_stroke("data/circle.stroke.srz");
+/*! Adds a template to a $P context.
+ *
+ * \param ctx The $P context.
+ * \param fname The name of the template file to load.
+ * \param name The name of the shape it contains.
+ *
+ * \return 0 on success, non-zero on failure of any kind.
+ */
+int _add_to_template(dp_context_t* ctx, const char* fname, const char* name) {
+  stroke_t* strk = load_stroke(fname);
   if (strk == NULL) {
-    ck_abort_msg("Could not load stroke.");
-    return;
+    return 1;
   }
-  dp_context_t* ctx = dp_create();
-  dp_add_template(ctx, strk, "fake stroke");
+  dp_add_template(ctx, strk, name);
 
-  debug("Destroying local copy of stroke: %p\n", strk);
+  debug("Destroying local copy of stroke from %s: %p\n", fname, strk);
   stroke_destroy(strk);
+
+  return 0;
+}
+
+START_TEST(c_dp_add_small_template) {
+  dp_context_t* ctx = dp_create();
+
+  // A 10-point stroke representing a circle.
+  if (_add_to_template(ctx, "data/circle.stroke.srz", "fake stroke")) {
+    dp_destroy(ctx);
+    ck_abort_msg("Could not load stroke.");
+  }
 
   debug("Destroying context: %p\n", ctx);
   dp_destroy(ctx);
+} END_TEST
+
+START_TEST(c_dp_add_many_large_templates) {
+  dp_context_t* ctx = dp_create();
+
+  // add several templates for a rectangle.
+  const int num = 4;
+  const char* fnames[] = {
+    "data/rect1.stroke.srz",
+    "data/rect2.stroke.srz",
+    "data/rect3.stroke.srz",
+    "data/rect4.stroke.srz"
+  };
+  for (int i = 0; i < num; i++) {
+    if (_add_to_template(ctx, fnames[i], "rectangle")) {
+      dp_destroy(ctx);
+      ck_abort_msg("Could not load stroke.");
+    }
+  }
+
+  debug("Destroying context: %p\n", ctx);
+  dp_destroy(ctx);
+} END_TEST
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// ---------------------------- Cross-Validation ---------------------------- //
+////////////////////////////////////////////////////////////////////////////////
+
+/*! Does a recognition of stroke.
+ *
+ * Asserts that the recognition is what was expected.
+ *
+ * \param ctx The $P context to use.
+ * \param fname The name of the file to read in and test.
+ * \param name The name of the template we're expecting.
+ *
+ * \return 0 on success, non-zero on an error of some kind.
+ */
+int _do_rec(const dp_context_t* ctx, const char* fname, const char* name) {
+  stroke_t* strk = load_stroke(fname);
+  if (strk == NULL) {
+    return 1;
+  }
+
+  debug("Running test of stroke at %s\n", fname);
+  dp_result_t res = dp_recognize(ctx, strk);
+  debug("Destroying local copy of stroke from %s: %p\n", fname, strk);
+  stroke_destroy(strk);
+
+  if (res.tmpl == NULL) {
+    return 2;
+  }
+  if (0 != strcmp(res.tmpl->name, name)) {
+    return 3;
+  }
+
+  return 0;
+}
+
+START_TEST(c_dp_full_rect_test) {
+  const int num = 4;
+  const char* circle_fname = "data/circle.stroke.srz";
+  const char* fnames[] = {
+    "data/rect1.stroke.srz",
+    "data/rect2.stroke.srz",
+    "data/rect3.stroke.srz",
+    "data/rect4.stroke.srz"
+  };
+  const char* shape_name = "rectangle";
+
+  for (int i = 0; i < num; i++) {
+    debug("Testing on case #%d\n", i);
+    dp_context_t* ctx = dp_create();
+
+    // Add a circle stroke so that we have the opportunity to fail.
+    if (_add_to_template(ctx, circle_fname, "circle")) {
+      dp_destroy(ctx);
+      ck_abort_msg("Could not load circle stroke.");
+    }
+
+    // Add the training data.
+    for (int j = 0; j < num; j++) {
+      if (j == i) {
+        continue;
+      } else if (_add_to_template(ctx, fnames[i], shape_name)) {
+        dp_destroy(ctx);
+        ck_abort_msg("Could not load stroke.");
+      }
+    }
+
+    // Run the test.
+    int ret = _do_rec(ctx, fnames[i], shape_name);
+    switch (ret) {
+    case 1:
+      dp_destroy(ctx);
+      ck_abort_msg("Could not load stroke.");
+    case 2:
+      dp_destroy(ctx);
+      ck_abort_msg("Got NULL template back.");
+    case 3:
+      dp_destroy(ctx);
+      ck_abort_msg("Wrong result.");
+    }
+
+    debug("Destroying context: %p\n", ctx);
+    dp_destroy(ctx);
+  }
 } END_TEST
 
 
@@ -166,7 +292,7 @@ START_TEST(c_dp_add_template) {
 static inline Suite* dp_suite() {
   Suite* suite = suite_create("stroke");
 
-  TCase* tc = tcase_create("point");
+  TCase* tc = tcase_create("setters");
   tcase_add_test(tc, c_dp_create);
   tcase_add_test(tc, c_dp_set_n_epsilon_1);
   tcase_add_test(tc, c_dp_set_n_epsilon_2);
@@ -176,7 +302,15 @@ static inline Suite* dp_suite() {
   tcase_add_test(tc, c_dp_set_n_too_high_1);
   tcase_add_test(tc, c_dp_set_n_too_high_2);
   tcase_add_test(tc, c_dp_set_n_too_high_3);
-  tcase_add_test(tc, c_dp_add_template);
+  suite_add_tcase(suite, tc);
+
+  tc = tcase_create("templates");
+  tcase_add_test(tc, c_dp_add_small_template);
+  tcase_add_test(tc, c_dp_add_many_large_templates);
+  suite_add_tcase(suite, tc);
+
+  tc = tcase_create("running");
+  tcase_add_test(tc, c_dp_full_rect_test);
   suite_add_tcase(suite, tc);
 
   return suite;
