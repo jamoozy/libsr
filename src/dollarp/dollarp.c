@@ -74,13 +74,19 @@ static inline double _path_length(const stroke_t* strk) {
 
 /*! Resamples the stroke to have `n` points.
  *
+ * The passed stroke is resampled inline.  If the passed stroke does not have at
+ * least 2 points, this returns without doing anything.
+ *
  * \param strk The stroke to resample.
  * \param n The number of points the stroke should have.
- *
- * \return The resampled stroke.
  */
 static inline void _resample(stroke_t* strk, int n) {
   EN("_resample(strk<%ld>, %d)\n", strk->num, n);
+
+  if (strk->num < 2) {
+    debug("Too few elements in strk.  Returning.\n");
+    return;
+  }
 
   double I = _path_length(strk) / (n - 1);
   double D = 0;
@@ -227,7 +233,7 @@ dp_context_t* dp_create() {
   return self;
 }
 
-// Adds a template.  Copies the stroke.
+// Adds a template.  Copies the stroke and name.
 void dp_add_template(dp_context_t* self, const stroke_t* strk, const char* name) {
   EN("dp_add_template(self, strk<%ld>, \"%s\"\n", strk->num, name);
 
