@@ -7,7 +7,7 @@
 
 
 //! Convenience macro.
-#define ck_assert_double_eq(x,y) ck_assert(GEOM_EQ(x, y))
+//#define ck_assert_double_eq(x,y) ck_assert(GEOM_EQ(x, y))
 
 
 
